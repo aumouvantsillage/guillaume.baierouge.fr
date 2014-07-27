@@ -1,0 +1,18 @@
+{
+  "name": "guillaume.baierouge.fr",
+  "version": "14.07.271624",
+  "description": "Guillaume Savaton 's personal website",
+  "homepage": "http://guillaume.baierouge.fr",
+  "license": "Creative Commons Attribution 4.0 International License",
+  "author": {
+    "name": "Guillaume Savaton",
+    "url": "http://guillaume.baierouge.fr"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/senshu/guillaume.baierouge.fr.git"
+  },
+  "devDependencies": {
+    "metalsmith": "^0.9.0"
+  }
+}
