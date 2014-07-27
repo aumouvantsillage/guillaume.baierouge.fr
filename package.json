@@ -13,6 +13,12 @@
     "url": "https://github.com/senshu/guillaume.baierouge.fr.git"
   },
   "devDependencies": {
-    "metalsmith": "^0.9.0"
+    "metalsmith": "^0.9.0",
+    "metalsmith-drafts": "0.0.1",
+    "metalsmith-markdown": "^0.2.1",
+    "metalsmith-sass": "^0.3.0",
+    "metalsmith-tags": "^0.6.1",
+    "metalsmith-templates": "^0.5.2",
+    "nunjucks": "^1.0.5"
   }
 }
