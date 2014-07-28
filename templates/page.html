@@ -1,0 +1,18 @@
+<!doctype html>
+<html {% if lang %}lang="{{lang}}"{% endif %}>
+    <head>
+        <meta charset="utf-8">
+        <title>{{siteTitle}}</title>
+        <link rel="stylesheet" href="{{siteRoot}}/assets/vendor/normalize.css">
+        <link rel="stylesheet" href="{{siteRoot}}/css/screen.css">
+    </head>
+    <body>
+		{% include "templates/header.html" %}
+        <main>
+			{% block main %}
+       			Main content
+			{% endblock %}
+        </main>
+		{% include "templates/footer.html" %}
+    </body>
+</html>
