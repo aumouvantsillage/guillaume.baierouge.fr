@@ -1,6 +1,7 @@
 {% extends "templates/page.html" %}
 
 {% block main %}
+	<time datetime="{{date}}">{{date}}</time>
 	<h1>{{title}}</h1>
 	{{author}}
 	<nav>
@@ -8,7 +9,6 @@
 			<a href="{{siteRoot}}/tags/{{t}}.html">{{t}}</a>
 		{% endfor %}
 	</nav>
-	<time datetime="{{date}}">{{date}}</time>
 	{{contents}}
 {% endblock %}
 

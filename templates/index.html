@@ -1,9 +1,5 @@
 {% extends "templates/page.html" %}
 
 {% block main %}
-	<ul>
-		{% for p in posts %}
-			<li><a href="{{p.path}}">{{p.title}}</a></li>
-		{% endfor %}
-	</ul>
+    {% include "templates/post-list.html" %}
 {% endblock %}

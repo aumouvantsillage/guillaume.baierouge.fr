@@ -9,4 +9,8 @@ tags: Mozilla, Tablet, Firefox OS
 template: post.html
 ---
 
-This is the first post in this series.
+This is the first __post__ in this series.
+
+<!-- more -->
+
+Details __here__.

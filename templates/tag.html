@@ -1,10 +1,6 @@
 {% extends "templates/page.html" %}
 
 {% block main %}
-	<h2>Posts for tag {{tag}}</h2>
-	<ul>
-		{% for p in posts %}
-			<li><a href="../{{p.path}}">{{p.title}}</a></li>
-		{% endfor %}
-	</ul>
+	<h1>Posts for tag {{tag}}</h1>
+    {% include "templates/post-list.html" %}
 {% endblock %}

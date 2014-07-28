@@ -7,6 +7,7 @@ var templates = require("metalsmith-templates");
 var sass = require("metalsmith-sass");
 var tags = require("metalsmith-tags");
 var collections = require("metalsmith-collections");
+var more = require("metalsmith-more");
 
 Metalsmith(__dirname)
     .metadata({
@@ -28,6 +29,7 @@ Metalsmith(__dirname)
         gfm: true,
         tables: true
     }))
+    .use(more())
     .use(permalinks({
 		pattern: ":date/:title",
 		relative: false

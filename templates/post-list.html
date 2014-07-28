@@ -1,0 +1,7 @@
+{% for p in posts %}
+    <article>
+	    <time datetime="{{p.date.toISOString()}}">{{p.date.toISOString().split("T")[0]}}</time>
+        <h1><a href="{{siteRoot}}/{{p.path}}">{{p.title}}</a></h1>
+        {{p.less}}
+    </article>
+{% endfor %}
