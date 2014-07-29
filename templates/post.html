@@ -1,14 +1,18 @@
 {% extends "templates/page.html" %}
 
 {% block main %}
-	<time datetime="{{date}}">{{date}}</time>
-	<h1>{{title}}</h1>
-	{{author}}
-	<nav>
-		{% for t in tags %}
-			<a href="{{siteRoot}}/tags/{{t}}.html">{{t}}</a>
-		{% endfor %}
-	</nav>
-	{{contents}}
+    <article>
+        <header>
+            <time datetime="{{date.toISOString()}}">{{date.toISOString().split("T")[0]}}</time>
+            <h1>{{title}}</h1>
+            {{author}}
+            <nav>
+                {% for t in tags %}
+                    <a href="{{siteRoot}}/tags/{{t}}.html">{{t}}</a>
+                {% endfor %}
+            </nav>
+        </header>
+	    {{contents}}
+    </article>
 {% endblock %}
 

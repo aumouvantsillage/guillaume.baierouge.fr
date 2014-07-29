@@ -1,6 +1,8 @@
 {% extends "templates/page.html" %}
 
 {% block main %}
-	<h1>Posts for tag {{tag}}</h1>
+    <header>
+	    <h1>Posts for tag {{tag}}</h1>
+    </header>
     {% include "templates/post-list.html" %}
 {% endblock %}
