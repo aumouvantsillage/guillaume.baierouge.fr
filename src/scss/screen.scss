@@ -1,9 +1,12 @@
-$link-color: #26a;
+$link-color: rgb(34,102,170);
+$table-heading-background: rgb(125,165,205);
+$heading-font: "Antonio", sans-serif;
+$content-font: "PT Serif", serif;
 
 body {
     box-sizing: border-box;
     font-size: large;
-    font-family: "PT Serif", serif;
+    font-family: $content-font;
     text-align: justify;
     word-wrap: break-word;
     hyphens: auto;
@@ -12,6 +15,7 @@ body {
 
 header {
     text-align: center;
+    margin-bottom: 2em;
 }
 
 footer {
@@ -20,8 +24,15 @@ footer {
     margin-bottom: 2em;
 }
 
+hr {
+    width: 30%;
+    height: 1px;
+    border: none;
+    background: #aaa;
+}
+
 h1, h2, h3, h4 {
-    font-family: "Antonio";
+    font-family: $heading-font;
 }
 
 header h1 {
@@ -68,3 +79,29 @@ ul {
     }
 }
 
+table {
+    margin-left: auto;
+    margin-right: auto;
+    
+    th, td {
+        padding: 0.3em 1em;
+    }
+    
+    th {
+        text-align: center;
+        font-family: $heading-font;
+        font-weight: normal;
+        background: $table-heading-background;
+    }
+    
+    td {
+        border-bottom: 1px solid #aaa;
+    }
+}
+
+blockquote {
+    border-left: 0.3em solid $table-heading-background;
+    font-style: italic;
+    margin-left: 1em;
+    padding: 0.1em 1em;
+}

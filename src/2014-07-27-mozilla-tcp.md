@@ -41,7 +41,7 @@ However, the features and the performance of the hardware can have an
 impact on the overall user experience and it will be interesting to see how Firefox OS
 benefits or suffers from these hardware specs.
 
-Here is a side-by-side comparison of the Nexus 7 with the Flatfish:
+Here is a side-by-side comparison of a few features of the Nexus 7 and the Flatfish:
 
 <!---->     | Nexus 7                                 | Flatfish
 ------------|-----------------------------------------|---------
@@ -60,13 +60,12 @@ Using Firefox OS
 ================
 
 The tablet comes with Firefox OS 1.4.0-0-prerelease.
-Below, I give a list of noteworthy details about my first experiments:
-
-The initial setup worked fine.
+I have decided to use it for a short period of time before attempting to upgrade the firmware.
 
 Things that worked out of the box
 ---------------------------------
 
+The initial setup worked fine.
 Though the UI is available in French, the introductory tutorial was only in English.
 I could perform the following tasks with no problem:
 
@@ -97,7 +96,7 @@ shows the address bar immediately.
 The keyboard is too big.
 Moreover, in portrait orientation, the keyboard layout is broken:
 it seems that the size of the buttons is fixed, so when the
-screen width is not sufficient, on row of keys is split in several rows.
+screen width is not sufficient, one row of keys is split in several rows.
 
 Things that do not work as expected
 -----------------------------------
