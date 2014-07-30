@@ -62,6 +62,12 @@ Using Firefox OS
 The tablet comes with Firefox OS 1.4.0-0-prerelease.
 I have decided to use it for a short period of time before attempting to upgrade the firmware.
 
+<div class="warning">
+    When reading the following notes, please do not forget that they concern
+    a very early prototype, not a final product.
+    At the time of this writing, several updates have already been released.
+</div>
+
 Things that worked out of the box
 ---------------------------------
 
