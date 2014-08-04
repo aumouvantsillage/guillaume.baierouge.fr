@@ -2,6 +2,7 @@ $link-color: rgb(34,102,170);
 $table-heading-background: rgb(125,165,205);
 $heading-font: "Antonio", sans-serif;
 $content-font: "PT Serif", serif;
+$warning-color: rgb(255,220,70);
 
 body {
     box-sizing: border-box;
@@ -104,4 +105,9 @@ blockquote {
     font-style: italic;
     margin-left: 1em;
     padding: 0.1em 1em;
+}
+
+.warning {
+    background: $warning-color;
+    padding: 0.3em 1em;
 }
