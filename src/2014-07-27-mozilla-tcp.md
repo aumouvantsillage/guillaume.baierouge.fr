@@ -1,5 +1,5 @@
 ---
-title: Mozilla Firefox OS Tablet Contribution Program
+title: First steps in the Mozilla Firefox OS Tablet Contribution Program
 author: Guillaume Savaton
 lang: en
 date: 2014-07-27
@@ -84,7 +84,7 @@ wheather [Forecast](https://marketplace.firefox.com/app/forecast), are locked in
 As a consequence, I regularly need to change the orientation of the tablet.
 
 Sometimes, the user interface responds with a small delay, or does not respond at all.
-I often need to repeat the swipe gesture several times to
+For instance, I often need to repeat the swipe gesture several times to
 [open the notification tray](https://support.mozilla.org/en-US/kb/navigating-your-firefox-os-phone#w_see-your-notifications).
 
 In the web browser, the address bar is attached to the top of the current page.
@@ -96,7 +96,7 @@ shows the address bar immediately.
 The keyboard is too big.
 Moreover, in portrait orientation, the keyboard layout is broken:
 it seems that the size of the buttons is fixed, so when the
-screen width is not sufficient, one row of keys is split in several rows.
+screen width is not sufficient, each row of keys is split in several rows.
 
 Things that do not work as expected
 -----------------------------------
@@ -114,7 +114,7 @@ indicate:
 
 But the home button seems to be missing.
 
-In the web browser, when a page has been displayed in landscape mode an the orientation is switched
+In the web browser, when a page has been displayed in landscape mode and the orientation is switched
 to portrait, the page becomes unstable.
 
 I did not find a *Caps lock* function on the keyboard.
