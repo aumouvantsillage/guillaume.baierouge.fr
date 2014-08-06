@@ -6,3 +6,6 @@ all:
 
 serve:
 	cd build; ../node_modules/http-server/bin/http-server
+
+upload:
+	rsync --archive --update --progress --compress build/* www-data@baierouge.fr:/var/www/guillaume.baierouge.fr/

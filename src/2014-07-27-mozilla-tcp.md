@@ -90,24 +90,24 @@ wheather [Forecast](https://marketplace.firefox.com/app/forecast), are locked in
 As a consequence, I regularly need to change the orientation of the tablet.
 
 Sometimes, the user interface responds with a small delay, or does not respond at all.
-For instance, I often need to repeat the swipe gesture several times to
-[open the notification tray](https://support.mozilla.org/en-US/kb/navigating-your-firefox-os-phone#w_see-your-notifications).
+For instance, [I often need to repeat the swipe gesture several times](https://discourse.mozilla-community.org/t/bug-notification-area-is-hard-to-activate/529)
+to [open the notification tray](https://support.mozilla.org/en-US/kb/navigating-your-firefox-os-phone#w_see-your-notifications).
 
 In the web browser, the address bar is attached to the top of the current page.
 It move out of the screen when scrolling down, and if I want to show it again,
-I need to scroll up to the top.
+[I need to scroll up to the top](https://discourse.mozilla-community.org/t/bug-scrolling-back-to-top-is-painful/533).
 Firefox for Android does not behave like this: scrolling up a little at any point in the page
 shows the address bar immediately.
 
-The keyboard is too big.
-Moreover, in portrait orientation, the keyboard layout is broken:
+The keyboard feels too big.
+Moreover, in portrait orientation, [the keyboard layout is broken](https://bugzilla.mozilla.org/show_bug.cgi?id=1007393):
 it seems that the size of the buttons is fixed, so when the
 screen width is not sufficient, each row of keys is split in several rows.
 
 Things that do not work as expected
 -----------------------------------
 
-After an app has been installed from the marketplace, it cannot be run immediately.
+After an app has been installed from the marketplace, [it cannot be run immediately](https://bugzilla.mozilla.org/show_bug.cgi?id=1008516).
 When launching the app for the first time, a directory view of the internal files of the app
 is displayed.
 Apps run correctly after rebooting the tablet.
@@ -124,3 +124,14 @@ In the web browser, when a page has been displayed in landscape mode and the ori
 to portrait, the page becomes unstable.
 
 I did not find a *Caps lock* function on the keyboard.
+
+Next steps
+==========
+
+I am confident that some of these issues have already been addressed.
+In the coming weeks, I will upgrade to a more recent release and start reporting bugs.
+On my todo list:
+
+* Build the firmware myself.
+* Get a glimpse of the source tree and development tools, to see if I can get familiar with the code base in a reasonable time.
+* Make performance tests and comparisons between apps running in Firefox for Android and the same apps running in Firefox OS.
