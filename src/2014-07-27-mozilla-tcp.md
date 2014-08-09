@@ -94,7 +94,7 @@ For instance, [I often need to repeat the swipe gesture several times](https://d
 to [open the notification tray](https://support.mozilla.org/en-US/kb/navigating-your-firefox-os-phone#w_see-your-notifications).
 
 In the web browser, the address bar is attached to the top of the current page.
-It move out of the screen when scrolling down, and if I want to show it again,
+It moves out of the screen when scrolling down, and if I want to show it again,
 [I need to scroll up to the top](https://discourse.mozilla-community.org/t/bug-scrolling-back-to-top-is-painful/533).
 Firefox for Android does not behave like this: scrolling up a little at any point in the page
 shows the address bar immediately.
