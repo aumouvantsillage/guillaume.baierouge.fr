@@ -83,8 +83,25 @@ As a result, the following picture shows an *ideal* situation where the
 application only records input coordinates and no time is spent rendering
 the paths.
 
-<object data="/assets/figures/Painter.drawing.svg" type="image/svg+xml"
-    width="75%"></object>
+<img src="/assets/figures/Painter-FxOS-Flatfish.drawing.svg" width="75%">
+
+On the following chart,
+* The X axis corresponds to the time, in milliseconds.
+* The vertical lines represent the time of the animation frames (1 line every 5 animation frames).
+* The blue curve represents the cumulated distance from the beginning of the path.
+* The orange curve represents the number of points since the beginning of the path.
+
+This chart shows that when no repaint operation is performed, the touch events are
+evenly distributed in time and the animation frames follow a regular rate.
+
+<img src="/assets/figures/Painter-FxOS-Flatfish.chart.svg" width="75%">
+
+<table>
+    <tr><td>Segments</td><td>394</td></tr>
+    <tr><td>Time between animation frames (min)</td><td>4 ms</td></tr>
+    <tr><td>Time between animation frames (average)</td><td>17 ms</td></tr>
+    <tr><td>Time between animation frames (max)</td><td>45 ms</td></tr>
+</table>
 
 SVGPolylinePainter
 ------------------
@@ -92,14 +109,28 @@ SVGPolylinePainter
 In the following picture, the path is drawn from left to right.
 We can observe that the segments of the polyline become longer at the end.
 
-<object data="/assets/figures/SVGPolylinePainter.drawing.svg" type="image/svg+xml"
-    width="75%"></object>
+<img src="/assets/figures/SVGPolylinePainter-FxOS-Flatfish.drawing.svg" width="75%">
 
 In the ``SVGPolylinePainter`` object, each execution of the ``repaint`` method assigns
 a new value to the ``points`` attribute of the same ``polyline`` element.
 Even if only one point was added, this forces the rendering engine to redraw the entire polyline.
 As the polyline becomes longer, the rendering engine takes more and more time to draw it,
 so that the application reacts more and more slowly.
+
+This is visible in the following chart: the vertical lines show that the delay between animation
+frames increases over time.
+While the distance (blue curve) still progresses approximately linearly,
+the orange curve shows that the application can handle fewer and fewer touch events.
+
+<img src="/assets/figures/SVGPolylinePainter-FxOS-Flatfish.chart.svg" width="75%">
+
+<table>
+    <tr><td>Segments</td><td>210</td></tr>
+    <tr><td>Time between animation frames (min)</td><td>1 ms</td></tr>
+    <tr><td>Time between animation frames (average)</td><td>50 ms</td></tr>
+    <tr><td>Time between animation frames (max)</td><td>117 ms</td></tr>
+</table>
+
 
 SVGPolylineGroupPainter
 -----------------------
@@ -109,8 +140,20 @@ creates a new ``polyline`` element each time the ``repaint`` method is called.
 The following picture shows no significant difference in smoothness between the beginning and the
 end of the path.
 
-<object data="/assets/figures/SVGPolylineGroupPainter.drawing.svg" type="image/svg+xml"
-    width="75%"></object>
+<img src="/assets/figures/SVGPolylineGroupPainter-FxOS-Flatfish.drawing.svg" width="75%">
+
+In the following chart, we observe that the orange curve is nearly linear and that the animation frames
+are distributed more evenly in time.
+
+<img src="/assets/figures/SVGPolylineGroupPainter-FxOS-Flatfish.chart.svg" width="75%">
+
+<table>
+    <tr><td>Segments</td><td>403</td></tr>
+    <tr><td>Time between animation frames (min)</td><td>1 ms</td></tr>
+    <tr><td>Time between animation frames (average)</td><td>24 ms</td></tr>
+    <tr><td>Time between animation frames (max)</td><td>51 ms</td></tr>
+</table>
+
 
 CanvasPainter
 -------------
@@ -119,6 +162,14 @@ CanvasPainter
 that the rendering will not slow down while the path grows.
 But rendering on a ``canvas`` element gives a surprisingly bad result.
 
-<object data="/assets/figures/CanvasPainter.drawing.svg" type="image/svg+xml"
-    width="75%"></object>
+<img src="/assets/figures/CanvasPainter-FxOS-Flatfish.drawing.svg" width="75%">
+
+<img src="/assets/figures/CanvasPainter-FxOS-Flatfish.chart.svg" width="75%">
+
+<table>
+    <tr><td>Segments</td><td>27</td></tr>
+    <tr><td>Time between animation frames (min)</td><td>1 ms</td></tr>
+    <tr><td>Time between animation frames (average)</td><td>323 ms</td></tr>
+    <tr><td>Time between animation frames (max)</td><td>497 ms</td></tr>
+</table>
 
