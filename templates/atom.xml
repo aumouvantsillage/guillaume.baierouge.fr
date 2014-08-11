@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>{{site.title}}</title>
+    <link href="{{site.url}}/atom.xml" rel="self" />
+    <link href="{{site.url}}" />
+  	<updated>{{date.toISOString()}}</updated>
+   
+    {% for p in posts %}
+        <entry>
+            <title>{{p.title}}</title>
+            <link href="{{site.url}}/{{p.path}}" />
+            <updated>{{p.updated.toISOString() if p.updated else p.date.toISOString()}}</updated>
+            <summary>{{p.less}}</summary>
+        </entry>
+    {% endfor %}
+</feed>

@@ -2,11 +2,11 @@
     <article>
         <header>
             <time datetime="{{p.date.toISOString()}}">{{p.date.toISOString().split("T")[0]}}</time>
-            <h1><a href="{{siteRoot}}/{{p.path}}">{{p.title}}</a></h1>
+            <h1><a href="{{site.root}}/{{p.path}}">{{p.title}}</a></h1>
             {{p.author}}
             <nav>
                 {% for t in p.tags %}
-                    <a href="{{siteRoot}}/tags/{{t}}.html">{{t}}</a>
+                    <a href="{{site.root}}/tags/{{t}}.html">{{t}}</a>
                 {% endfor %}
             </nav>
         </header>

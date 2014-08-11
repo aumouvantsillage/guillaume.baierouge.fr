@@ -2,12 +2,13 @@
 <html {% if lang %}lang="{{lang}}"{% endif %}>
     <head>
         <meta charset="utf-8">
-        <title>{{siteTitle}}</title>
-        <link rel="stylesheet" href="{{siteRoot}}/assets/vendor/normalize.css">
-        <link rel="stylesheet" href="{{siteRoot}}/css/antonio.css">
-        <link rel="stylesheet" href="{{siteRoot}}/css/pt-serif.css">
-        <link rel="stylesheet" href="{{siteRoot}}/css/source-code-pro.css">
-        <link rel="stylesheet" href="{{siteRoot}}/css/screen.css">
+        <title>{{site.title}}</title>
+        <link rel="alternate"  href="{{site.root}}/atom.xml" type="application/atom+xml" title="Atom Feed" />
+        <link rel="stylesheet" href="{{site.root}}/assets/vendor/normalize.css">
+        <link rel="stylesheet" href="{{site.root}}/css/antonio.css">
+        <link rel="stylesheet" href="{{site.root}}/css/pt-serif.css">
+        <link rel="stylesheet" href="{{site.root}}/css/source-code-pro.css">
+        <link rel="stylesheet" href="{{site.root}}/css/screen.css">
     </head>
     <body>
 		{% include "templates/header.html" %}

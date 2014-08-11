@@ -8,21 +8,26 @@ var sass = require("metalsmith-sass");
 var tags = require("metalsmith-tags");
 var collections = require("metalsmith-collections");
 var more = require("metalsmith-more");
+var date = require('metalsmith-build-date');
 
 Metalsmith(__dirname)
     .metadata({
-        siteTitle: "guillaume savaton - au mouvant sillage",
+        site: {
+            title: "guillaume savaton - au mouvant sillage",
+            url: "http://guillaume.baierouge.fr",
+            root: ""
+        },
         piwik: {
             siteId: 3,
             url: "http://baierouge.fr/piwik"
         },
         flattr: {
-            userId: "senshu",
-            url: encodeURIComponent("http://guillaume.baierouge.fr")
+            userId: "senshu"
         }
     })
     .source("src")
     .destination("build")
+    .use(date())
     .use(assets({
         source: "assets",
         destination: "assets"
@@ -55,4 +60,3 @@ Metalsmith(__dirname)
     }))
     .use(templates("nunjucks"))
     .build();
-
