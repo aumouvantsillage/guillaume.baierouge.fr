@@ -157,3 +157,8 @@ object {
 img {
     @include outlined-block;
 }
+
+header img {
+    border: none;
+    box-shadow: none;
+}

@@ -11,7 +11,15 @@ var more = require("metalsmith-more");
 
 Metalsmith(__dirname)
     .metadata({
-        siteTitle: "au mouvant sillage"
+        siteTitle: "guillaume savaton - au mouvant sillage",
+        piwik: {
+            siteId: 3,
+            url: "http://baierouge.fr/piwik"
+        },
+        flattr: {
+            userId: "senshu",
+            url: encodeURIComponent("http://guillaume.baierouge.fr")
+        }
     })
     .source("src")
     .destination("build")
