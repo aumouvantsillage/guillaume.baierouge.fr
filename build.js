@@ -23,15 +23,13 @@ Metalsmith(__dirname)
         },
         flattr: {
             userId: "senshu"
-        }
+        },
+        github: "https://github.com/senshu/",
+        twitter: "https://twitter.com/senshua",
+        linkedIn: "http://fr.linkedin.com/in/gsavaton/",
+        googlePlus: "https://plus.google.com/115225184510134342799/posts"
     })
-    .source("src")
-    .destination("build")
     .use(date())
-    .use(assets({
-        source: "assets",
-        destination: "assets"
-    }))
     .use(sass({
         outputStyle: "compressed",
         outputDir: "css"
@@ -59,4 +57,8 @@ Metalsmith(__dirname)
         }
     }))
     .use(templates("nunjucks"))
+    .use(assets({
+        source: "assets",
+        destination: "assets"
+    }))
     .build();

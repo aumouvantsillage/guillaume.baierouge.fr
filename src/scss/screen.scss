@@ -31,6 +31,11 @@ body {
     word-wrap: break-word;
     hyphens: auto;
     margin: 1em 10%;
+
+    > header nav a {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+    }
 }
 
 header {
@@ -154,11 +159,6 @@ object {
     @include outlined-block;
 }
 
-img {
+main img {
     @include outlined-block;
-}
-
-header img {
-    border: none;
-    box-shadow: none;
 }
