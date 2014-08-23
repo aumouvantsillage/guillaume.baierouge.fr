@@ -3,6 +3,7 @@ title: "Gribouille: a demo hand-writing/drawing application for Firefox OS on th
 author: Guillaume Savaton
 lang: en
 date: 2014-08-08
+updated: 2014-08-12
 draft: false
 collection: posts
 tags: Mozilla, Tablet, Firefox OS
@@ -74,7 +75,7 @@ in all four cases.
 
 The application was run in the following conditions:
 * As a packaged app in Firefox OS 2.1 on the Flatfish tablet.
-* As a web page in Firefox 31.0 for Android on a Nexus 7 (2012) tablet.
+* As a web page in Firefox 31 and Chrome 36 for Android 4.4.4 on a Nexus 7 (2012) tablet.
 
 The pictures concern Firefox OS on the Flatfish.
 They are reconstructed from the points collected by the application.
@@ -113,12 +114,12 @@ Both tested platforms show similar performance.
 The maximum time between frames in Firefox for Android is due to an exceptionally
 longer frame that happened during the execution for no identified reason.
 
-<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7
-----------------------------------------|----------------------|-----------------------------
-Segments                                | 394                  | 451
-Time between animation frames (min)     | 4 ms                 | 4 ms
-Time between animation frames (average) | 17 ms                | 19 ms
-Time between animation frames (max)     | 45 ms                | 267 ms
+<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7 | Chrome, Nexus7
+----------------------------------------|----------------------|------------------------------|---------------
+Segments                                | 394                  | 451                          | 408
+Time between animation frames (min)     | 4 ms                 | 4 ms                         | 1 ms
+Time between animation frames (average) | 17 ms                | 19 ms                        | 17 ms
+Time between animation frames (max)     | 45 ms                | 267 ms                       | 66 ms
 
 
 SVGPolylinePainter
@@ -148,12 +149,12 @@ Firefox for Android renders the polyline more slowly, but does not miss touch ev
 (the number of segments is close to the ``Painter`` case).
 For this reason, the resulting drawing is smoother but is also displayed with more latency.
 
-<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7
-----------------------------------------|----------------------|-----------------------------
-Segments                                | 210                  | 455
-Time between animation frames (min)     | 1 ms                 | 13 ms
-Time between animation frames (average) | 50 ms                | 111 ms
-Time between animation frames (max)     | 117 ms               | 427 ms
+<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7 | Chrome, Nexus7
+----------------------------------------|----------------------|------------------------------|---------------
+Segments                                | 210                  | 455                          | 352
+Time between animation frames (min)     | 1 ms                 | 13 ms                        | 11 ms
+Time between animation frames (average) | 50 ms                | 111 ms                       | 59 ms
+Time between animation frames (max)     | 117 ms               | 427 ms                       | 582 ms
 
 
 SVGPolylineGroupPainter
@@ -172,15 +173,15 @@ are distributed more evenly in time.
 <img src="/assets/figures/SVGPolylineGroupPainter-FxOS-Flatfish.chart.svg" width="75%">
 
 In this case again, the average time between animation frames in Firefox OS is smaller
-than in Firefox for Android.
+than in Firefox for Android and Chrome.
 The application is slightly more pleasant to use in Firefox OS.
 
-<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7
-----------------------------------------|----------------------|-----------------------------
-Segments                                | 403                  | 428
-Time between animation frames (min)     | 1 ms                 | 6 ms
-Time between animation frames (average) | 24 ms                | 59 ms
-Time between animation frames (max)     | 51 ms                | 284 ms
+<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7 | Chrome, Nexus7
+----------------------------------------|----------------------|------------------------------|---------------
+Segments                                | 403                  | 428                          | 354
+Time between animation frames (min)     | 1 ms                 | 6 ms                         | 11 ms
+Time between animation frames (average) | 24 ms                | 59 ms                        | 48 ms
+Time between animation frames (max)     | 51 ms                | 284 ms                       | 444 ms
 
 
 CanvasPainter
@@ -196,13 +197,14 @@ But rendering on a ``canvas`` element gives a surprisingly bad result.
 
 Like Firefox OS, Firefox for Android takes a lot of time to render on a canvas.
 But the number of segments shows that it still manages to create a smooth drawing.
+In this case, Chrome gives the best result, very close to the *ideal* ``Painter`` case.
 
-<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7
-----------------------------------------|----------------------|-----------------------------
-Segments                                | 27                   | 461
-Time between animation frames (min)     | 1 ms                 | 16 ms
-Time between animation frames (average) | 323 ms               | 192 ms
-Time between animation frames (max)     | 497 ms               | 447 ms
+<!-- -->                                | Firefox OS, Flatfish | Firefox for Android, Nexus 7 | Chrome, Nexus7
+----------------------------------------|----------------------|------------------------------|---------------
+Segments                                | 27                   | 461                          | 409
+Time between animation frames (min)     | 1 ms                 | 16 ms                        | 2 ms
+Time between animation frames (average) | 323 ms               | 192 ms                       | 19 ms
+Time between animation frames (max)     | 497 ms               | 447 ms                       | 97 ms
 
 
 Preliminary conclusion
@@ -226,7 +228,7 @@ is completely unusable on the Flatfish.
 This small study raises a few questions:
 
 * First of all, in both tested versions of Firefox, why is the canvas backend so bad compared to SVG?
-  A quick experiment with the Chrome browser on the Nexus 7 shows that canvas is the fastest backend in that browser!
+  With the Chrome browser on the Nexus 7, canvas is the fastest backend!
 * Can we make Firefox OS handle touch events during repaints, as Firefox for Android seems to do?
 * Is it a hardware or software issue? I wish I could make comparisons with Firefox OS running on another device.
 * Are there parameters that we can tune to benefit from hardware acceleration on the Flatfish?
