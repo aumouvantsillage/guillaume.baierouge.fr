@@ -1,5 +1,6 @@
 $link-color: rgb(34,102,170);
-$table-heading-background: rgb(125,165,205);
+$icon-color: rgb(130, 150, 170);
+$table-heading-background: rgb(190, 200, 210);
 $info-color: rgb(170, 255, 70);
 $warning-color: rgb(255,220,70);
 
@@ -8,6 +9,7 @@ $content-font: "PT Serif", serif;
 $code-font: "Source Code Pro", monospace;
 
 $shadow-color: rgba(100, 100, 100, 0.75);
+$text-shadow-color: rgba(100, 100, 100, 0.5);
 
 @mixin shadowed-block {
     -webkit-box-shadow: 0px 3px 6px 0px $shadow-color;
@@ -15,9 +17,14 @@ $shadow-color: rgba(100, 100, 100, 0.75);
     box-shadow:         0px 3px 6px 0px $shadow-color;
 }
 
+@mixin shadowed-text {
+    -webkit-text-shadow: 0px 1px 2px $text-shadow-color;
+    -moz-text-shadow:    0px 1px 2px $text-shadow-color;
+    text-shadow:         0px 1px 2px $text-shadow-color;
+}
+
 @mixin outlined-block {
     border: 10px solid white;
-    display: block;
     margin-left: auto;
     margin-right: auto;
     @include shadowed-block;
@@ -32,9 +39,20 @@ body {
     hyphens: auto;
     margin: 1em 10%;
 
-    > header nav a {
-        margin-left: 0.5em;
-        margin-right: 0.5em;
+    > header nav {
+        a {
+            margin-left: 0.5em;
+            margin-right: 0.5em;
+            color: $icon-color;
+        }
+        
+        a:hover {
+            color: $link-color;
+        }
+    }
+    
+    > header form {
+        display: inline;
     }
 }
 
@@ -58,6 +76,7 @@ hr {
 
 h1, h2, h3, h4 {
     font-family: $heading-font;
+    @include shadowed-text;
 }
 
 header h1 {
@@ -105,9 +124,8 @@ ul {
 }
 
 table {
-    margin-left: auto;
-    margin-right: auto;
-    
+    @include outlined-block;
+
     th, td {
         padding: 0.3em 1em;
     }
@@ -155,10 +173,7 @@ code {
     @include shadowed-block;
 }
 
-object {
-    @include outlined-block;
-}
-
 main img {
+    display: block;
     @include outlined-block;
 }
