@@ -9,6 +9,7 @@ var tags = require("metalsmith-tags");
 var collections = require("metalsmith-collections");
 var more = require("metalsmith-more");
 var date = require('metalsmith-build-date');
+var katex = require("metalsmith-katex");
 
 Metalsmith(__dirname)
     .metadata({
@@ -43,6 +44,7 @@ Metalsmith(__dirname)
         gfm: true,
         tables: true
     }))
+    .use(katex())
     .use(more())
     .use(permalinks({
 		pattern: ":date/:title",
