@@ -1,5 +1,5 @@
 ---
-title: Rendering math with KaTeX and Metalsmith
+title: Rendering math for the web with KaTeX and Metalsmith
 author: Guillaume Savaton
 lang: en
 date: 2014-09-20
