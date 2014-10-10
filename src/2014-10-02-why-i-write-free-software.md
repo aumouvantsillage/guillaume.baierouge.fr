@@ -3,6 +3,7 @@ title: 5 reasons why I write free software
 author: Guillaume Savaton
 lang: en
 date: 2014-10-02
+updated: 2014-10-09
 draft: false
 collection: posts
 tags: Free software, Sozi
@@ -113,6 +114,12 @@ Many thanks to all of you, who clicked that Flattr button, for your support!
 I personally do not donate to the developers of every free software that I use,
 so I do not expect to receive donations from all users of Sozi as well.
 As a result, Sozi will probably not make me rich.
+
+*Edit:* I realize that this section could be misinterpreted.
+Actually, I am quite satisfied with what I earn in my current job.
+I am not asking you to give me a complementary income in exchange for my work.
+Please consider that these donations can help me pay costs related to the
+development of Sozi, such as the hosting service for the web site of Sozi.
 
 For fun
 =======
