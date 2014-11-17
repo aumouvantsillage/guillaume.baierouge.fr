@@ -3,6 +3,7 @@ title: Rendering math for the web with KaTeX and Metalsmith
 author: Guillaume Savaton
 lang: en
 date: 2014-09-20
+updated: 2014-11-17
 draft: false
 collection: posts
 tags: Math, Metalsmith, KaTeX
@@ -23,7 +24,15 @@ During the build process, these formulas are extracted and converted to HTML by 
 
 You can see an example below:
 
-<tex>\displaystyle\sum_{k=0}^N k = \frac{N \times (N+1)}{2}</tex>
+```
+<tex>
+\displaystyle\sum_{k=0}^N k = \frac{N \times (N+1)}{2}
+</tex>
+```
+
+<tex>
+\displaystyle\sum_{k=0}^N k = \frac{N \times (N+1)}{2}
+</tex>
 
 The plugin is [published as an npm module](https://www.npmjs.org/package/metalsmith-katex).
 The source code is available [in a GitHub repository](https://github.com/senshu/metalsmith-katex).
