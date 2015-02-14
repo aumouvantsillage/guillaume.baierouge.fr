@@ -46,7 +46,9 @@ Metalsmith(__dirname)
         tables: true
     }))
     .use(katex())
-    .use(vextab())
+    .use(vextab({
+        width: 800
+    }))
     .use(more())
     .use(permalinks({
 		pattern: ":date/:title",
