@@ -11,6 +11,7 @@ var more = require("metalsmith-more");
 var date = require('metalsmith-build-date');
 var katex = require("metalsmith-katex");
 var vextab = require("metalsmith-vextab");
+var sections = require("./plugins/metalsmith-sections");
 
 Metalsmith(__dirname)
     .metadata({
@@ -49,6 +50,10 @@ Metalsmith(__dirname)
     .use(vextab({
         width: 800
     }))
+    .use(sections({
+        level: 2,
+        nested: false
+    }))
     .use(more())
     .use(permalinks({
 		pattern: ":date/:title",
@@ -70,4 +75,7 @@ Metalsmith(__dirname)
         source: "assets",
         destination: "assets"
     }))
-    .build();
+    .build(function (err) {
+        if (err) throw err;
+    });
+

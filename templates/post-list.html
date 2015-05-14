@@ -10,6 +10,7 @@
                 {% endfor %}
             </nav>
         </header>
-        {{p.less}} <a href="{{site.root}}/{{p.path}}">Read more&hellip;</a>
+        {{p.less}}
+        <a href="{{site.root}}/{{p.path}}">{% if p.lang == "fr" %}Lire la suite{% else %}Read more{% endif %}&hellip;</a>
     </article>
 {% endfor %}

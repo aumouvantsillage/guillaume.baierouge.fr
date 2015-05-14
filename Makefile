@@ -7,5 +7,5 @@ all:
 serve: all
 	cd build; ../node_modules/http-server/bin/http-server
 
-upload: all
+upload: #all
 	rsync --archive --update --progress --compress build/* www-data@baierouge.fr:/var/www/guillaume.baierouge.fr/

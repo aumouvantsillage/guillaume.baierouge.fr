@@ -91,8 +91,17 @@ article {
     h3 { font-size: 100%; font-weight: normal; }
     h3:before { content: "\00bb\2002"; color: #aaa; }
 
+    h1, h2 {
+        position: sticky;
+        top: 0px;
+        background-color: white;
+    }
+
     header {
-        h1 { font-size: 180%; }
+        h1 {
+            position: relative;
+            font-size: 180%;
+        }
         
         margin-bottom: 2em;
     }
