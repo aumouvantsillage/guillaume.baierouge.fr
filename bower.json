@@ -1,0 +1,8 @@
+{
+  "name": "guillaume.baierouge.fr",
+  "devDependencies": {
+    "katex": "~0.4.3",
+    "fontawesome": "~4.3.0",
+    "normalize.css": "~3.0.3"
+  }
+}

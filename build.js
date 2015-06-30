@@ -13,6 +13,12 @@ var katex = require("metalsmith-katex");
 var vextab = require("metalsmith-vextab");
 var sections = require("./plugins/metalsmith-sections");
 
+var nunjucks = require("nunjucks");
+
+nunjucks.configure({
+    watch: false
+});
+
 Metalsmith(__dirname)
     .metadata({
         site: {
@@ -75,7 +81,10 @@ Metalsmith(__dirname)
         source: "assets",
         destination: "assets"
     }))
+    .use(assets({
+        source: "bower_components",
+        destination: "bower_components"
+    }))
     .build(function (err) {
         if (err) throw err;
     });
-
