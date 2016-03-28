@@ -1,7 +1,7 @@
 {
   "name": "guillaume.baierouge.fr",
   "devDependencies": {
-    "katex": "~0.4.3",
+    "katex": "~0.5.1",
     "fontawesome": "~4.3.0",
     "normalize.css": "~3.0.3"
   }

@@ -59,11 +59,11 @@ They can use two backends for drawing: SVG and canvas.
   Like ``SVGPolylineGroupPainter``, each repaint draws a sequence of straight lines
   that connect the points that were added since the previous repaint.
 
-<div class="info">
-    The painter can be selected from a drop-down list when lauching the application.
-    To retry with another painter, you must restart the application, or reload the
-    page if you are running it from a web browser.
-</div>
+:::info
+The painter can be selected from a drop-down list when lauching the application.
+To retry with another painter, you must restart the application, or reload the
+page if you are running it from a web browser.
+:::
 
 Results
 =======
@@ -81,13 +81,13 @@ The pictures concern Firefox OS on the Flatfish.
 They are reconstructed from the points collected by the application.
 The red circles show the actual points that were recorded.
 
-<div class="info">
-    When a path has been drawn, the application prints a JSON object to the console
-    with all the collected data.
-    Copy-paste the JSON data to a text file and run ``node js/analyze.js filename.json``.
-    You will get a few messages with statistics, and two SVG files will be saved:
-    one with the reconstructed drawing and the other with a chart.
-</div>
+:::info
+When a path has been drawn, the application prints a JSON object to the console
+with all the collected data.
+Copy-paste the JSON data to a text file and run ``node js/analyze.js filename.json``.
+You will get a few messages with statistics, and two SVG files will be saved:
+one with the reconstructed drawing and the other with a chart.
+:::
 
 Painter
 -------

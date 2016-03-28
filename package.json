@@ -1,6 +1,6 @@
 {
   "name": "guillaume.baierouge.fr",
-  "version": "15.06.302127",
+  "version": "16.03.282237",
   "description": "Guillaume Savaton 's personal website",
   "homepage": "http://guillaume.baierouge.fr",
   "license": "Creative Commons Attribution 4.0 International License",
@@ -14,21 +14,25 @@
   },
   "devDependencies": {
     "debug": "^2.2.0",
+    "highlight.js": "^9.2.0",
     "http-server": "^0.8.0",
     "jsdom": "^3.1.2",
+    "katex": "^0.5.1",
+    "markdown-it": "^6.0.0",
+    "markdown-it-anchor": "^2.5.0",
+    "markdown-it-container": "^2.0.0",
+    "markdown-it-math": "^3.0.2",
     "metalsmith": "^1.7.0",
     "metalsmith-assets": "0.1.0",
     "metalsmith-build-date": "^0.1.0",
     "metalsmith-collections": "^0.7.0",
     "metalsmith-drafts": "0.0.1",
-    "metalsmith-katex": "^0.3.0",
-    "metalsmith-markdown": "^0.2.1",
+    "metalsmith-markdownit": "^0.3.0",
     "metalsmith-more": "^0.2.0",
     "metalsmith-permalinks": "^0.4.0",
     "metalsmith-sass": "^1.2.0",
     "metalsmith-tags": "^0.10.0",
     "metalsmith-templates": "^0.7.0",
-    "metalsmith-vextab": "^0.2.1",
     "nunjucks": "^1.2.0"
   }
 }

@@ -2,22 +2,66 @@ var Metalsmith = require("metalsmith");
 var assets = require("metalsmith-assets");
 var drafts = require("metalsmith-drafts");
 var permalinks = require("metalsmith-permalinks");
-var markdown = require("metalsmith-markdown");
+var markdown = require("metalsmith-markdownit");
 var templates = require("metalsmith-templates");
 var sass = require("metalsmith-sass");
 var tags = require("metalsmith-tags");
 var collections = require("metalsmith-collections");
 var more = require("metalsmith-more");
 var date = require('metalsmith-build-date');
-var katex = require("metalsmith-katex");
-var vextab = require("metalsmith-vextab");
 var sections = require("./plugins/metalsmith-sections");
-
+var highlight = require("highlight.js");
+var katex = require("katex");
 var nunjucks = require("nunjucks");
+var container = require("markdown-it-container");
+var anchor = require("markdown-it-anchor");
+var math = require("markdown-it-math");
 
-nunjucks.configure({
-    watch: false
+/*
+ * Configure nunjucks.
+ * Disable file watching in nunjucks to prevent an exception.
+ * Add a filter for relative links.
+ */
+
+nunjucks.configure({watch: false}).addFilter("relative", function (childName, parentName) {
+    var path = require("path");
+    return path.relative(path.dirname(parentName), childName);
 });
+
+/*
+ * Syntax highlighter configuration for Markdown code blocks.
+ */
+
+function highlighter(code, lang) {
+    return lang ? highlight.highlight(lang, code).value : code;
+}
+
+/*
+ * Configure Markdown processor.
+ */
+
+var md = markdown("commonmark", {
+    highlight: highlighter,
+    typographer: true,
+    quotes: ['«\xA0', '\xA0»', '‹\xA0', '\xA0›']
+});
+
+md.parser
+    .use(container, "info")
+    .use(container, "warning")
+    .use(anchor)
+    .use(math, {
+        inlineRenderer: function (str) {
+            return katex.renderToString(str);
+        },
+        blockRenderer: function (str) {
+            return katex.renderToString(str, {
+                displayMode: true
+            });
+        }
+    })
+    .enable("table")
+    .enable("smartquotes");
 
 Metalsmith(__dirname)
     .metadata({
@@ -47,15 +91,7 @@ Metalsmith(__dirname)
         outputDir: "css"
     }))
     .use(drafts())
-    .use(markdown({
-        smartypants: false,
-        gfm: true,
-        tables: true
-    }))
-    .use(katex())
-    .use(vextab({
-        width: 800
-    }))
+    .use(md)
     .use(sections({
         level: 2,
         nested: false
