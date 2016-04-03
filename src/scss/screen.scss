@@ -3,6 +3,7 @@ $icon-color: rgb(130, 150, 170);
 $table-heading-background: rgb(190, 200, 210);
 $info-color: rgb(170, 255, 70);
 $warning-color: rgb(255,220,70);
+$code-background: rgba(230, 230, 230, 0.75);
 
 $heading-font: "Antonio", sans-serif;
 $content-font: "PT Serif", serif;
@@ -158,18 +159,24 @@ blockquote {
     padding: 0.1em 1em;
 }
 
+pre {
+    padding: 0.5em 1em;
+    @include shadowed-block;
+}
+
 pre, code {
     font-family: $code-font;
+    background: $code-background;
 }
 
 code {
-    background: rgba(230, 230, 230, 0.75);
     border-radius: 0.25em;
     padding: 0 0.3em;
 }
 
 pre code {
     padding: 0;
+    background: transparent;
 }
 
 .info, .warning {
