@@ -1,27 +1,35 @@
 ---
-title: Installing Pantheon desktop over Ubuntu 14.04
+title: How to install the Pantheon desktop environment over Ubuntu 14.04
 author: Guillaume Savaton
 lang: fr
 date: 2016-03-28
-update: 2016-03-28
+update: 2016-04-03
 draft: false
 collection: posts
 tags: Linux, Free Software
 template: post.html
 ---
 
-As a user of Elementary OS at home, I found myself in a very uncomfortable situation at work recently,
-where I had to use a vanilla Ubuntu 14.04 setup.
-I took a little time to try to install the Pantheon desktop on that computer but I stumbled upon some issues.
-Here is the process that finally worked.
+[Elementary OS](http://elementary.io/) is a Linux distribution that comes with its own desktop environment called Pantheon.
+The developers do not officially support installing Pantheon separately from the rest of the distribution.
+In fact, while Elementary OS Freya is based on Ubuntu 14.04, it requires [newer versions of several packages](https://launchpad.net/~elementary-os/+archive/ubuntu/os-patches/).
+
+Fortunately, if your computer is already running Ubuntu 14.04, there is a reasonably easy way to transform
+your existing setup into a seemingly genuine Elementary OS setup.
 
 <!-- more -->
 
-Add the package repositories and install the desktop environment
-================================================================
+Several conversations can be found about this topic on the web, but the proposed solutions generally rely on the unstable package repositories
+from the Elementary OS developers team.
+I preferred to use the very same repositories as in an official installation of Elementary OS.
 
-Most articles I found on the web recommend to use the *daily* repository from the Elementary OS team.
-However, I preferred to use the same APT sources that I had on my home computers running Elementary OS.
+Here is the process that worked for me:
+
+Adding the package repositories and installing the desktop environment
+======================================================================
+
+In a terminal, I ran the following commands.
+They added the package repositories of the Elementary OS project, upgraded the already installed packages, and installed the Pantheon desktop environment.
 
 ```bash
 sudo add-apt-repository ppa:elementary-os/stable
@@ -30,8 +38,10 @@ sudo apt-get dist-upgrade
 sudo apt-get install elementary-desktop
 ```
 
-Fix rendering issues
-====================
+As far as I could see, a side-by-side comparison of the lists of installed packages in Elementary OS and in my modified Ubuntu showed only minor differences.
+
+Fixing rendering issues
+=======================
 
 After rebooting, I chose the *Pantheon* session from the logging screen.
 I found that the Applications menu (also known as *Slingshot Launcher*) did not work correctly:
@@ -49,8 +59,8 @@ gsettings set com.canonical.desktop.interface scrollbar-mode normal
 killall slingshot-launcher
 ```
 
-Set up the Plymouth and LightDM themes (optional)
-=================================================
+Setting up the Plymouth and LightDM themes (optional)
+=====================================================
 
 Show the Elementary logo at startup:
 
