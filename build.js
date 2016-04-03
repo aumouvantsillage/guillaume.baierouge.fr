@@ -1,3 +1,5 @@
+"use strict";
+
 var Metalsmith = require("metalsmith");
 var assets = require("metalsmith-assets");
 var drafts = require("metalsmith-drafts");
