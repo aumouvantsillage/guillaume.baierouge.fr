@@ -77,6 +77,7 @@ Metalsmith(__dirname)
         },
         github: "https://github.com/senshu/",
         twitter: "https://twitter.com/senshua",
+        mastodon: "https://mamot.fr/@senshu",
         linkedIn: "http://fr.linkedin.com/in/gsavaton/",
         buymeacoffee: "https://www.buymeacoffee.com/THtbNvnqE"
     })
@@ -113,8 +114,16 @@ Metalsmith(__dirname)
         destination: "assets"
     }))
     .use(assets({
-        source: "bower_components",
-        destination: "bower_components"
+        source: "node_modules/normalize.css",
+        destination: "css/normalize.css"
+    }))
+    .use(assets({
+        source: "node_modules/katex/dist",
+        destination: "css/katex"
+    }))
+    .use(assets({
+        source: "node_modules/@fortawesome/fontawesome-free",
+        destination: "css/fontawesome"
     }))
     .build(function (err) {
         if (err) throw err;
