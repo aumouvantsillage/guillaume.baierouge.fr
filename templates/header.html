@@ -1,13 +1,11 @@
 <header>
 	<h1><a href="{{site.root}}/">{{site.title}}</a></h1>
     <nav>
-        <a href="{{twitter}}" title="Twitter"><i class="fa fa-twitter"></i></a>       
-        <a href="{{googlePlus}}" title="Google+"><i class="fa fa-google-plus"></i></a>       
-        <a href="{{linkedIn}}" title="LinkedIn"><i class="fa fa-linkedin"></i></a>       
-        <a href="{{github}}" title="GitHub repositories"><i class="fa fa-github"></i></a>       
-        <a href="{{site.root}}/atom.xml" title="Atom feed"><i class="fa fa-rss"></i></a>       
-        {% include "templates/flattr.html" %}
-        {% include "templates/paypal.html" %}
+        <a href="{{twitter}}" title="Twitter"><i class="fa fa-twitter"></i></a>
+        <a href="{{linkedIn}}" title="LinkedIn"><i class="fa fa-linkedin"></i></a>
+        <a href="{{github}}" title="GitHub repositories"><i class="fa fa-github"></i></a>
+        <a href="{{site.root}}/atom.xml" title="Atom feed"><i class="fa fa-rss"></i></a>
+		{% include "templates/buymeacoffee.html" %}
     </nav>
 	<hr>
 </header>
