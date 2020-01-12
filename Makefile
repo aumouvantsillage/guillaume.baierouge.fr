@@ -8,4 +8,4 @@ serve: all
 	./node_modules/.bin/http-server -o index.html build
 
 upload: #all
-	rsync --archive --checksum --delete --progress --compress build/* www-data@baierouge.fr:/var/www/guillaume.baierouge.fr/
+	rsync --archive --checksum --delete --progress --compress build/* guillaume@baierouge.fr:/var/www/guillaume.baierouge.fr/
