@@ -8,11 +8,10 @@
             {{author}}
             <nav>
                 {% for t in tags %}
-                    <a href="{{site.root}}/tags/{{t}}.html">{{t}}</a>
+                    <a href="{{site.root}}/tags/{{t.slug}}">{{t.name}}</a>{% if not loop.last %},{% endif %}
                 {% endfor %}
             </nav>
         </header>
 	    {{contents}}
     </article>
 {% endblock %}
-

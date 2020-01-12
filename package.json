@@ -1,6 +1,6 @@
 {
   "name": "guillaume.baierouge.fr",
-  "version": "16.04.032053",
+  "version": "20.01.121736",
   "description": "Guillaume Savaton 's personal website",
   "homepage": "http://guillaume.baierouge.fr",
   "license": "Creative Commons Attribution 4.0 International License",
@@ -12,27 +12,30 @@
     "type": "git",
     "url": "https://github.com/senshu/guillaume.baierouge.fr.git"
   },
+  "scripts": {
+    "test": "./node_modules/.bin/http-server -o index.html build"
+  },
   "devDependencies": {
-    "debug": "^2.2.0",
-    "highlight.js": "^9.2.0",
-    "http-server": "^0.8.0",
-    "jsdom": "^3.1.2",
-    "katex": "^0.5.1",
-    "markdown-it": "^6.0.0",
-    "markdown-it-anchor": "^2.5.0",
+    "debug": "^4.1.0",
+    "highlight.js": "^9.17.1",
+    "http-server": "^0.12.1",
+    "jsdom": "^15.2.1",
+    "katex": "^0.11.1",
+    "markdown-it": "^10.0.0",
+    "markdown-it-anchor": "^5.2.5",
     "markdown-it-container": "^2.0.0",
-    "markdown-it-math": "^3.0.2",
-    "metalsmith": "^1.7.0",
-    "metalsmith-assets": "0.1.0",
-    "metalsmith-build-date": "^0.1.0",
-    "metalsmith-collections": "^0.7.0",
-    "metalsmith-drafts": "0.0.1",
-    "metalsmith-markdownit": "^0.3.0",
+    "markdown-it-math": "^4.1.1",
+    "metalsmith": "^2.3.0",
+    "metalsmith-assets": "^0.1.0",
+    "metalsmith-build-date": "^0.2.0",
+    "metalsmith-collections": "^0.9.0",
+    "metalsmith-drafts": "^1.0.0",
+    "metalsmith-markdownit": "^0.5.0",
     "metalsmith-more": "^0.2.0",
-    "metalsmith-permalinks": "^0.4.0",
-    "metalsmith-sass": "^1.2.0",
-    "metalsmith-tags": "^0.10.0",
+    "metalsmith-permalinks": "^2.2.0",
+    "metalsmith-sass": "^1.7.0",
+    "metalsmith-tags": "^2.0.0",
     "metalsmith-templates": "^0.7.0",
-    "nunjucks": "^1.2.0"
+    "nunjucks": "^3.2.0"
   }
 }

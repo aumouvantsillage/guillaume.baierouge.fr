@@ -1,32 +1,33 @@
 "use strict";
 
-var Metalsmith = require("metalsmith");
-var assets = require("metalsmith-assets");
-var drafts = require("metalsmith-drafts");
-var permalinks = require("metalsmith-permalinks");
-var markdown = require("metalsmith-markdownit");
-var templates = require("metalsmith-templates");
-var sass = require("metalsmith-sass");
-var tags = require("metalsmith-tags");
-var collections = require("metalsmith-collections");
-var more = require("metalsmith-more");
-var date = require('metalsmith-build-date');
-var sections = require("./plugins/metalsmith-sections");
-var highlight = require("highlight.js");
-var katex = require("katex");
-var nunjucks = require("nunjucks");
-var container = require("markdown-it-container");
-var anchor = require("markdown-it-anchor");
-var math = require("markdown-it-math");
+const Metalsmith  = require("metalsmith");
+const assets      = require("metalsmith-assets");
+const drafts      = require("metalsmith-drafts");
+const permalinks  = require("metalsmith-permalinks");
+const markdown    = require("metalsmith-markdownit");
+const templates   = require("metalsmith-templates");
+const sass        = require("metalsmith-sass");
+const tags        = require("metalsmith-tags");
+const collections = require("metalsmith-collections");
+const more        = require("metalsmith-more");
+const date        = require('metalsmith-build-date');
+const sections    = require("./plugins/metalsmith-sections");
+const highlight   = require("highlight.js");
+const katex       = require("katex");
+const nunjucks    = require("nunjucks");
+const container   = require("markdown-it-container");
+const anchor      = require("markdown-it-anchor");
+const math        = require("markdown-it-math");
 
 /*
  * Configure nunjucks.
  * Disable file watching in nunjucks to prevent an exception.
+ * Disable autoescaping.
  * Add a filter for relative links.
  */
 
-nunjucks.configure({watch: false}).addFilter("relative", function (childName, parentName) {
-    var path = require("path");
+nunjucks.configure({watch: false, autoescape: false}).addFilter("relative", function (childName, parentName) {
+    const path = require("path");
     return path.relative(path.dirname(parentName), childName);
 });
 
@@ -42,7 +43,7 @@ function highlighter(code, lang) {
  * Configure Markdown processor.
  */
 
-var md = markdown("commonmark", {
+const md = markdown("commonmark", {
     highlight: highlighter,
     typographer: true,
     quotes: ['«\xA0', '\xA0»', '‹\xA0', '\xA0›']
@@ -53,13 +54,11 @@ md.parser
     .use(container, "warning")
     .use(anchor)
     .use(math, {
-        inlineRenderer: function (str) {
+        inlineRenderer(str) {
             return katex.renderToString(str);
         },
-        blockRenderer: function (str) {
-            return katex.renderToString(str, {
-                displayMode: true
-            });
+        blockRenderer(str) {
+            return katex.renderToString(str, {displayMode: true});
         }
     })
     .enable("table")
