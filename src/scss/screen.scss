@@ -3,7 +3,7 @@ $icon-color: rgb(130, 150, 170);
 $table-heading-background: rgb(190, 200, 210);
 $info-color: rgb(170, 255, 70);
 $warning-color: rgb(255,220,70);
-$code-background: rgba(230, 230, 230, 0.75);
+$code-background: rgba(170, 170, 170, 0.25);
 
 $heading-font: "Antonio", sans-serif;
 $content-font: "PT Serif", serif;
@@ -28,17 +28,18 @@ $text-shadow-color: rgba(100, 100, 100, 0.5);
     border: 10px solid white;
     margin-left: auto;
     margin-right: auto;
+    max-width: calc(60rem - 30px);
     @include shadowed-block;
 }
 
 body {
     box-sizing: border-box;
-    font-size: large;
+    font-size: 14pt;
     font-family: $content-font;
     text-align: justify;
     word-wrap: break-word;
     hyphens: auto;
-    margin: 1em 10%;
+    margin: 1rem calc(50vw - 30rem);
 
     > header nav {
         a {
@@ -46,12 +47,12 @@ body {
             margin-right: 0.5em;
             color: $icon-color;
         }
-        
+
         a:hover {
             color: $link-color;
         }
     }
-    
+
     > header form {
         display: inline;
     }
@@ -59,13 +60,13 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 2em;
+    margin-bottom: 2rem;
 }
 
 footer {
     text-align: center;
-    margin-top: 2em;
-    margin-bottom: 2em;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 hr {
@@ -86,28 +87,47 @@ header h1 {
 
 article {
     h1 { font-size: 160%; }
-    
+
     h2 { font-size: 120%; }
     h2:before { content: "\203a\2002"; color: #aaa; }
     h3 { font-size: 100%; font-weight: normal; }
     h3:before { content: "\00bb\2002"; color: #aaa; }
-
-    h1, h2 {
-        position: sticky;
-        top: 0px;
-        background-color: white;
-    }
 
     header {
         h1 {
             position: relative;
             font-size: 180%;
         }
-        
-        margin-bottom: 2em;
+
+        margin-bottom: 2rem;
     }
-    
-    margin-bottom: 1em;
+
+    section {
+        h1, h2 {
+            position: sticky;
+            top: 0px;
+            background-color: white;
+        }
+
+        h1, h2, h3 {
+            margin-left: -1em;
+            margin-top: 1.5em;
+            word-wrap: normal;
+            hyphens: none;
+            text-align: left;
+        }
+
+        img {
+            display: block;
+            @include outlined-block;
+        }
+    }
+
+    margin-bottom: 1rem;
+
+    p, li {
+        line-height: 1.4;
+    }
 }
 
 a {
@@ -122,12 +142,12 @@ a:hover {
 ul {
     list-style: none;
     padding-left: 1.5em;
-    
+
     li {
         text-indent: -1.5em;
         padding-left: 1em;
     }
-    
+
     li:before {
         content: "\2014\2002";
     }
@@ -139,14 +159,14 @@ table {
     th, td {
         padding: 0.3em 1em;
     }
-    
+
     th {
         text-align: center;
         font-family: $heading-font;
         font-weight: normal;
         background: $table-heading-background;
     }
-    
+
     td {
         border-bottom: 1px solid #aaa;
     }
@@ -162,6 +182,7 @@ blockquote {
 pre {
     padding: 0.5em 1em;
     @include shadowed-block;
+    overflow-x: auto;
 }
 
 pre, code {
@@ -191,9 +212,4 @@ pre code {
 .warning {
     background: $warning-color;
     @include shadowed-block;
-}
-
-main img {
-    display: block;
-    @include outlined-block;
 }

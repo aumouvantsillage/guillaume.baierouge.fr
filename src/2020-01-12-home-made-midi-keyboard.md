@@ -2,8 +2,8 @@
 title: midi@3:14, home-made MIDI keyboard
 author: Guillaume Savaton
 lang: fr
-date: 2019-01-12
-update: 2019-01-12
+date: 2020-01-12
+update: 2020-01-12
 draft: false
 collection: posts
 tags: Free Software, Free Hardware, Music
