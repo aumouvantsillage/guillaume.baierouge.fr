@@ -1,16 +1,16 @@
-{% for p in posts %}
-    <article>
-        <header>
-            <time datetime="{{p.date.toISOString()}}">{{p.date.toISOString().split("T")[0]}}</time>
-            <h1><a href="{{site.root}}/{{p.path}}">{{p.title}}</a></h1>
-            {{p.author}}
-            <nav>
-                {% for t in p.tags %}
-                    <a href="{{site.root}}/tags/{{t.slug}}">{{t.name}}</a>{% if not loop.last %},{% endif %}
-                {% endfor %}
-            </nav>
-        </header>
-        {{p.less}}
-        <a href="{{site.root}}/{{p.path}}">{% if p.lang == "fr" %}Lire la suite{% else %}Read more{% endif %}&hellip;</a>
-    </article>
-{% endfor %}
+{% from "templates/tag-list.html" import tagList %}
+
+{% macro postList(posts) %}
+    {% for p in posts %}
+        <article>
+            <header>
+                <time datetime="{{p.date.toISOString()}}">{{p.date.toISOString().split("T")[0]}}</time>
+                <h1><a href="{{site.root}}/{{p.path}}">{{p.title}}</a></h1>
+                {{p.author}}
+                {{tagList(p.tags)}}
+            </header>
+            {{p.less}}
+            <a href="{{site.root}}/{{p.path}}">{% if p.lang == "fr" %}Lire la suite{% else %}Read more{% endif %}&hellip;</a>
+        </article>
+    {% endfor %}
+{% endmacro %}

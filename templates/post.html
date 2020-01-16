@@ -1,4 +1,5 @@
 {% extends "templates/page.html" %}
+{% from "templates/tag-list.html" import tagList %}
 
 {% block main %}
     <article>
@@ -6,11 +7,7 @@
             <time datetime="{{date.toISOString()}}">{{date.toISOString().split("T")[0]}}</time>
             <h1>{{title}}</h1>
             {{author}}
-            <nav>
-                {% for t in tags %}
-                    <a href="{{site.root}}/tags/{{t.slug}}">{{t.name}}</a>{% if not loop.last %},{% endif %}
-                {% endfor %}
-            </nav>
+            {{tagList(tags)}}
         </header>
 	    {{contents}}
     </article>
