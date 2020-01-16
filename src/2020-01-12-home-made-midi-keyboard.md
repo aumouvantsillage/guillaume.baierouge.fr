@@ -10,9 +10,9 @@ tags: Free Software, Free Hardware, Music, midi@3:14
 template: post.html
 ---
 
-This article is the first of a series about the "midi@3:14" MIDI keyboard.
-We will first have a look at the hardware, and in the following articles,
-we will describe its firmware and additional software.
+This article is the first of a series about "midi@3:14", my home-made MIDI keyboard.
+In the following sections, you will read about the hardware design and assembly.
+The next articles will be dedicated to the firmware and companion software.
 
 <!-- more -->
 
@@ -40,9 +40,16 @@ as choosing an instrument or changing the base pitch (more on that in the next a
 ![midi@3:14 keyboard layout](/assets/figures/midi314-layout.svg)
 
 ::: info
-The name "midi@3:14" refers to the MIDI interface and the layout.
-It may remind French readers of the expression "Chercher midi à quatorze heures",
-which translates to "To seek noon at 2pm", and usually means "To complicate things needlessly".
+The name "midi@3:14" refers to the MIDI interface and the 3&times;14 layout.
+There is no specific intention behind this name, but if you like fun facts,
+I can come up with at least two explanations:
+
+1. "midi@3:14" is a pun on the French expression "Chercher midi à quatorze heures",
+   which translates to "To seek noon at 2pm", and usually means "To complicate things needlessly".
+   As you will see in the following sections, midi@3:14 is not particularly complicated
+   actually.
+2. The numbers 3 and 14 are related to a bigger plan to create a complete synthesizer
+   using this keyboard and a Raspberry Pi computer.
 :::
 
 Electronic design
@@ -70,11 +77,17 @@ The source files are available in the `hardware` folder of the
 Schematic capture
 -----------------
 
-The *Pro Micro* module has 18 I/O pins, of which 9 are digital only, 4 are analog only,
+Designing a 3&times;14 switch matrix is not a big challenge, but
+before drawing the schematic, let's think about how the microcontroller module
+will drive the rows and columns.
+
+The *Pro Micro* has 18 I/O pins, of which 9 are digital only, 4 are analog only,
 and 5 can be either digital or analog.
 A naive switch matrix layout would use one pin per row and one pin per column.
 For a 3&times;14 keyboard, this would require 17 digital pins, i.e. more than
 what the *Pro Micro* provides.
+
+![midi@3:14 switch matrix design](/assets/figures/midi314-switch-matrix.svg)
 
 However, there is no obligation for the electrical wiring to mimic the actual spatial key layout.
 In midi@3:14, a better solution was to design the circuit as if the keyboard had 6 rows and 7 columns.
@@ -119,6 +132,7 @@ more expensive than the PCBs themselves, but this is clearly not Elecrow's fault
 
 ![midi@3:14 PCB from manufacturer](/assets/figures/midi314-pcb-naked.jpg)
 
+Now let's have a look at the components.
 This is the Arduino-compatible *Pro Micro* module from SparkFun:
 
 ![midi@3:14 SparkFun Pro Micro](/assets/figures/midi314-sparkfun-pro-micro.jpg)
@@ -127,20 +141,22 @@ Diodes and potentiometers, ordered from [Farnell](https://www.farnell.com/):
 
 ![midi@3:14 Diodes and potentiometers](/assets/figures/midi314-diodes-and-pots.jpg)
 
-Cherry MX "Red" switches and keycaps, from [WASD Keyboards](https://www.wasdkeyboards.com/):
+Cherry MX "Red" switches and keycaps, from [WASD Keyboards](https://www.wasdkeyboards.com/).
+The "red" flavor is advertised as "ideal for action gamers".
+I chose them because they have low spring force and no audible click.
 
 ![midi@3:14 Cherry MX switches and keycaps](/assets/figures/midi314-switches-and-caps.jpg)
 
-The completed keyboard is mounted on a laser-cut orange plexiglas plate
+And here is the completed keyboard, mounted on a laser-cut orange plexiglas plate
 matching the orange key and the blue color of the board.
-It is now ready to be programmed and used:
+It is now ready to be programmed and used.
 
 ![midi@3:14 Final assembly](/assets/figures/midi314-final-assembly.jpg)
 
 Bill of materials and cost
 ==========================
 
-Here is the list of parts used in this project and the additional costs.
+Here is the list of parts used in this project, and the additional costs.
 I have kept the prices in the currencies that were used when ordering
 (US dollars and Euros).
 Note that these prices were applicable in March 2018.
@@ -148,8 +164,7 @@ They are likely to have changed since.
 
 The first line shows that 50 key switches were ordered from WASD while only
 42 were needed.
-In fact, the unit price of these switches was lower when ordering 50 and it
-turned out to be cheaper.
+In fact, their unit price was lower when ordering 50 and it turned out to be cheaper.
 
 | Description                                                                                                                 | Reference         | Provider                                                       | Qty | Unit price | Total price |
 |:----------------------------------------------------------------------------------------------------------------------------|:------------------|:---------------------------------------------------------------|----:|-----------:|------------:|
@@ -195,8 +210,8 @@ The knobs that I chose have a round hole and do not fit very well.
 Conclusion
 ==========
 
-With a background in electronics, the hardware part of this project was not very
-challenging, but it was fun to design and to make.
+For someone with a background in electronics, the hardware part of this project
+is not very challenging, but I found it fun to design and to make.
 It was my first attempt at designing a PCB using free software, and while
 the user interface of the KiCad suite is sometimes inconsistent,
 it proved to be reasonably easy and effective to use.
