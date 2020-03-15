@@ -1,9 +1,9 @@
 {
   "name": "guillaume.baierouge.fr",
-  "version": "20.01.162238",
-  "description": "Guillaume Savaton 's personal website",
+  "version": "20.03.152100",
+  "description": "Guillaume Savaton's personal website",
   "homepage": "http://guillaume.baierouge.fr",
-  "license": "Creative Commons Attribution 4.0 International License",
+  "license": "CC-BY-4.0",
   "author": {
     "name": "Guillaume Savaton",
     "url": "http://guillaume.baierouge.fr"
@@ -16,9 +16,9 @@
     "test": "./node_modules/.bin/http-server -o index.html build"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.12.0",
+    "@fortawesome/fontawesome-free": "^5.12.1",
     "debug": "^4.1.0",
-    "highlight.js": "^9.17.1",
+    "highlight.js": "^9.18.1",
     "http-server": "^0.12.1",
     "jsdom": "^15.2.1",
     "katex": "^0.11.1",
