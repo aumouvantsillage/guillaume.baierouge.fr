@@ -71,10 +71,10 @@ From the beginning, it was obvious that Sozi would be [free software](https://ww
 All the tools that I use to develop Sozi are free software, so publishing Sozi under a free license
 is my way to contribute to the free software ecosystem and give back what I receive from the community.
 
-The source code of Sozi is available from a [public repository](https://github.com/senshu/Sozi).
+The source code of Sozi is available from a [public repository](https://github.com/sozi-projects/Sozi).
 As a consequence, you are not only a user of Sozi, but also a potential participant in its development:
 * You can help [translate it into you native language](https://translations.launchpad.net/sozi) (the current Inkscape extension is available in 11 languages).
-* You can [report issues and request features](https://github.com/senshu/Sozi/issues), but also investigate by yourself and propose solutions.
+* You can [report issues and request features](https://github.com/sozi-projects/Sozi/issues), but also investigate by yourself and propose solutions.
 * You can make [a package for your preferred operating system](http://sozi.baierouge.fr/pages/install-linux.html).
   While it is limited to GNU/Linux distributions currently, I hope someone will make an installer for Windows or OS X.
 * You can help other users by answering questions in the [discussion group](http://groups.google.com/group/sozi-users).
