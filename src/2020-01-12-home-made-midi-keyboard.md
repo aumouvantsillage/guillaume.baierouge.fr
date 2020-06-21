@@ -72,7 +72,7 @@ by Michał Trybus.
 The following sections provide details about the PCB design using
 the free software suite [KiCad](https://kicad-pcb.org/) version 5.
 The source files are available in the `hardware` folder of the
-[midi314 repository at GitHub](https://github.com/senshu/midi314).
+[midi314 repository at GitHub](https://github.com/aumouvantsillage/midi314).
 
 Schematic capture
 -----------------
@@ -226,4 +226,4 @@ References
 * [altKeyboards](http://www.altkeyboards.com/): a site about alternate musical instruments with a focus on keyboards.
 * [The web site of the KiCad tool suite]([KiCad](https://kicad-pcb.org/)).
 * [How to make a keyboard - The matrix](http://blog.komar.be/how-to-make-a-keyboard-the-matrix/), by Michał Trybus.
-* [midi@3:14 source code repository at GitHub](https://github.com/senshu/midi314).
+* [midi@3:14 source code repository at GitHub](https://github.com/aumouvantsillage/midi314).

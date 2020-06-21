@@ -75,7 +75,7 @@ Metalsmith(__dirname)
             siteId: 3,
             url: "http://baierouge.fr/piwik"
         },
-        github: "https://github.com/senshu/",
+        github: "https://github.com/aumouvantsillage/",
         twitter: "https://twitter.com/umouvantsillage",
         mastodon: "https://mamot.fr/@aumouvantsillage",
         linkedIn: "http://fr.linkedin.com/in/gsavaton/",
