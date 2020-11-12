@@ -97,6 +97,9 @@ using the following syntax:
 * `(or expr ...)`
 * `(and expr ...)`
 
+Boolean literals are supported with the same syntax as in Racket:
+`#t` (true) and `#f` (false).
+
 Example
 -------
 
@@ -121,3 +124,14 @@ Here is the complete full-adder description using two instances of a half-adder 
   (assign s (h2 s))
   (assign co (or (h1 co) (h2 co))))
 ```
+
+As you can see, Tiny-HDL is fairly limited: it has only one data type;
+it does not support internal signal declarations; and it can only describe
+combinational circuits.
+However, the organization in entities, architectures and instances will provide
+an interesting challenge for name resolution and semantic checking:
+in the expression `(h1 a)`, how can we check that `a` exists as a port
+for `h1`, and is a valid target for assignment?
+
+Step 1: manual code generation
+==============================
