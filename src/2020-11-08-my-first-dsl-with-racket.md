@@ -50,6 +50,10 @@ Its syntax is based on [S-expressions](https://en.wikipedia.org/wiki/S-expressio
 but it is not mandatory: in Racket you can specify a custom parser for your language,
 and you can even use a parser generator such as [Brag](https://docs.racket-lang.org/brag/).
 
+In this article, we will use the well-known [binary adder](https://en.wikipedia.org/wiki/Adder_(electronics)#Binary_adders)
+circuit as an example.
+We will build a one-bit *full adder* composed of two *half adders*.
+
 Like in VHDL, Tiny-HDL separates the interface and the implementation of a circuit
 into an *entity* and an *architecture*.
 An entity has `input` and `output` ports that transport boolean values:
@@ -92,27 +96,27 @@ Then we assign the port `a` of the current architecture to the port `a` of `h1`.
 In the right-hand side of an assignment, Tiny-HDL also supports boolean operations
 using the following syntax:
 
-* `(not expr)`
-* `(xor expr expr)`
-* `(or expr ...)`
-* `(and expr ...)`
+* *Negation* of a boolean expression: `(not expr)`
+* *Or*, applied to zero or more expressions (returns false with no operand): `(or expr ...)`
+* *And*, applied to zero or more expressions (returns true with no operand): `(and expr ...)`
+* *Exclusive or* between two expressions: `(xor expr expr)`
 
 Boolean literals are supported with the same syntax as in Racket:
 `#t` (true) and `#f` (false).
 
-Example
--------
+A complete example
+------------------
 
-Here is the complete full-adder description using two instances of a half-adder entity:
+Here is the complete description of a full adder using two half adders:
 
 ```
 (entity half-adder ([input a] [input b] [output s] [output co]))
 
-(entity full-adder ([input a] [input b] [input ci] [output s] [output co]))
-
 (architecture half-adder-arch half-adder
   (assign s  (xor a b))
   (assign co (and a b)))
+
+(entity full-adder ([input a] [input b] [input ci] [output s] [output co]))
 
 (architecture full-adder-arch full-adder
   (instance h1 half-adder-arch)
@@ -133,5 +137,40 @@ an interesting challenge for name resolution and semantic checking:
 in the expression `(h1 a)`, how can we check that `a` exists as a port
 for `h1`, and is a valid target for assignment?
 
-Step 1: manual code generation
-==============================
+Language implementation roadmap
+===============================
+
+Imagine that we want to *simulate* digital electronic circuits by *executing*
+the corresponding Tiny-HDL source code on the Racket platform.
+The sequence of steps that we need to achieve can be summarized as:
+
+1. *Syntax analysis*: check a source file against the grammar of the language;
+   generate an *abstract syntax tree (AST)*.
+2. *Semantic checking*: explore and check the AST against a set of rules;
+   add semantic information to the AST for the *code generation* step.
+3. *Code generation*: emit an executable program for the target platform.
+4. *Execution*.
+
+Since Tiny-HDL's syntax is based on S-expressions, the *syntax analysis* step
+will be provided by Racket.
+The *code generation* step will emit Racket code that will be immediately
+executed by the Racket interpreter.
+
+In the following posts, we will follow the above steps in the reverse order:
+
+1. *Execution*: we will manually write some Racket code that implements the
+   full adder example, and we will let Racket execute it.
+2. *Code generation*: based on the manually written code, we will
+   develop a set of macros that convert a Tiny-HDL syntax tree into Racket code.
+3. *Semantic checking* (name resolution): in this step, we will write a basic
+   semantic checker that infers the links between named references and the
+   corresponding AST nodes;
+   the Tiny-HDL AST will be modified with information for the *code generation* step.
+4. *Semantic checking* (design rule checks): the semantic checker will be
+   completed with domain-specific rules to ensure that a Tiny-HDL source file
+   represents a valid digital electronic circuit.
+5. *Semantic checking* (modules): what if we want to split a circuit description
+   into several source files? How do we share information between modules for the
+   semantic checker?
+6. *Syntax analysis*: finally, we will register Tiny-HDL as a language
+   with an S-expression reader.
