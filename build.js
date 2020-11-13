@@ -125,6 +125,18 @@ Metalsmith(__dirname)
         source: "node_modules/@fortawesome/fontawesome-free",
         destination: "css/fontawesome"
     }))
+    .use(assets({
+        source: "node_modules/fontsource-pt-serif",
+        destination: "css/pt-serif"
+    }))
+    .use(assets({
+        source: "node_modules/fontsource-pt-sans-narrow",
+        destination: "css/pt-sans-narrow"
+    }))
+    .use(assets({
+        source: "node_modules/fontsource-source-code-pro",
+        destination: "css/source-code-pro"
+    }))
     .build(function (err) {
         if (err) throw err;
     });
