@@ -9,8 +9,16 @@ tags: Free Software, Domain-Specific Language, Racket
 template: post.html
 ---
 
-Before attempting to create a complete language implementation, let's figure
-out how each Tiny-HDL construct will be translated into Racket code.
+In [the previous post](/2020/11/08/my-first-domain-specific-language-with-racket),
+I have sketched an informal specification of a small hardware description language
+called Tiny-HDL.
+Our goal is to *execute* circuit descriptions, written in Tiny-HDL, on the Racket
+platform.
+Which means that we need to implement a *compiler* from Tiny-HDL to Racket.
+
+As explained in the proposed [language implementation roadmap](/2020/11/08/my-first-domain-specific-language-with-racket/#language-implementation-roadmap),
+we will start in the *execution* step, with a hand-written Racket example program that
+implements the Tiny-HDL concepts.
 
 <!-- more -->
 
@@ -160,11 +168,52 @@ becomes:
 Getting and running the complete example
 ========================================
 
-> TODO
+The complete implementation of Tiny-HDL is available on GitHub.
+The git repository contains one branch per step.
+In [branch step-01](https://github.com/aumouvantsillage/Tiny-HDL-Racket/tree/step-01),
+you will find the following files:
 
-The complete implementation of the full-adder example is available in file
-`examples/full-adder-step-01.rkt`.
-We also provide a test program in file `examples/full-adder-common-test.rkt`
-that prints the complete truth table of a full-adder.
-The same test program will be used throughout this experiment.
-You can run the example by typing this command:
+* [examples/full-adder-step-01.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-step-01.rkt):
+  the hand-written full adder example in Racket.
+* [examples/full-adder-common-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-common-test.rkt):
+  a Racket program that executes the full adder and prints its truth table.
+  This very same program will be used in steps 2 to 6, to check that our compiler works as expected.
+* [examples/full-adder-step-01.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-step-01-test.rkt):
+  the main test program for this step, using the two files mentioned above.
+
+Getting the source code for step 1
+----------------------------------
+
+Clone the git repository and switch to branch `step-01`:
+
+```
+git clone https://github.com/aumouvantsillage/Tiny-HDL-Racket.git
+cd Tiny-HDL-Racket
+git checkout step-01
+```
+
+Running the example
+-------------------
+
+Run `full-adder-step-01-test.rkt` with Racket:
+
+```
+racket examples/full-adder-step-01-test.rkt
+```
+
+The result should look like:
+
+```
+ a  b ci     s co
+#f #f #f -> #f #f
+#f #f #t -> #t #f
+#f #t #f -> #t #f
+#f #t #t -> #f #t
+#t #f #f -> #t #f
+#t #f #t -> #f #t
+#t #t #f -> #f #t
+#t #t #t -> #t #t
+```
+
+Now that we know how to describe and simulate digital circuits with Racket,
+let's implement a code generator.
