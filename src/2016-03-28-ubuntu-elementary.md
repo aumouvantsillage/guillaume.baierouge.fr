@@ -1,7 +1,7 @@
 ---
 title: How to install the Pantheon desktop environment over Ubuntu 14.04
 author: Guillaume Savaton
-lang: fr
+lang: en
 date: 2016-03-28
 update: 2016-04-03
 draft: false

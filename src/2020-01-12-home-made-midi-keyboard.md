@@ -1,7 +1,7 @@
 ---
 title: midi@3:14, home-made MIDI keyboard
 author: Guillaume Savaton
-lang: fr
+lang: en
 date: 2020-01-12
 update: 2020-01-12
 draft: false
