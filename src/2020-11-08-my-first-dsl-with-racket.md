@@ -161,7 +161,7 @@ In the following posts, we will follow the above steps in the reverse order:
 1. [Execution](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution):
    we will manually write some Racket code that implements the
    full adder example, and we will let Racket execute it.
-2. *Code generation*: based on the manually written code, we will
+2. [Code generation](/2020/11/23/my-first-domain-specific-language-with-racket.-step-2:-code-generation): based on the manually written code, we will
    develop a set of macros that convert a Tiny-HDL syntax tree into Racket code.
 3. *Semantic checking* (name resolution): in this step, we will write a basic
    semantic checker that infers the links between named references and the
