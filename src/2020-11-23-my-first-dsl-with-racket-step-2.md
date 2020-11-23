@@ -42,7 +42,8 @@ The code generator for Tiny-HDL will follow the same philosophy:
 * The *intermediate representation* of Tiny-HDL source code will be composed of
   [syntax objects](https://docs.racket-lang.org/guide/stx-obj.html),
   a built-in Racket data structure for S-expressions.
-* It will emit *executable* Racket code.
+* It will emit *executable* Racket code that follows the guidelines from
+  [step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution).
 
 Code generation using macros
 ============================
