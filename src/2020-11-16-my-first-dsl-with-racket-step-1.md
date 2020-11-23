@@ -109,13 +109,14 @@ Here is a naive translation of the body of architecture `half-adder-arch`:
 becomes:
 
 ```scheme
+; Warning: this does not work!
 (set-half-adder-s!  self (xor (half-adder-a self) (half-adder-b self)))
 (set-half-adder-co! self (and (half-adder-a self) (half-adder-b self)))
 ```
 
-Now, the function `half-adder-arch` is a *constructor*: it must not compute
-the `xor` and `and` operations immediately.
-Moreover, fields `a` and `b` have not been set yet and their value is `#f`.
+Remember that the function `half-adder-arch` is intended to be a *constructor*:
+it must not compute the `xor` and `and` operations immediately.
+Moreover, fields `a` and `b` are still empty.
 
 We want to populate the fields `s` and `co` with expressions that will be
 evaluated *later*.
@@ -178,7 +179,7 @@ you will find the following files:
 * [examples/full-adder-common-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-common-test.rkt):
   a Racket program that executes the full adder and prints its truth table.
   This very same program will be used in steps 2 to 6, to check that our compiler works as expected.
-* [examples/full-adder-step-01.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-step-01-test.rkt):
+* [examples/full-adder-step-01-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-step-01-test.rkt):
   the main test program for this step, using the two files mentioned above.
 
 Getting the source code for step 1
