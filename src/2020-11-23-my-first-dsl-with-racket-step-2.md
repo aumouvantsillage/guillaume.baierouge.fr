@@ -19,7 +19,7 @@ so that we can generate Racket code automatically.
 
 In a typical compiler, the code generator transforms an *intermediate representation*
 of a program, such as an *abstract syntax tree* (AST), into an *executable form*.
-Typically, the *intermediate representation* of a program is a data structure
+The *intermediate representation* is a data structure
 that results from the syntax and semantic analysis steps.
 The *executable form* depends on the target execution platform:
 it can be machine code for a processor,
@@ -45,9 +45,42 @@ The code generator for Tiny-HDL will follow the same philosophy:
 * It will emit *executable* Racket code that follows the guidelines from
   [step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution).
 
+Standalone, embedded, and hosted DSLs
+=====================================
+
+Before discovering Racket, I was familiar with the concepts of *external*
+(or *standalone*) and *internal* (or *embedded*) domain-specific languages.
+
+To summarize, an *embedded* DSL is built on top of another programming language.
+While it uses the syntax and the compilation infrastructure of the
+underlying language (totally or partially), the domain-specific aspects
+can be provided in the form of libraries and syntactic patterns.
+A great example is [Clash](https://clash-lang.org/), a hardware description language
+built on Haskell.
+
+On the opposite side, a *standalone* DSL has its own syntax, semantics,
+and compilation infrastructure.
+It can borrow part of its concepts and syntax from another language,
+but it generally adds custom elements that make it incompatible with the original.
+VHDL is an example of such a DSL: it takes inspiration from a subset of the
+Ada programming language, but most of its syntax and semantics are specific to
+the digital hardware domain.
+
+As a third way, Racket developers promote the concept of *hosted* DSL.
+If my understanding is correct, a *hosted* DSL is an extension of
+a *host* language with custom syntax.
+The custom syntactic forms are meant to be translated into the host language
+at compile time.
+In languages that support them, the translation rules can be specified
+using *procedural macros*.
+
+In this project, Tiny-HDL is clearly intended as a *standalone* language.
+However, I think that it will be easier to understand the
+process of implementing this language in Racket if we work on a *hosted*
+version first.
+
 Code generation using macros
 ============================
-
 
 Getting and running the complete example
 ========================================
