@@ -45,34 +45,39 @@ The code generator for Tiny-HDL will follow the same philosophy:
 * It will emit *executable* Racket code that follows the guidelines from
   [step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution).
 
-Standalone, embedded, and hosted DSLs
-=====================================
+Code generation for domain-specific languages
+=============================================
 
-Before discovering Racket, I was familiar with the concepts of *external*
-(or *standalone*) and *internal* (or *embedded*) domain-specific languages.
+Before discovering Racket, I was familiar with the concepts of *standalone*
+(or *external*) and *embedded* (or *internal*) domain-specific languages.
 
-To summarize, an *embedded* DSL is built on top of another programming language.
-While it uses the syntax and the compilation infrastructure of the
-underlying language (totally or partially), the domain-specific aspects
-can be provided in the form of libraries and syntactic patterns.
-A great example is [Clash](https://clash-lang.org/), a hardware description language
-built on Haskell.
+An *embedded* DSL is built on top of another programming language.
+It uses the syntax and the compilation infrastructure of the
+underlying language, extending it with libraries and usage guidelines
+to support domain-specific concepts.
+As an example, [Clash](https://clash-lang.org/) is a hardware description
+language built on Haskell: a valid circuit description in Clash is also a valid
+Haskell program whose execution constitutes a *simulation* of the circuit.
 
-On the opposite side, a *standalone* DSL has its own syntax, semantics,
-and compilation infrastructure.
-It can borrow part of its concepts and syntax from another language,
-but it generally adds custom elements that make it incompatible with the original.
-VHDL is an example of such a DSL: it takes inspiration from a subset of the
-Ada programming language, but most of its syntax and semantics are specific to
-the digital hardware domain.
+On the opposite side, a *standalone* DSL has its own syntax and semantics,
+and requires a specific compilation infrastructure.
+VHDL and Verilog are examples of standalone DSLs for digital circuit development.
+If you want to *simulate* a circuit described in one of these languages, you will
+need a dedicated simulator or compiler, such as GHDL or Verilator.
 
 As a third way, Racket developers promote the concept of *hosted* DSL.
-If my understanding is correct, a *hosted* DSL is an extension of
-a *host* language with custom syntax.
-The custom syntactic forms are meant to be translated into the host language
-at compile time.
-In languages that support them, the translation rules can be specified
-using *procedural macros*.
+If my understanding is correct, a *hosted* DSL extends a *host* language with
+custom syntactic forms.
+At compile time, these custom syntactic forms are translated into the host
+language by executing rewriting rules.
+When Racket is the host language, rewriting rules are typically specified
+as *procedural macros* written in Racket itself.
+
+> Each of these three types of DSLs handles code generation in a different way:
+> an *embedded* DSL uses a pre-existing code generator for its underlying language;
+> a *standalone* DSL needs a dedicated code generator written in another language;
+> a *hosted* DSL specifies code generation rules that can be written as *macros*
+> in the hosted language itself.
 
 In this project, Tiny-HDL is clearly intended as a *standalone* language.
 However, I think that it will be easier to understand the
