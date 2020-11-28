@@ -27,26 +27,8 @@ bytecode for a virtual machine, or source code in an interpreted language.
 In some cases, a code generator can be composed of several stages, involving
 lower-level source code generation that is fed into another compiler.
 
-In this landscape, [homoiconic](https://en.wikipedia.org/wiki/Homoiconicity)
-languages provide a unique approach to compilation.
-For instance, in languages from the Lisp family, the *intermediate representation*
-of a Lisp program is composed of primitive Lisp data structures.
-Having built-in support for manipulating code as data means that it is fairly
-*easy* to write a Lisp program that transforms a Lisp program into another Lisp program.
-As a consequence, we could use Lisp to write a compiler that translates a custom
-variant of Lisp into *executable* Lisp code.
-
-The code generator for Tiny-HDL will follow the same philosophy:
-
-* It will be written in Racket.
-* The *intermediate representation* of Tiny-HDL source code will be composed of
-  [syntax objects](https://docs.racket-lang.org/guide/stx-obj.html),
-  a built-in Racket data structure for S-expressions.
-* It will emit *executable* Racket code that follows the guidelines from
-  [step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution).
-
-Code generation for domain-specific languages
-=============================================
+Code generation from domain-specific languages
+==============================================
 
 Before discovering Racket, I was familiar with the concepts of *standalone*
 (or *external*) and *embedded* (or *internal*) domain-specific languages.
@@ -77,15 +59,36 @@ as *procedural macros* written in Racket itself.
 > an *embedded* DSL uses a pre-existing code generator for its underlying language;
 > a *standalone* DSL needs a dedicated code generator written in another language;
 > a *hosted* DSL specifies code generation rules that can be written as *macros*
-> in the hosted language itself.
+> in the host language itself.
+
+From Tiny-HDL to Racket using macros
+====================================
 
 In this project, Tiny-HDL is clearly intended as a *standalone* language.
-However, I think that it will be easier to understand the
-process of implementing this language in Racket if we work on a *hosted*
-version first.
+However, since the syntax of Tiny-HDL is based on S-expressions,
+implementing it as a *hosted* language in Racket felt more *natural* to me at first.
+This is the approach that we will follow in steps 2 to 5.
+As a consequence, in step 2, the full-adder example will look like this:
 
-Code generation using macros
-============================
+```scheme
+#lang racket
+
+(require tiny-hdl)
+
+(entity half-adder ([input a] [input b] [output s] [output co]))
+
+(architecture half-adder-arch half-adder
+  (assign (port-ref half-adder s)  (xor (port-ref half-adder a) (port-ref half-adder b)))
+  (assign (port-ref half-adder co) (and (port-ref half-adder a) (port-ref half-adder b))))
+
+...
+```
+
+You can notice the `#lang racket` directive that shows that this file is still
+considered as Racket source code.
+The `(require tiny-hdl)` form imports the macros provided by the `tiny-hdl` package,
+so that the `entity`, `architecture`, and other Tiny-HDL forms are expanded into
+Racket code.
 
 Getting and running the complete example
 ========================================
