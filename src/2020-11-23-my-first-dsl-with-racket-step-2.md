@@ -90,6 +90,170 @@ The `(require tiny-hdl)` form imports the macros provided by the `tiny-hdl` pack
 so that the `entity`, `architecture`, and other Tiny-HDL forms are expanded into
 Racket code.
 
+Finally, you may have noticed the `port-ref` forms that were absent from
+the language in the previous posts.
+These will be explained in the following sections.
+
+Entities
+--------
+
+Based on the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#entities),
+we can write a Racket macro that generalizes the translation of an entity into a structure type:
+
+```scheme
+(define-simple-macro (entity ent-name ([_ port-name] ...))
+  (begin
+    (provide (struct-out ent-name))
+    (struct ent-name ([port-name #:auto] ...) #:mutable)))
+```
+
+The only new element here is the `provide` form that makes the structure type
+available to other modules.
+
+Architectures
+-------------
+
+Here again, a generalization of the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#architectures)
+leads to this macro:
+
+```scheme
+(define-simple-macro (architecture arch-name ent-name body ...)
+  (begin
+    (provide arch-name)
+    (define (arch-name)
+      (define self (ent-name))
+      body ...
+      self)))
+```
+
+> In the following sections, we will modify this macro
+> slightly to provide additional information needed during the expansion of
+> the architecture `body`.
+
+Instances
+---------
+
+An [instantiation statement](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#instantiation-statements)
+expands to a variable that receives the result of a call to an architecture constructor:
+
+```scheme
+(define-simple-macro (instance inst-name arch-name)
+  (define inst-name (arch-name)))
+```
+
+Assignments and expressions
+---------------------------
+
+Boolean literals (`#t`, `#f`) are already valid Racket expressions
+that won't need any specific treatment.
+The same applies to boolean operations (`not`, `and`, `or`, `xor`)
+after their operands have been expanded.
+
+Reading and writing ports is not as straightforward.
+Let's analyze an example from the architectures `half-adder-arch` and `full-adder-arch`:
+
+```
+(assign s (xor a b))
+(assign (h2 a) (h1 s))
+```
+
+These statements should be translated into:
+
+```scheme
+(set-half-adder-s! self (λ () (xor ((half-adder-a self)) ((half-adder-b self)))))
+(set-half-adder-a! h2 (λ () ((half-adder-s h1))))
+```
+
+As you can see, the entity name `half-adder` is present in the generated code
+but not in the source code.
+
+In the first statement, since we are inside `half-adder-arch`, we could use
+a [syntax parameter](https://docs.racket-lang.org/reference/stxparam.html)
+to store the name of the current entity and make it
+available in the expansion of the architecture body.
+But this technique is not usable in the second statement because it
+needs to retrieve the name of the entity from the architecture
+of `h1` and `h2`.
+
+In this step, I have chosen to make a *dumb* translator where each rewriting
+rule operates only with the information immediately available.
+For this reason, I introduce a `port-ref` form that associates the port name
+with its entity name, along with an optional instance name.
+The semantic checker, in the name resolution step, will be responsible for
+creating these `port-ref` expressions.
+In the code generation step, the two statements above will take the following form:
+
+```
+(assign (port-ref half-adder s) (xor (port-ref half-adder a) (port-ref half-adder b)))
+(assign (port-ref half-adder a h2) (port-ref half-adder s h1))
+```
+
+The corresponding macros will use the function `format-id` to concatenate the
+entity and port names into *setter* and *getter* function names.
+The first argument of the setter and getter will depend on the presence or
+absence of an instance name in the `port-ref` form.
+If no instance name is present, it should use the `self` variable defined in
+the current architecture constructor (but it will not work).
+
+```scheme
+(define-simple-macro (assign ((~literal port-ref) ent-name port-name (~optional inst-name)) expr)
+   #:with setter-name (format-id #'port-name "set-~a-~a!" #'ent-name #'port-name)
+   #:with arg-name (if (attribute inst-name) #'inst-name #'self)
+   (setter-name arg-name (λ () expr)))
+
+(define-simple-macro (port-ref ent-name port-name (~optional inst-name))
+   #:with getter-name (format-id #'port-name "~a-~a" #'ent-name #'port-name)
+   #:with arg-name (if (attribute inst-name) #'inst-name #'self)
+   ((getter-name arg-name)))
+```
+
+Working around macro hygiene
+----------------------------
+
+If you try to run the full adder example with the above macros, you will get
+the following error message in macros `assign` and `port-ref`:
+
+```
+self: unbound identifier
+```
+
+The reason is that the symbol `self` introduced in the `architecture` macro
+is bound to a compile-time lexical scope, to avoid conflicts with
+other bindings of the same name at runtime.
+As a consequence, in the code generated by macros `assign` and `port-ref`
+the variable `self` is out of scope.
+
+To fix this, we can use a [syntax parameter](https://docs.racket-lang.org/reference/stxparam.html)
+and a [rename transformer](https://docs.racket-lang.org/reference/stxtrans.html#%28def._%28%28quote._~23~25kernel%29._make-rename-transformer%29%29)
+that will provide an *alias* of the `self` variable in the body of an architecture's
+constructor.
+Here are fixed versions of the `architecture`, `assign`, and `port-ref` macros:
+
+```scheme
+(define-syntax-parameter current-instance
+  (λ (stx)
+    (raise-syntax-error (syntax-e stx) "can only be used inside an architecture")))
+
+(define-simple-macro (architecture arch-name ent-name body ...)
+  (begin
+    (provide arch-name)
+    (define (arch-name)
+      (define self (ent-name))
+      (syntax-parameterize ([current-instance (make-rename-transformer #'self)])
+        body ...)
+      self)))
+
+(define-simple-macro (assign ((~literal port-ref) ent-name port-name (~optional inst-name)) expr)
+  #:with setter-name (format-id #'port-name "set-~a-~a!" #'ent-name #'port-name)
+  #:with arg-name (if (attribute inst-name) #'inst-name #'current-instance)
+  (setter-name arg-name (λ () expr)))
+
+(define-simple-macro (port-ref ent-name port-name (~optional inst-name))
+  #:with getter-name (format-id #'port-name "~a-~a" #'ent-name #'port-name)
+  #:with arg-name (if (attribute inst-name) #'inst-name #'current-instance)
+  ((getter-name arg-name)))
+```
+
 Getting and running the complete example
 ========================================
 
@@ -118,6 +282,12 @@ git checkout step-02
 
 Running the example
 -------------------
+
+Register the current folder as a Racket *collection*:
+
+```
+raco link -n tiny-hdl .
+```
 
 Run `full-adder-step-02-test.rkt` with Racket:
 
