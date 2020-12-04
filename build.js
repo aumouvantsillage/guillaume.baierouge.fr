@@ -12,12 +12,12 @@ const collections = require("metalsmith-collections");
 const more        = require("metalsmith-more");
 const date        = require('metalsmith-build-date');
 const sections    = require("./plugins/metalsmith-sections");
-const highlight   = require("highlight.js");
 const katex       = require("katex");
 const nunjucks    = require("nunjucks");
 const container   = require("markdown-it-container");
 const anchor      = require("markdown-it-anchor");
 const math        = require("markdown-it-math");
+const prism       = require("markdown-it-prism");
 
 /*
  * Configure nunjucks.
@@ -32,19 +32,10 @@ nunjucks.configure({watch: false, autoescape: false}).addFilter("relative", func
 });
 
 /*
- * Syntax highlighter configuration for Markdown code blocks.
- */
-
-function highlighter(code, lang) {
-    return lang ? highlight.highlight(lang, code).value : code;
-}
-
-/*
  * Configure Markdown processor.
  */
 
 const md = markdown("commonmark", {
-    highlight: highlighter,
     typographer: true,
     quotes: ['«\xA0', '\xA0»', '‹\xA0', '\xA0›']
 });
@@ -53,6 +44,7 @@ md.parser
     .use(container, "info")
     .use(container, "warning")
     .use(anchor)
+    .use(prism)
     .use(math, {
         inlineRenderer(str) {
             return katex.renderToString(str);
@@ -116,6 +108,10 @@ Metalsmith(__dirname)
     .use(assets({
         source: "node_modules/normalize.css",
         destination: "css/normalize.css"
+    }))
+    .use(assets({
+        source: "node_modules/prismjs/themes/",
+        destination: "css/prismjs"
     }))
     .use(assets({
         source: "node_modules/katex/dist",
