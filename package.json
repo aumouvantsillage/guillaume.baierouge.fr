@@ -21,7 +21,7 @@
     "fontsource-pt-sans-narrow": "^3.0.9",
     "fontsource-pt-serif": "^3.0.9",
     "fontsource-source-code-pro": "^3.0.10",
-    "highlight.js": "^9.18.3",
+    "highlight.js": "^10.4.1",
     "jsdom": "^15.2.1",
     "katex": "^0.11.1",
     "local-web-server": "^4.2.1",
