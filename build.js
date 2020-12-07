@@ -110,10 +110,6 @@ Metalsmith(__dirname)
         destination: "css/normalize.css"
     }))
     .use(assets({
-        source: "node_modules/prismjs/themes/",
-        destination: "css/prismjs"
-    }))
-    .use(assets({
         source: "node_modules/katex/dist",
         destination: "css/katex"
     }))
@@ -130,8 +126,8 @@ Metalsmith(__dirname)
         destination: "css/pt-sans-narrow"
     }))
     .use(assets({
-        source: "node_modules/fontsource-source-code-pro",
-        destination: "css/source-code-pro"
+        source: "node_modules/fontsource-jetbrains-mono",
+        destination: "css/jetbrains-mono"
     }))
     .build(function (err) {
         if (err) throw err;
