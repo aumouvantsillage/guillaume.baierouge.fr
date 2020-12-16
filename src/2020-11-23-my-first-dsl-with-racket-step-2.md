@@ -70,7 +70,7 @@ implementing it as a *hosted* language in Racket felt more *natural* to me at fi
 This is the approach that we will follow in steps 2 to 5.
 As a consequence, in step 2, the full-adder example will look like this:
 
-```scheme
+```racket
 #lang racket
 
 (require tiny-hdl)
@@ -100,7 +100,7 @@ Entities
 Based on the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#entities),
 we can write a Racket macro that generalizes the translation of an entity into a structure type:
 
-```scheme
+```racket
 (define-simple-macro (entity ent-name ([_ port-name] ...))
   (begin
     (provide (struct-out ent-name))
@@ -116,7 +116,7 @@ Architectures
 Here again, a generalization of the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#architectures)
 leads to this macro:
 
-```scheme
+```racket
 (define-simple-macro (architecture arch-name ent-name body ...)
   (begin
     (provide arch-name)
@@ -136,7 +136,7 @@ Instances
 An [instantiation statement](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#instantiation-statements)
 expands to a variable that receives the result of a call to an architecture constructor:
 
-```scheme
+```racket
 (define-simple-macro (instance inst-name arch-name)
   (define inst-name (arch-name)))
 ```
@@ -159,7 +159,7 @@ Let's analyze an example from the architectures `half-adder-arch` and `full-adde
 
 These statements should be translated into:
 
-```scheme
+```racket
 (set-half-adder-s! self (λ () (xor ((half-adder-a self)) ((half-adder-b self)))))
 (set-half-adder-a! h2 (λ () ((half-adder-s h1))))
 ```
@@ -195,7 +195,7 @@ absence of an instance name in the `port-ref` form.
 If no instance name is present, it should use the `self` variable defined in
 the current architecture constructor (but it will not work).
 
-```scheme
+```racket
 (define-simple-macro (assign ((~literal port-ref) ent-name port-name (~optional inst-name)) expr)
    #:with setter-name (format-id #'port-name "set-~a-~a!" #'ent-name #'port-name)
    #:with arg-name (if (attribute inst-name) #'inst-name #'self)
@@ -229,7 +229,7 @@ that will provide an *alias* of the `self` variable in the body of an architectu
 constructor.
 Here are fixed versions of the `architecture`, `assign`, and `port-ref` macros:
 
-```scheme
+```racket
 (define-syntax-parameter current-instance
   (λ (stx)
     (raise-syntax-error (syntax-e stx) "can only be used inside an architecture")))

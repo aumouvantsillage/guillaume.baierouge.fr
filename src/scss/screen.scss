@@ -3,11 +3,11 @@ $icon-color: rgb(130, 150, 170);
 $table-heading-background: rgb(190, 200, 210);
 $info-color: rgb(200, 220, 255);
 $warning-color: rgb(255,220,70);
-$code-background: rgba(170, 170, 170, 0.25);
+$code-background: rgba(170, 170, 170, 0.15);
 
 $heading-font: "PT Sans Narrow", sans-serif;
 $content-font: "PT Serif", serif;
-$code-font: "Source Code Pro", monospace;
+$code-font: "JetBrains Mono", monospace;
 
 $shadow-color: rgba(100, 100, 100, 0.75);
 $text-shadow-color: rgba(100, 100, 100, 0.5);
@@ -188,7 +188,20 @@ pre {
 
 pre, code {
     font-family: $code-font;
+    font-size: 90%;
     background: $code-background;
+
+    font-variant-ligatures: none;
+    text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+
+    -moz-tab-size: 4;
+	tab-size: 4;
+
+	hyphens: none;
 }
 
 code {

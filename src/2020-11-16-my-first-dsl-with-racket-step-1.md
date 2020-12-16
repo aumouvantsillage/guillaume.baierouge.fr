@@ -44,7 +44,7 @@ In Tiny-HDL, this entity looks like this:
 ```
 In Racket, a basic structure type declaration could be:
 
-```scheme
+```racket
 (struct half-adder (a b s co))
 ```
 
@@ -73,7 +73,7 @@ will be easier like this).
 The `#:auto` modifier will also be added, so that all fields now have `#f`
 (false) as their default value.
 
-```scheme
+```racket
 (struct half-adder ([a #:auto] [b #:auto] [s #:auto] [co #:auto]) #:mutable)
 ```
 
@@ -84,7 +84,7 @@ An architecture is translated into a function that returns an instance of
 a structure type.
 Here is the skeleton of the constructor for architecture `half-adder-arch`:
 
-```scheme
+```racket
 (define (half-adder-arch)
   (define self (half-adder))
   ...
@@ -108,7 +108,7 @@ Here is a naive translation of the body of architecture `half-adder-arch`:
 
 becomes:
 
-```scheme
+```racket
 ; Warning: this does not work!
 (set-half-adder-s!  self (xor (half-adder-a self) (half-adder-b self)))
 (set-half-adder-co! self (and (half-adder-a self) (half-adder-b self)))
@@ -122,7 +122,7 @@ We want to populate the fields `s` and `co` with expressions that will be
 evaluated *later*.
 To achieve that, we will wrap each expression in a *lambda* function like this:
 
-```scheme
+```racket
 (set-half-adder-s!  self (λ () (xor ((half-adder-a self)) ((half-adder-b self)))))
 (set-half-adder-co! self (λ () (and ((half-adder-a self)) ((half-adder-b self)))))
 ```
@@ -148,7 +148,7 @@ Architecture `full-adder-arch` creates two instances of `half-adder-arch`.
 A straightforward translation consists in calling the constructor `half-adder-arch`
 twice, assigning the results to variables like this:
 
-```scheme
+```racket
 (define h1 (half-adder-arch))
 (define h2 (half-adder-arch))
 ```
@@ -162,7 +162,7 @@ structure type, we can use the same techniques as above to read and write their 
 
 becomes:
 
-```scheme
+```racket
 (set-half-adder-a! h2 (λ () ((half-adder-s h1))))
 ```
 
