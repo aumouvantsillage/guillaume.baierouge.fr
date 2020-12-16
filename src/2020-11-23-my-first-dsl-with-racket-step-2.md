@@ -5,7 +5,7 @@ date: 2020-11-23
 update: 2020-11-23
 draft: false
 collection: posts
-tags: Free Software, Domain-Specific Language, Racket
+tags: Domain-Specific Language, Racket
 template: post.html
 ---
 
