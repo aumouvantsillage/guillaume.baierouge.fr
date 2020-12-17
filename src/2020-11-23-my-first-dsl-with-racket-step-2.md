@@ -254,8 +254,8 @@ Here are fixed versions of the `architecture`, `assign`, and `port-ref` macros:
   ((getter-name arg-name)))
 ```
 
-Getting and running the complete example
-========================================
+Getting the source code and running the example
+===============================================
 
 The source code for this step can be found in [branch step-02](https://github.com/aumouvantsillage/Tiny-HDL-Racket/tree/step-02)
 of the git repository for this project.
@@ -267,7 +267,7 @@ You will find the following new files:
   the code generator module.
 * [examples/full-adder-step-02.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-02/examples/full-adder-step-02.rkt):
   the full adder example written with macros in Racket.
-* [examples/full-adder-step-02-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-01/examples/full-adder-step-01-test.rkt):
+* [examples/full-adder-step-02-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-02/examples/full-adder-step-02-test.rkt):
   the main test program for this step.
 
 Getting the source code for step 2

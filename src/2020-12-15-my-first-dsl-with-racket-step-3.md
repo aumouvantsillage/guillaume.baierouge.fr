@@ -10,8 +10,8 @@ template: post.html
 ---
 
 The semantic checker for Tiny-HDL will be written in two steps.
-In the name resolution step, the checker introduces scopes in the abstract
-syntax tree, and uses them to associate each named reference to the corresponding
+In the *name resolution* step, the checker introduces scopes in the abstract
+syntax tree, and uses them to map each named reference to the corresponding
 declaration.
 
 <!-- more -->
@@ -36,12 +36,13 @@ The Racket reference, however, contains a lot of information, but it is not
 organized as a beginner-level, step-by-step guide.
 For instance, searching for *scopes* will lead to the
 [Syntax Model](https://docs.racket-lang.org/reference/syntax-model.html)
-page, with a section about *Identifiers, bindings and scopes*.
+section in chapter 1, with a subsection about *Identifiers, bindings and scopes*.
 But the API for managing *internal definition contexts* and creating bindings
 is documented in the
-[Syntax Transformers](https://docs.racket-lang.org/reference/stxtrans.html) page.
-In both cases, it is not obvious whether this documentation is specific to the
-implementation of Racket itself, or whether it can be applied in the context of a DSL.
+[Syntax Transformers](https://docs.racket-lang.org/reference/stxtrans.html) section
+in chapter 12.
+In both sections, it is not obvious whether this documentation is specific to the
+Racket language itself, or whether it can be also applied in the context of a DSL.
 
 An API for scopes and bindings in Racket
 ========================================
@@ -59,22 +60,23 @@ It has an official [documentation page](https://docs.racket-lang.org/ee-lib/inde
 that has been updated very recently, and its source code
 is available [in a GitHub repository](https://github.com/michaelballantyne/ee-lib).
 
-> At the time when I started the implementation of Tiny-HDL (in May 2020),
+> When I started the implementation of Tiny-HDL in May 2020,
 > `ee-lib` was still experimental and unpublished.
 > I had the opportunity to read a draft of the aforementioned paper, kindly
 > shared with me by Michael Ballantyne and Matthias Felleisen in reaction to
 > [my questions on the *racket-users* mailing list](https://groups.google.com/g/racket-users/c/9FTGtrU_KC0/m/aO3ToAJoAgAJ).
 >
-> Since I wanted to use officially available material only,
-> I ended up writing my own minimal scoping module: it is basically a
-> stripped-down version of the `ee-lib` API that provides just enough
-> for my needs, without any attempt to be compatible with `ee-lib`
+> Browsing the source code of `ee-lib` was very informative, but there is still
+> a lot in it that I don't fully understand.
+> As an exercise, I ended up writing my own minimal scoping module for Tiny-HDL:
+> it is basically a stripped-down version of the `ee-lib` API that provides just
+> enough for my needs, without any attempt to be compatible with `ee-lib`
 > or to address macro-extensibility concerns.
 
 The implementation of scopes and name resolution in Tiny-HDL uses the following
 functions and macros:
 
-* `with-scope`: wraps its body in a new scope.
+* `with-scope`: wraps its body in a new scope nested in the current scope.
 * `add-scope`: decorates a syntax object with scope information.
 * `bind!`: creates a binding for a given name in the the current scope, and maps this binding to some given data.
 * `lookup`: looks for a binding in the current scope and returns its corresponding data.
@@ -248,7 +250,7 @@ The structure types that we will use are declared below.
 
 For an entity, we will store its port definitions in a special
 [dictionary with identifier keys](https://docs.racket-lang.org/syntax/syntax-helpers.html?q=free-id-table#%28part._idtable%29),
-(or *identifier table*).
+or *identifier table*.
 
 ```racket
 (struct entity (ports))
@@ -280,7 +282,7 @@ The semantic checker
 
 The semantic checker is implemented in the file [lib/checher.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/checker.rkt).
 
-Its entry point is a macro `begin-tiny-hdl` where the top-level scope is
+Its entry point is a `begin-tiny-hdl` form where the top-level scope is
 created before calling the checker function.
 The checker itself runs in two passes:
 
@@ -315,6 +317,10 @@ access to the current scope.
 
 In the code fragments below, the `lib/syntax.rkt` and `lib/meta.rkt`
 are `require`d with prefixes `stx/` and `meta/` respectively.
+This will rename the syntax classes into
+`stx/entity`, `stx/architecture`,... and the structure types into
+`meta/entity`, `meta/architecture`...
+
 We will also make use of the `~>` and `~>>` macros from the
 [`threading`](https://docs.racket-lang.org/threading/index.html) module.
 
@@ -333,14 +339,6 @@ We will also make use of the `~>` and `~>>` macros from the
 
 Top-level scope
 ---------------
-
-We define the following utility function that calls the thunks returned
-by the `checker` function after processing a list of syntax objects:
-
-```racket
-(define (check-all lst)
-  (map (λ (f) (f)) lst))
-```
 
 The first pattern that we will match corresponds to the `begin-tiny-hdl`
 form.
@@ -362,5 +360,293 @@ that contains the result of the second pass for its body.
      (thunk
        #`(begin
            #,@(check-all body^)))]
-    ...
+    ...))
 ```
+
+`check-all` is a utility function that calls the thunks returned
+by `checker` after processing a list of syntax objects:
+
+```racket
+(define (check-all lst)
+  (map (λ (f) (f)) lst))
+```
+
+Entities
+--------
+
+When the current syntax object matches the `entity` syntax class,
+the first pass creates an instance of the `entity` structure type
+with a dictionary of `port`s, and adds a binding for the entity name
+in the current scope.
+An entity does not need to introduce a new scope.
+
+The second pass returns the entity syntax object without modification.
+
+```racket
+(define (checker stx)
+  (syntax-parse stx
+    ...
+    [:stx/entity
+     (bind! #'name (meta/make-entity
+                     (for/hash ([p (in-list (attribute port))])
+                       (define/syntax-parse q:stx/port p)
+                       (values #'q.name (meta/port (syntax->datum #'q.mode))))))
+     (thunk stx)]
+    ...))
+```
+
+Architectures
+-------------
+
+When the current syntax object matches the `architecture` syntax class,
+the first pass creates an instance of the `architecture` structure type
+and adds a binding for the architecture name in the current scope.
+The architecture body is processed recursively in a new scope.
+
+In the second pass, we perform a lookup for the entity name attached to
+the architecture.
+This will raise a syntax error if no binding is found for that name, or if
+the name does not refer to an entity.
+
+The body is checked and the result is wrapped in a new `architecture` form.
+The parameter `current-entity-name` will be used when checking expressions
+that refer to ports of the current entity.
+
+```racket
+(define current-entity-name (make-parameter #f))
+
+(define (checker stx)
+  (syntax-parse stx
+    ...
+    [:stx/architecture
+     (bind! #'name (meta/architecture #'ent-name))
+     (define body^ (with-scope
+                     (~>> (attribute body)
+                          (map add-scope)
+                          (map checker))))
+     (thunk/in-scope
+       (lookup #'ent-name meta/entity?)
+       (parameterize ([current-entity-name #'ent-name])
+         #`(architecture name ent-name
+             #,@(check-all body^))))]
+    ...))
+```
+
+Instantiations
+--------------
+
+In the first pass, an instantiation statement creates an `instance` structure
+and a binding for the instance name in the scope of the enclosing architecture
+body.
+
+In the second pass, a call to `lookup` checks that the architecture name
+mentioned in the instantiation statement refers to an existing architecture.
+
+```racket
+(define (checker stx)
+  (syntax-parse stx
+    ...
+    [:stx/instance
+     (bind! #'name (meta/instance #'arch-name))
+     (thunk/in-scope
+       (lookup #'arch-name meta/architecture?)
+       stx)]
+   ...))
+```
+
+Assignments and operations
+--------------------------
+
+When processing an assignment statement or an operation expression,
+the first pass and the second pass
+are applied recursively to the children syntax objects:
+
+```racket
+(define (checker stx)
+  (syntax-parse stx
+    ...
+    [:stx/assignment
+     (define target^ (checker #'target))
+     (define expr^   (checker #'expr))
+     (thunk
+       #`(assign #,(target^) #,(expr^)))]
+
+    [:stx/operation
+     (define arg^ (map checker (attribute arg)))
+     (thunk
+       #`(op #,@(check-all arg^)))]
+  ...))
+```
+
+Port references
+---------------
+
+Now the last cases are the main reason why we needed scoping and name
+resolution in the first place.
+Our goal is to convert expressions like `port-name` or `(inst-name port-name)`
+into `(port-ref ...)` forms suitable for the code generation step.
+
+In both cases, there is nothing to do in the first pass.
+
+In the second pass, when the current syntax object matches the pattern `(inst-name port-name)`,
+we perform the following operations:
+
+1. Look-up `inst-name` and check that it refers to an existing instance.
+2. Get the architecture name mentioned in that instance.
+3. Retrieve the corresponding architecture information.
+4. Get the entity name mentioned in that architecture.
+5. Retrieve the corresponding entity information.
+6. Check that `port-name` refers to an existing port in that entity.
+7. Return a fully-resolved `port-ref` form.
+
+```racket
+(define (checker stx)
+  (syntax-parse stx
+    ...
+    [(inst-name:id port-name:id)
+     (thunk/in-scope
+       (define/syntax-parse ent-name
+         (~> #'inst-name
+             (lookup meta/instance?)               ; (1)
+             (meta/instance-arch-name)             ; (2)
+             (lookup meta/architecture?)           ; (3)
+             (meta/architecture-ent-name)))        ; (4)
+       (~> #'ent-name
+           (lookup meta/entity?)                   ; (5)
+           (meta/entity-port-ref #'port-name))     ; (6)
+       #'(port-ref ent-name port-name inst-name))] ; (7)
+
+    [port-name:id
+     (thunk/in-scope
+       (define/syntax-parse ent-name (current-entity-name))
+       (~> #'ent-name
+           (lookup)                                ; (5)
+           (meta/entity-port-ref #'port-name))     ; (6)
+       #'(port-ref ent-name port-name))]           ; (7)
+
+    [_ (thunk stx)])))
+```
+
+When the current syntax object is a simple identifier, the entity name
+is read from the `current-entity-name` parameter.
+Then we only need to apply the operations 5, 6, and 7.
+
+Entry point of the semantic checker
+-----------------------------------
+
+Finally, we define a `begin-tiny-hdl` macro whose expansion will call
+`checker` to perform the first pass, and will also call the returned thunk
+to perform the second pass, hence the double parentheses:
+
+```racket
+(define-syntax (begin-tiny-hdl stx)
+  (replace-context stx ((checker stx))))
+```
+
+The syntax object returned by the second pass comes annotated with scopes and
+bindings.
+If we pass this syntax object directly to the code generation step, the expander will
+attempt to expand those bindings as if they were macros, which will raise errors.
+
+As a solution, we call `replace-context` to restore the original syntactic context
+of our syntax object.
+
+Writing an example
+==================
+
+At this point, we are getting very close to the desired syntax for Tiny-HDL.
+We can apply the following modifications to the full adder example:
+
+* Wrap the Tiny-HDL code in a `begin-tiny-hdl` form.
+* Replace the `port-ref` forms with simpler port references.
+
+```racket
+#lang racket
+
+(require tiny-hdl)
+
+(begin-tiny-hdl
+  (entity half-adder ([input a] [input b] [output s] [output co]))
+
+  (entity full-adder ([input a] [input b] [input ci] [output s] [output co]))
+
+  (architecture half-adder-arch half-adder
+    (assign s  (xor a b))
+    (assign co (and a b)))
+
+  (architecture full-adder-arch full-adder
+    (instance h1 half-adder-arch)
+    (instance h2 half-adder-arch)
+    (assign (h1 a) a)
+    (assign (h1 b) b)
+    (assign (h2 a) (h1 s))
+    (assign (h2 b) ci)
+    (assign s      (h2 s))
+    (assign co     (or (h1 co) (h2 co)))))
+```
+
+Getting the source code and running the example
+===============================================
+
+The source code for this step can be found in [branch step-03](https://github.com/aumouvantsillage/Tiny-HDL-Racket/tree/step-03)
+of the git repository for this project.
+You will find the following new files:
+
+* [lib/scope.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/scope.rkt):
+  my minimal scoping module inspired by `ee-lib`.
+* [lib/syntax.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/syntax.rkt):
+  the syntax classes for Tiny-HDL.
+* [lib/meta.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/meta.rkt):
+  the structure types that capture compile-time information.
+* [lib/checker.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/checker.rkt):
+  the implementation of the name resolution step.
+* [examples/full-adder-step-03.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/examples/full-adder-step-03.rkt):
+  the full adder example with support for name resolution.
+* [examples/full-adder-step-03-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/examples/full-adder-step-03-test.rkt):
+  the main test program for this step.
+
+Getting the source code for step 3
+----------------------------------
+
+Assuming you have already [cloned the git repository](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution/#getting-the-source-code-for-step-1),
+switch to branch `step-03`:
+
+```
+git checkout step-03
+```
+
+Running the example
+-------------------
+
+You will need to install the `threading` library:
+
+```
+raco pkg install threading-lib
+```
+
+Run `full-adder-step-03-test.rkt` with Racket:
+
+```
+racket examples/full-adder-step-03-test.rkt
+```
+
+Hopefully, you will get the same result as in step 1:
+
+```
+ a  b ci     s co
+#f #f #f -> #f #f
+#f #f #t -> #t #f
+#f #t #f -> #t #f
+#f #t #t -> #f #t
+#t #f #f -> #t #f
+#t #f #t -> #f #t
+#t #t #f -> #f #t
+#t #t #t -> #t #t
+```
+
+Now try again after introducing errors in the example:
+
+* By using names that do not resolve to anything:
+  `(architecture full-adder-arch i-dont-exist)`.
+* By using names that refer to the wrong kind of object:
+  `(instance h1 h2)`.

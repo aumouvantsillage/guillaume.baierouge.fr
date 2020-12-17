@@ -166,8 +166,8 @@ becomes:
 (set-half-adder-a! h2 (λ () ((half-adder-s h1))))
 ```
 
-Getting and running the complete example
-========================================
+Getting the source code and running the example
+===============================================
 
 The complete implementation of Tiny-HDL is available on GitHub.
 The git repository contains one branch per step.
