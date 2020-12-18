@@ -360,6 +360,7 @@ that contains the result of the second pass for its body.
      (thunk
        #`(begin
            #,@(check-all body^)))]
+
     ...))
 ```
 
@@ -386,12 +387,14 @@ The second pass returns the entity syntax object without modification.
 (define (checker stx)
   (syntax-parse stx
     ...
+
     [e:stx/entity
      (bind! #'e.name (meta/make-entity
                        (for/hash ([p (in-list (attribute e.port))])
                          (define/syntax-parse q:stx/port p)
                          (values #'q.name (meta/port (syntax->datum #'q.mode))))))
      (thunk stx)]
+
     ...))
 ```
 
@@ -418,6 +421,7 @@ that refer to ports of the current entity.
 (define (checker stx)
   (syntax-parse stx
     ...
+
     [a:stx/architecture
      (bind! #'a.name (meta/architecture #'a.ent-name))
      (define body^ (with-scope
@@ -429,6 +433,7 @@ that refer to ports of the current entity.
        (parameterize ([current-entity-name #'a.ent-name])
          #`(architecture a.name a.ent-name
              #,@(check-all body^))))]
+
     ...))
 ```
 
@@ -446,11 +451,13 @@ mentioned in the instantiation statement refers to an existing architecture.
 (define (checker stx)
   (syntax-parse stx
     ...
+
     [i:stx/instance
      (bind! #'i.name (meta/instance #'i.arch-name))
      (thunk/in-scope
        (lookup #'i.arch-name meta/architecture?)
        stx)]
+
    ...))
 ```
 
@@ -465,6 +472,7 @@ are applied recursively to the children syntax objects:
 (define (checker stx)
   (syntax-parse stx
     ...
+
     [a:stx/assignment
      (define target^ (checker #'a.target))
      (define expr^   (checker #'a.expr))
@@ -475,6 +483,7 @@ are applied recursively to the children syntax objects:
      (define arg^ (map checker (attribute o.arg)))
      (thunk
        #`(o.op #,@(check-all arg^)))]
+
   ...))
 ```
 
@@ -503,6 +512,7 @@ we perform the following operations:
 (define (checker stx)
   (syntax-parse stx
     ...
+    
     [(inst-name:id port-name:id)
      (thunk/in-scope
        (define/syntax-parse ent-name
