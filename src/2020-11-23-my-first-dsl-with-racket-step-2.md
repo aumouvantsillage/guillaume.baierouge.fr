@@ -152,7 +152,7 @@ after their operands have been expanded.
 Reading and writing ports is not as straightforward.
 Let's analyze an example from the architectures `half-adder-arch` and `full-adder-arch`:
 
-```
+```racket
 (assign s (xor a b))
 (assign (h2 a) (h1 s))
 ```
@@ -183,7 +183,7 @@ The semantic checker, in the name resolution step, will be responsible for
 creating these `port-ref` expressions.
 In the code generation step, the two statements above will take the following form:
 
-```
+```racket
 (assign (port-ref half-adder s) (xor (port-ref half-adder a) (port-ref half-adder b)))
 (assign (port-ref half-adder a h2) (port-ref half-adder s h1))
 ```

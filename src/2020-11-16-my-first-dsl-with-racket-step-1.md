@@ -39,7 +39,7 @@ Entities
 Let's translate the `half-adder` entity into Racket code.
 In Tiny-HDL, this entity looks like this:
 
-```
+```racket
 (entity half-adder ([input a] [input b] [output s] [output co]))
 ```
 In Racket, a basic structure type declaration could be:
@@ -101,7 +101,7 @@ To read and write ports, we can call the accessors of the corresponding
 structure fields.
 Here is a naive translation of the body of architecture `half-adder-arch`:
 
-```
+```racket
 (assign s  (xor a b))
 (assign co (and a b)))
 ```
@@ -140,7 +140,7 @@ Instantiation statements
 
 Architecture `full-adder-arch` creates two instances of `half-adder-arch`.
 
-```
+```racket
 (instance h1 half-adder-arch)
 (instance h2 half-adder-arch)
 ```
@@ -156,7 +156,7 @@ twice, assigning the results to variables like this:
 Now that variables `h1` and `h2` are populated with instances of the `half-adder`
 structure type, we can use the same techniques as above to read and write their ports:
 
-```
+```racket
 (assign (h2 a) (h1 s))
 ```
 

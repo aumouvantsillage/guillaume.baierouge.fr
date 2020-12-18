@@ -58,7 +58,7 @@ Like in VHDL, Tiny-HDL separates the interface and the implementation of a circu
 into an *entity* and an *architecture*.
 An entity has `input` and `output` ports that transport boolean values:
 
-```
+```racket
 (entity half-adder ([input a] [input b] [output s] [output co]))
 
 (entity full-adder ([input a] [input b] [input ci] [output s] [output co]))
@@ -66,7 +66,7 @@ An entity has `input` and `output` ports that transport boolean values:
 
 An architecture provides an implementation for a given entity:
 
-```
+```racket
 (architecture half-adder-arch half-adder
     ...
 )
@@ -85,7 +85,7 @@ Two kinds of statements are supported:
 In this example, we create an instance `h1` of the architecture `half-adder-arch`.
 Then we assign the port `a` of the current architecture to the port `a` of `h1`.
 
-```
+```racket
 (architecture full-adder-arch full-adder
   (instance h1 half-adder-arch)
   ...
@@ -109,7 +109,7 @@ A complete example
 
 Here is the complete description of a full adder using two half adders:
 
-```
+```racket
 (entity half-adder ([input a] [input b] [output s] [output co]))
 
 (architecture half-adder-arch half-adder
@@ -164,13 +164,13 @@ In the following posts, we will follow the above steps in the reverse order:
 2. [Code generation](/2020/11/23/my-first-domain-specific-language-with-racket.-step-2:-code-generation):
    based on the manually written code, we will develop a set of macros that
    convert a Tiny-HDL syntax tree into Racket code.
-3. [Semantic checking* (name resolution)](/2020/12/15/my-first-domain-specific-language-with-racket.-step-3:-name-resolution):
+3. [Semantic checking (name resolution)](/2020/12/15/my-first-domain-specific-language-with-racket.-step-3:-name-resolution):
    in this step, we will write a basic semantic checker that infers the links
    between named references and the corresponding AST nodes;
    the Tiny-HDL AST will be modified with information for the *code generation* step.
-4. *Semantic checking* (design rule checks): the semantic checker will be
-   completed with domain-specific rules to ensure that a Tiny-HDL source file
-   represents a valid digital electronic circuit.
+4. [Semantic checking (design rule checks)](/2020/12/18/my-first-domain-specific-language-with-racket.-step-4:-design-rule-checks):
+   the semantic checker will be completed with domain-specific rules to ensure
+   that a Tiny-HDL source file represents a valid digital electronic circuit.
 5. *Semantic checking* (modules): what if we want to split a circuit description
    into several source files? How do we share information between modules for the
    semantic checker?
