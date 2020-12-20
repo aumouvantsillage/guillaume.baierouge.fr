@@ -2,7 +2,7 @@
 title: "My first domain-specific language with Racket. Step 4: Design rule checks"
 lang: en
 date: 2020-12-18
-update: 2020-12-18
+update: 2020-12-20
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
@@ -21,6 +21,14 @@ Here is a list of rules that we want to check:
 * All the input ports of an instance must be assigned one, and only one time in the enclosing architecture.
 * An input port of an architecture cannot be assigned.
 * An output port of an instance cannot be assigned.
+
+> Edit 2020-12-20:
+>
+> Two other rules could be added to this list.
+> They are not implemented at the moment, but will possibly be in the future:
+>
+> * Recursive instanciations are forbidden.
+> * Combinational loops (when a signal depends on itself) are forbidden.
 
 Checking architectures and instances
 ====================================
