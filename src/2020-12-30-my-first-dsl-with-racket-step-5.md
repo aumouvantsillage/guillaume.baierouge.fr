@@ -16,8 +16,8 @@ in the semantic checking step of a domain-specific language.
 
 <!-- more -->
 
-Tiny-HDL modules vs Racket modules
-==================================
+Current use of Racket modules in Tiny-HDL
+=========================================
 
 Tiny-HDL already uses the Racket module system in the expanded Racket code.
 For each entity and each architecture, it generates a structure type and
@@ -48,14 +48,13 @@ For instance, the test module for the full adder example in step 3 begins like t
 ...
 ```
 
-At first sight, `require` also seems to be a great solution if we want to split a
-circuit description into several modules.
+Now, what if we want to split a circuit description into several modules?
 For instance, we could create a module containing the entity `half-adder` and
 the architecture `half-adder-arch`, and another module containing the entity
 `full-adder` and the architecture `full-adder-arch`.
-The Racket code generated from the full-adder module would be able to
-use the types and functions defined in the half-adder module,
-and it would run as expected.
+Using `require`, the Racket code generated from the full-adder module would
+be able to use the types and functions defined in the half-adder module,
+and it would run as expected:
 
 ```racket
 ; half-adder-step-05.rkt
@@ -83,12 +82,41 @@ At the moment, the `checker` function creates compile-time data and bindings tha
 As a consequence, in the example above, when checking the instances `h1` and `h2`,
 no binding will be found for the architecture `half-adder-arch`.
 
-In this post, we propose a solution that addresses the following concerns:
+Issues and solutions
+====================
+
+The `checker` function that we wrote in steps 3 and 4 creates bindings using
+the `bind!` function, which is itself based on
+[`syntax-local-bind-syntaxes`](https://docs.racket-lang.org/reference/stxtrans.html#%28def._%28%28quote._~23~25kernel%29._syntax-local-bind-syntaxes%29%29),
+a function from the Racket library.
+
+`syntax-local-bind-syntaxes` creates bindings within an *internal definition context*,
+which is fine for local definitions inside a Tiny-HDL `architecture` form.
+However, compile-time data for entities and architectures themselves need to
+be attached to module-level bindings if we want to *export* them.
+
+> While working on this step, I tried really hard to keep the structure
+> of the `checker` function intact.
+> Using the same `bind!` function for all bindings would have been really neat.
+> These are the two directions that I followed:
+>
+> * Find a drop-in replacement for `syntax-local-bind-syntaxes`, but for creating bindings in a module context.
+> * Find a technique to promote an *internal* binding into a module-level binding.
+>
+> As it turns out, neither approach gave any good practical results.
+> My explorations led either to partially broken solutions, and to a working,
+> but convoluted implementation that involved too much code duplication.
+>
+> As you will see below, a working solution in the spirit of Racket requires
+> to treat module-level bindings separately.
+> I just had to accept that and break my precious `checker` function into two
+> parts.
+>
+> Many thanks to Michael Ballantyne for his explanations, and for showing me
+> examples of his methodology to address this problem.
+
 
 * Add a `use` form to Tiny-HDL that expands to `require`.
 * Export compile-time data for entities and architectures as module-level bindings.
 * Organize the expansion of `begin-tiny-hdl` into two passes, to make sure that
   module-level bindings are available in the semantic checking step.
-
-Failed attempts
-===============
