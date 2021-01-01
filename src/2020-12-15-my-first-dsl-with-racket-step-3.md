@@ -2,7 +2,7 @@
 title: "My first domain-specific language with Racket. Step 3: Name resolution"
 lang: en
 date: 2020-12-15
-update: 2020-12-15
+update: 2021-01-01
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
@@ -274,16 +274,18 @@ and for an instance, the architecture name:
 (struct instance (arch-name))
 ```
 
-The code fragments above are taken from the file [lib/meta.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/meta.rkt)
+The code fragments above are taken from the file
+[lib/meta.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/meta.rkt)
 available in the Tiny-HDL source repository.
 
 The semantic checker
 ====================
 
-The semantic checker is implemented in the file [lib/checher.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/checker.rkt).
+The semantic checker is implemented in the file
+[lib/checher.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-03/lib/checker.rkt).
 
-Its entry point is a `begin-tiny-hdl` form where the top-level scope is
-created before calling the checker function.
+Its entry point is a `begin-tiny-hdl` macro that delegates to a
+semantic checker function.
 The checker itself runs in two passes:
 
 1. The first pass annotates the source syntax object with scopes,
@@ -291,13 +293,13 @@ The checker itself runs in two passes:
 2. The second pass resolves named references, checks that they are valid,
    and generates a syntax object suitable for code generation.
 
-I have written a single function `checker` that contains the logic for both passes.
-When called, `checker` executes the first pass immediately and returns a
+I have written a single function `make-checker` that contains the logic for both passes.
+When called, `make-checker` executes the first pass immediately and returns a
 function (a *thunk*) that will perform the second pass.
-Here is a template of the `checker` function:
+Here is a template of the `make-checker` function:
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     #:literals [...]
 
@@ -342,13 +344,13 @@ Top-level scope
 
 The first pattern that we will match corresponds to the `begin-tiny-hdl`
 form.
-In the first pass, it processes its body by calling `checker` recursively
+In the first pass, its body is processed by calling `make-checker` recursively
 in the context of a new scope.
-In the second pass, it generates a `begin` form
-that contains the result of the second pass for its body.
+The second pass is also applied recursively and the result is wrapped in
+a `begin` form.
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     #:literals [begin-tiny-hdl]
 
@@ -356,7 +358,7 @@ that contains the result of the second pass for its body.
      (define body^ (with-scope
                      (~>> (attribute body)
                           (map add-scope)
-                          (map checker))))
+                          (map make-checker))))
      (thunk
        #`(begin
            #,@(check-all body^)))]
@@ -365,7 +367,7 @@ that contains the result of the second pass for its body.
 ```
 
 `check-all` is a utility function that calls the thunks returned
-by `checker` after processing a list of syntax objects:
+by `make-checker` after processing a list of syntax objects:
 
 ```racket
 (define (check-all lst)
@@ -377,14 +379,14 @@ Entities
 
 When the current syntax object matches the `entity` syntax class,
 the first pass creates an instance of the `entity` structure type
-with a dictionary of `port`s, and adds a binding for the entity name
+with a dictionary of port data, and adds a binding for the entity name
 in the current scope.
 An entity does not need to introduce a new scope.
 
 The second pass returns the entity syntax object without modification.
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
@@ -418,7 +420,7 @@ that refer to ports of the current entity.
 ```racket
 (define current-entity-name (make-parameter #f))
 
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
@@ -427,7 +429,7 @@ that refer to ports of the current entity.
      (define body^ (with-scope
                      (~>> (attribute a.body)
                           (map add-scope)
-                          (map checker))))
+                          (map make-checker))))
      (thunk/in-scope
        (lookup #'a.ent-name meta/entity?)
        (parameterize ([current-entity-name #'a.ent-name])
@@ -448,7 +450,7 @@ In the second pass, a call to `lookup` checks that the architecture name
 mentioned in the instantiation statement refers to an existing architecture.
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
@@ -469,18 +471,18 @@ the first pass and the second pass
 are applied recursively to the children syntax objects:
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
     [a:stx/assignment
-     (define target^ (checker #'a.target))
-     (define expr^   (checker #'a.expr))
+     (define target^ (make-checker #'a.target))
+     (define expr^   (make-checker #'a.expr))
      (thunk
        #`(assign #,(target^) #,(expr^)))]
 
     [o:stx/operation
-     (define arg^ (map checker (attribute o.arg)))
+     (define arg^ (map make-checker (attribute o.arg)))
      (thunk
        #`(o.op #,@(check-all arg^)))]
 
@@ -509,10 +511,10 @@ we perform the following operations:
 7. Return a fully-resolved `port-ref` form.
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
-    
+
     [(inst-name:id port-name:id)
      (thunk/in-scope
        (define/syntax-parse ent-name
@@ -545,12 +547,12 @@ Entry point of the semantic checker
 -----------------------------------
 
 Finally, we define a `begin-tiny-hdl` macro whose expansion will call
-`checker` to perform the first pass, and will also call the returned thunk
+`make-checker` to perform the first pass, and will also call the returned thunk
 to perform the second pass, hence the double parentheses:
 
 ```racket
 (define-syntax (begin-tiny-hdl stx)
-  (replace-context stx ((checker stx))))
+  (replace-context stx ((make-checker stx))))
 ```
 
 The syntax object returned by the second pass comes annotated with scopes and

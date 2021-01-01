@@ -9,10 +9,9 @@ tags: Domain-Specific Language, Racket
 template: post.html
 ---
 
-Racket offers a sophisticated module system that allows modules to
-cooperate at run time, but also at compile time.
-In this post, we will see how we can take advantage of the module system
-in the semantic checking step of a domain-specific language.
+Racket offers a sophisticated module system that allows to organize
+a program into multiple files. In this step, we will show a solution to
+take advantage of Racket modules in a DSL.
 
 <!-- more -->
 
@@ -48,13 +47,12 @@ For instance, the test module for the full adder example in step 3 begins like t
 ...
 ```
 
-Now, what if we want to split a circuit description into several modules?
-For instance, we could create a module containing the entity `half-adder` and
-the architecture `half-adder-arch`, and another module containing the entity
+Now, what if we want to organize a Tiny-HDL circuit description into several files?
+For instance, we could create a source file containing the entity `half-adder` and
+the architecture `half-adder-arch`, and another file containing the entity
 `full-adder` and the architecture `full-adder-arch`.
-Using `require`, the Racket code generated from the full-adder module would
-be able to use the types and functions defined in the half-adder module,
-and it would run as expected:
+With the appropriate `require` form before the description of the full adder,
+this example should run as expected:
 
 ```racket
 ; half-adder-step-05.rkt
@@ -78,24 +76,24 @@ and it would run as expected:
 ```
 
 But this is not enough: we also need our modules to cooperate in the semantic checking steps.
-At the moment, the `checker` function creates compile-time data and bindings that are not exported.
+At the moment, the `make-checker` function creates compile-time data and bindings that are not exported.
 As a consequence, in the example above, when checking the instances `h1` and `h2`,
-no binding will be found for the architecture `half-adder-arch`.
+`lookup` will fail to find an architecture named `half-adder-arch`.
 
 Exporting entity and architecture definitions
 =============================================
 
-The `checker` function that we wrote in steps 3 and 4 creates bindings using
+The `make-checker` function that we wrote in steps 3 and 4 creates bindings using
 the `bind!` function, which is itself based on
 [`syntax-local-bind-syntaxes`](https://docs.racket-lang.org/reference/stxtrans.html#%28def._%28%28quote._~23~25kernel%29._syntax-local-bind-syntaxes%29%29),
 a function from the Racket library.
 `syntax-local-bind-syntaxes` creates bindings within an *internal definition context*,
-which is fine for local definitions inside a Tiny-HDL `architecture` body.
+which is fine for local definitions inside a Tiny-HDL architecture body.
 However, compile-time data for entities and architectures themselves need to
 be attached to module-level bindings if we want to *export* them.
 
 > While working on this step, I tried really hard to keep the structure
-> of the `checker` function intact.
+> of the `make-checker` function intact.
 > Using the same `bind!` function for all bindings would have been really neat.
 > Here are the two directions that I followed:
 >
@@ -107,7 +105,7 @@ be attached to module-level bindings if we want to *export* them.
 > but convoluted implementations that involved too much code duplication.
 > As you will see below, a working solution in the spirit of Racket requires
 > to treat module-level bindings separately.
-> I just had to accept that and break my precious `checker` function into two
+> I just had to accept that and break my precious `make-checker` function into two
 > parts.
 >
 > Many thanks to Michael Ballantyne for his explanations, and for showing me
@@ -123,11 +121,11 @@ The good news is that both kinds of bindings can be read using the function
 on which the `lookup` function is based.
 
 So, for Tiny-HDL entities and architectures, the code responsible for constructing
-and binding compile-time data must be moved to a macro that expands to `provide`
+compile-time data must be moved to a macro that expands to `provide`
 and `define-syntax` forms like this:
 
 ```racket
-(define-syntax-parser module-level-bind
+(define-syntax-parser compile-as-module-level-defs
   [(_ e:stx/entity)
    #'(begin
        (provide e.name)
@@ -148,28 +146,26 @@ and `define-syntax` forms like this:
 
 ...
 
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
     [(begin-tiny-hdl body ...)
      ; We no longer need to create a scope here.
-     (define body^ (map checker (attribute body)))
+     (define body^ (map make-checker (attribute body)))
      (thunk
        ...)]
 
     [e:stx/entity
-     ; Deleted. See macro module-level-bind.
-     ; (bind! #'e.name (meta/make-entity ...))
+     ; (bind! #'e.name (meta/make-entity ...)) <-- Moved to macro compile-as-module-level-defs.
      (thunk stx)]
 
     [a:stx/architecture
-     ; Deleted. See macro module-level-bind.
-     ; (bind! #'a.name (meta/architecture ...))
+     ; (bind! #'a.name (meta/architecture ...)) <-- Moved to macro compile-as-module-level-defs.
      (define body^ (with-scope
                      (~>> (attribute a.body)
                           (map add-scope)
-                          (map checker))))
+                          (map make-checker))))
      (thunk/in-scope
        ...)]
     ...))
@@ -178,31 +174,31 @@ and `define-syntax` forms like this:
 This implementation solves the problem of exporting bindings to *other* modules,
 but will these bindings still be available for the semantic checker when
 processing the *current* module?
-We need to make sure that macro `module-level-bind` is expanded *before*
+We need to make sure that macro `compile-as-module-level-defs` is expanded *before*
 executing any `lookup`.
-To achieve that, we will reorganize the `begin-tiny-hdl` macro in two passes:
+To achieve that, we reorganize the `begin-tiny-hdl` macro in two passes:
 
-1. Expand the macro `module-level-bind` for each form inside `begin-tiny-hdl`.
-2. Expand the macro `check` that will call the semantic checker.
+1. Expand the macro `compile-as-module-level-defs` for each form inside `begin-tiny-hdl`.
+2. Expand the macro `compile-tiny-hdl` that will call the semantic checker.
 
 ```racket
 (define-syntax-parser begin-tiny-hdl
   [(_ body ...)
    #'(begin
-       (module-level-bind body) ...
-       (check body ...))])
+       (compile-as-module-level-defs body) ...
+       (compile-tiny-hdl body ...))])
 
-(define-syntax (check stx)
-  ((checker stx)))
+(define-syntax (compile-tiny-hdl stx)
+  ((make-checker stx)))
 
 ...
 
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
-    #:literals [check]
+    #:literals [compile-tiny-hdl]
     ...
-    [(check body ...)
-     (define body^ (map checker (attribute body)))
+    [(compile-tiny-hdl body ...)
+     (define body^ (map make-checker (attribute body)))
      (thunk
        ...)]
     ...))
@@ -221,10 +217,10 @@ Here is a syntax class for this new form:
 ```
 
 The `use` form must be expanded before calling the semantic checker.
-A good place to do that is in the `module-level-bind` macro:
+A good place to do that is in the `compile-as-module-level-defs` macro:
 
 ```racket
-(define-syntax-parser module-level-bind
+(define-syntax-parser compile-as-module-level-defs
   [(_ e:stx/entity)
    #'(...)]
 
@@ -239,10 +235,10 @@ A good place to do that is in the `module-level-bind` macro:
 ```
 
 After being expanded, `use` forms are no longer needed.
-The `checker` function will transform them into neutral `begin` forms:
+The `make-checker` function will transform them into neutral `begin` forms:
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
@@ -263,14 +259,69 @@ context:
 Fixing name collisions
 ======================
 
-TODO
+There is one last issue with the proposed modifications.
+With the introduction of macro `compile-as-module-level-defs`, each
+entity, and each architecture expands to two definitions with the same name:
+
+* For entity `half-adder`, we get a `(define-syntax half-adder ...)`
+  and a `(struct half-adder ...)`.
+* For an architecture `half-adder-arch`, we gen a `(define-syntax half-adder-arch ...)`
+  and a `(define (half-adder-arch) ...)`.
+
+We will implement these simple fixes:
+
+1. The generated functions that act as constructors will have a `make-` prefix in their names.
+   We introduce this helper function to generate constructor names:
+
+    ```racket
+    (define-for-syntax (constructor-name name)
+      (format-id name "make-~a" name))
+    ```
+
+2. For an entity, the name of the structure type will not be exposed directly.
+
+Here is the new version of the `entity` macro.
+It changes the name of the structure type to a unique, automatically generated name,
+and adds a prefix to the constructor name.
+The field accessors will keep the same names as before.
+
+```racket
+(define-simple-macro (entity ent-name ([_ port-name] ...))
+  #:with ent-struct-name (generate-temporary #'ent-name)
+  #:with ent-ctor-name   (constructor-name   #'ent-name)
+  (begin
+    (provide (struct-out ent-struct-name))
+    (struct ent-name ([port-name #:auto] ...)
+      #:mutable
+      #:name             ent-struct-name
+      #:constructor-name ent-ctor-name)))
+```
+
+In the `architecture` and `instance` macros, we now use prefixed constructor names:
+
+```racket
+(define-simple-macro (architecture arch-name ent-name body ...)
+  #:with arch-ctor-name (constructor-name #'arch-name)
+  #:with ent-ctor-name  (constructor-name #'ent-name)
+  (begin
+    (provide arch-ctor-name)
+    (define (arch-ctor-name)
+      (define self (ent-ctor-name))
+      (syntax-parameterize ([current-instance (make-rename-transformer #'self)])
+        body ...)
+      self)))
+
+(define-simple-macro (instance inst-name arch-name)
+  #:with arch-ctor-name (constructor-name #'arch-name)
+  (define inst-name (arch-ctor-name)))
+```
 
 Example
 =======
 
-The full adder example can now be split into two modules like this:
+The full adder example can now be split into two files like this:
 
-* A module containing the half adder entity and its architecture:
+1. A file containing the half adder entity and its architecture:
 
 ```racket
 #lang racket
@@ -285,7 +336,7 @@ The full adder example can now be split into two modules like this:
     (assign co (and a b))))
 ```
 
-* A module containing the full adder entity and its architecture:
+2. A file containing the full adder entity and its architecture:
 
 ```racket
 #lang racket

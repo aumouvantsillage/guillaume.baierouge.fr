@@ -2,7 +2,7 @@
 title: "My first domain-specific language with Racket. Step 4: Design rule checks"
 lang: en
 date: 2020-12-18
-update: 2020-12-20
+update: 2021-01-01
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
@@ -42,17 +42,17 @@ Then, a function `check-all-assigned` will check that every output port of the
 current architecture matches an element of that set.
 
 ```racket
-(define current-entity-name (make-parameter #f))
+(define current-entity-name        (make-parameter #f))
 (define current-assignment-targets (make-parameter #f))
 
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
     [a:stx/architecture
      ...
      (thunk/in-scope
        ...
-       (parameterize ([current-entity-name #'a.ent-name]
+       (parameterize ([current-entity-name        #'a.ent-name]
                       [current-assignment-targets (collect-assignment-targets (attribute a.body))])
          (check-all-assigned stx)
          #`(architecture a.name a.ent-name
@@ -158,16 +158,16 @@ the *actual* mode is retrieved by looking up the entity and inspecting the targe
 An error is raised if the modes are not equal.
 
 ```racket
-(define (checker stx)
+(define (make-checker stx)
   (syntax-parse stx
     ...
 
     [a:stx/assignment
-     (define target^ (checker #'a.target))
-     (define expr^   (checker #'a.expr))
+     (define target^ (make-checker #'a.target))
+     (define expr^   (make-checker #'a.expr))
      (thunk/in-scope
-       (define target* (target^))
-       (define/syntax-parse (_ ent-name port-name (~optional inst-name)) target*)
+       (define checked-target (target^))
+       (define/syntax-parse (_ ent-name port-name (~optional inst-name)) checked-target)
        (define expected-mode (if (attribute inst-name) 'input 'output))
        (define actual-mode (~> #'ent-name
                                (lookup)
@@ -175,7 +175,7 @@ An error is raised if the modes are not equal.
                                (meta/port-mode)))
        (unless (eq? expected-mode actual-mode)
          (raise-syntax-error (syntax->datum #'port-name) "Invalid target for assignment" stx))
-       #`(assign #,target* #,(expr^)))]
+       #`(assign #,checked-target #,(expr^)))]
 
     ...))
 ```
