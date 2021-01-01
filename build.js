@@ -1,6 +1,7 @@
 "use strict";
 
 const Metalsmith  = require("metalsmith");
+const branch      = require("metalsmith-branch");
 const assets      = require("metalsmith-assets");
 const drafts      = require("metalsmith-drafts");
 const permalinks  = require("metalsmith-permalinks");
@@ -85,10 +86,20 @@ Metalsmith(__dirname)
         nested: false
     }))
     .use(more())
-    .use(permalinks({
-		pattern: ":date/:title",
-		relative: false
-	}))
+    .use(branch()
+            .filter((name, file) => file.subtitle)
+            .use(permalinks({
+        		pattern: ":date/:title.-:subtitle",
+        		relative: false
+        	}))
+    )
+    .use(branch()
+            .filter((name, file) => !file.subtitle)
+            .use(permalinks({
+        		pattern: ":date/:title",
+        		relative: false
+        	}))
+    )
     .use(tags({
         sortBy: "date",
         reverse: true,

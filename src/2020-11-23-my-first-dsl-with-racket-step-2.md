@@ -1,5 +1,7 @@
 ---
-title: "My first domain-specific language with Racket. Step 2: Code generation"
+title: "My first domain-specific language with Racket"
+subtitle: "Step 2: Code generation"
+author: Guillaume Savaton
 lang: en
 date: 2020-11-23
 update: 2020-11-23

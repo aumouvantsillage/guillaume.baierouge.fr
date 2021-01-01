@@ -171,7 +171,7 @@ In the following posts, we will follow the above steps in the reverse order:
 4. [Semantic checking (design rule checks)](/2020/12/18/my-first-domain-specific-language-with-racket.-step-4:-design-rule-checks):
    the semantic checker will be completed with domain-specific rules to ensure
    that a Tiny-HDL source file represents a valid digital electronic circuit.
-5. [Semantic checking (modules)](/2020/12/18/my-first-domain-specific-language-with-racket.-step-5:-modules):
+5. [Semantic checking (modules)](/2020/12/30/my-first-domain-specific-language-with-racket.-step-5:-modules):
    what if we want to split a circuit description into several source files?
    How do we share information between modules for the semantic checker?
 6. *Syntax analysis*: finally, we will register Tiny-HDL as a language

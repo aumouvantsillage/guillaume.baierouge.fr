@@ -5,7 +5,12 @@
         <article>
             <header>
                 <time datetime="{{p.date.toISOString()}}">{{p.date.toISOString().split("T")[0]}}</time>
-                <h1><a href="{{site.root}}/{{p.path}}">{{p.title}}</a></h1>
+                {% if p.subtitle %}
+                    <h1>{{p.title}}</h1>
+                    <h2><a href="{{site.root}}/{{p.path}}">{{p.subtitle}}</a></h2>
+                {% else %}
+                    <h1><a href="{{site.root}}/{{p.path}}">{{p.title}}</a></h1>
+                {% endif %}
                 {{p.author}}
                 {{tagList(p.tags)}}
             </header>

@@ -1,5 +1,7 @@
 ---
-title: "My first domain-specific language with Racket. Step 3: Name resolution"
+title: "My first domain-specific language with Racket"
+subtitle: "Step 3: Name resolution"
+author: Guillaume Savaton
 lang: en
 date: 2020-12-15
 update: 2021-01-01

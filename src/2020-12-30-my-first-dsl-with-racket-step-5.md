@@ -1,5 +1,7 @@
 ---
-title: "My first domain-specific language with Racket. Step 5: Modules"
+title: "My first domain-specific language with Racket"
+subtitle: "Step 5: Modules"
+author: Guillaume Savaton
 lang: en
 date: 2020-12-30
 update: 2020-12-30

@@ -1,5 +1,7 @@
 ---
-title: "My first domain-specific language with Racket. Step 4: Design rule checks"
+title: "My first domain-specific language with Racket"
+subtitle: "Step 4: Design rule checks"
+author: Guillaume Savaton
 lang: en
 date: 2020-12-18
 update: 2021-01-01

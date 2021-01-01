@@ -1,5 +1,7 @@
 ---
-title: "My first domain-specific language with Racket. Step 1: Execution"
+title: "My first domain-specific language with Racket"
+subtitle: "Step 1: Execution"
+author: Guillaume Savaton
 lang: en
 date: 2020-11-16
 update: 2020-11-16
