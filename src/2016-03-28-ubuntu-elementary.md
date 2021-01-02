@@ -5,7 +5,9 @@ lang: en
 date: 2016-03-28
 update: 2016-04-03
 draft: false
-collection: posts
+collection:
+- posts
+- stories
 tags: Linux, Free Software
 template: post.html
 ---

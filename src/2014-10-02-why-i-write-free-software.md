@@ -5,7 +5,9 @@ lang: en
 date: 2014-10-02
 updated: 2014-10-09
 draft: false
-collection: posts
+collection:
+- posts
+- stories
 tags: Free software, Sozi
 template: post.html
 ---

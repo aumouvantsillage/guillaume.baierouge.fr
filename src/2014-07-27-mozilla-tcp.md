@@ -4,7 +4,9 @@ author: Guillaume Savaton
 lang: en
 date: 2014-07-27
 draft: false
-collection: posts
+collection:
+- posts
+- stories
 tags: Mozilla, Tablet, Firefox OS
 template: post.html
 ---
@@ -43,14 +45,14 @@ benefits or suffers from these hardware specs.
 
 Here is a side-by-side comparison of a few features of the Nexus 7 and the Flatfish:
 
-<!---->     | Nexus 7                                 | Flatfish
-------------|-----------------------------------------|---------
-Processor   | Quad-core ARM Cortex A9, 1.3 GHz        | Quad-core ARM Cortex A7, 1.2 GHz
-GPU         | Twelve-core Nvidia GeForce ULP, 416 MHz | PowerVR SGX544MP2
-RAM         | 1 Gb                                    | 2 Gb
-Storage     | 32 Gb                                   | 16 Gb
-Screen size | 7 in, 1280x800                          | 10 in, 1280x800
-Battery     | 4325 mAh                                | 7000 mAh
+| <!---->     | Nexus 7                                 | Flatfish                         |
+|:------------|:----------------------------------------|:---------------------------------|
+| Processor   | Quad-core ARM Cortex A9, 1.3 GHz        | Quad-core ARM Cortex A7, 1.2 GHz |
+| GPU         | Twelve-core Nvidia GeForce ULP, 416 MHz | PowerVR SGX544MP2                |
+| RAM         | 1 Gb                                    | 2 Gb                             |
+| Storage     | 32 Gb                                   | 16 Gb                            |
+| Screen size | 7 in, 1280x800                          | 10 in, 1280x800                  |
+| Battery     | 4325 mAh                                | 7000 mAh                         |
 
 My first experiments are not conclusive concerning the performance of the processor and GPU.
 However, I find the screen strikingly uncomfortable, maybe due to the fact that I am used

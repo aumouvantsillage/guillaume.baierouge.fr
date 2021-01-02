@@ -13,6 +13,7 @@ const collections = require("metalsmith-collections");
 const more        = require("metalsmith-more");
 const date        = require('metalsmith-build-date');
 const sections    = require("./plugins/metalsmith-sections");
+const stories     = require("./plugins/metalsmith-stories");
 const katex       = require("katex");
 const nunjucks    = require("nunjucks");
 const container   = require("markdown-it-container");
@@ -88,6 +89,7 @@ Metalsmith(__dirname)
     .use(more())
     .use(branch()
             .filter((name, file) => file.subtitle)
+            // TODO: Change to :data/:title/:subtitle.
             .use(permalinks({
         		pattern: ":date/:title.-:subtitle",
         		relative: false
@@ -103,11 +105,17 @@ Metalsmith(__dirname)
     .use(tags({
         sortBy: "date",
         reverse: true,
-        template: "tag.html"
+        template: "tag.html",
+        metadataKey: "allTags"
     }))
+    .use(stories())
     .use(collections({
         posts: {
             sortBy: "date",
+            reverse: true
+        },
+        stories: {
+            sortBy: "storyDate",
             reverse: true
         }
     }))

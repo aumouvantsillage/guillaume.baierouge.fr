@@ -1,6 +1,30 @@
 {% extends "templates/page.html" %}
 {% from "templates/post-list.html" import postList %}
+{% from "templates/tag-list.html" import tagList %}
 
 {% block main %}
-    {{postList(posts)}}
+    {% for p in stories %}
+        <article>
+            <header>
+                <time datetime="{{p.date.toISOString()}}">{{p.date.toISOString().split("T")[0]}}</time>
+                <h1><a href="{{site.root}}/{{p.path}}">{{p.title}}</a></h1>
+                {{p.author}}
+                {{tagList(p.tags)}}
+            </header>
+            {{p.less}}
+            <a href="{{site.root}}/{{p.path}}">{% if p.lang == "fr" %}Lire la suite{% else %}Read more{% endif %}&hellip;</a>
+            {% if p.story.length %}
+                <p>This story continues in the following posts:</p>
+                <ul class="story">
+                {% for c in p.story %}
+                    <li>
+                        <a href="{{site.root}}/{{c.path}}">{{c.subtitle}}</a>
+                        <time datetime="{{c.date.toISOString()}}">({{c.date.toISOString().split("T")[0]}})</time>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            {% if not loop.last %}<hr>{% endif %}
+        </article>
+    {% endfor %}
 {% endblock %}

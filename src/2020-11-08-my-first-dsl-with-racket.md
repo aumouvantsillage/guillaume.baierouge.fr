@@ -5,7 +5,9 @@ lang: en
 date: 2020-11-08
 update: 2020-11-08
 draft: false
-collection: posts
+collection:
+- posts
+- stories
 tags: Domain-Specific Language, Racket
 template: post.html
 ---

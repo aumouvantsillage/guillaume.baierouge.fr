@@ -5,7 +5,9 @@ lang: en
 date: 2014-08-08
 updated: 2014-08-12
 draft: false
-collection: posts
+collection:
+- posts
+- stories
 tags: Mozilla, Tablet, Firefox OS
 template: post.html
 ---

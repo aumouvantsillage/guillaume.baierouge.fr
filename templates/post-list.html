@@ -16,6 +16,7 @@
             </header>
             {{p.less}}
             <a href="{{site.root}}/{{p.path}}">{% if p.lang == "fr" %}Lire la suite{% else %}Read more{% endif %}&hellip;</a>
+            {% if not loop.last %}<hr>{% endif %}
         </article>
     {% endfor %}
 {% endmacro %}

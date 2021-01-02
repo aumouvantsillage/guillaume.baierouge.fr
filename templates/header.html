@@ -1,13 +1,19 @@
 <header>
 	<h1><a href="{{site.root}}/">{{site.title}}</a></h1>
-    <nav>
+    <nav class="social">
         <a href="{{twitter}}"  title="Twitter"><i class="fab fa-twitter"></i></a>
 		<a href="{{mastodon}}" title="Mastodon"><i class="fab fa-mastodon"></i></a>
         <a href="{{linkedIn}}" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
         <a href="{{github}}"   title="GitHub repositories"><i class="fab fa-github"></i></a>
-		
+
         <a href="{{site.root}}/atom.xml" title="Atom feed"><i class="fas fa-rss"></i></a>
 		{% include "templates/buymeacoffee.html" %}
     </nav>
+	<hr>
+	<nav>
+		<a href="{{site.root}}/">Home</a>
+		<a href="{{site.root}}/recent">Recent posts</a>
+		<a href="{{site.root}}/tags">Tags</a>
+	</nav>
 	<hr>
 </header>

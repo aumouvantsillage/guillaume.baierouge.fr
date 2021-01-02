@@ -5,7 +5,9 @@ lang: en
 date: 2020-01-12
 update: 2020-01-12
 draft: false
-collection: posts
+collection:
+- posts
+- stories
 tags: Free Software, Free Hardware, Music, midi@3:14
 template: post.html
 ---

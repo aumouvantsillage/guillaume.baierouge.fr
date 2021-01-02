@@ -43,20 +43,20 @@ body {
     hyphens: auto;
     margin: 1rem calc(50vw - 30rem);
 
-    > header nav {
-        a {
+    > header {
+        nav a {
             margin-left: 0.5em;
             margin-right: 0.5em;
-            color: $icon-color;
         }
 
-        a:hover {
-            color: $link-color;
+        nav.social {
+            a { color: $icon-color; }
+            a:hover { color: $link-color; }
         }
-    }
 
-    > header form {
-        display: inline;
+        form {
+            display: inline;
+        }
     }
 }
 
@@ -97,7 +97,7 @@ article {
         nav {
             margin-top: 1rem;
         }
-        
+
         margin-bottom: 2rem;
     }
 
@@ -157,6 +157,17 @@ ul {
 
     li:before {
         content: "\2014\2002";
+    }
+}
+
+ul.story {
+    li:before {
+        content: "\203a\2002";
+        color: #aaa;
+    }
+
+    time {
+        font-size: 75%;
     }
 }
 

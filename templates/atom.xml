@@ -7,7 +7,11 @@
 
     {% for p in posts %}
         <entry>
-            <title><![CDATA[{{p.title}}]]></title>
+			{% if p.subtitle %}
+				<title><![CDATA[{{p.title}}. {{p.subtitle}}]]></title>
+			{% else %}
+            	<title><![CDATA[{{p.title}}]]></title>
+			{% endif %}
             <link href="{{site.url}}/{{p.path}}" />
             <updated>{{p.updated.toISOString() if p.updated else p.date.toISOString()}}</updated>
             <summary><![CDATA[{{p.less}}]]></summary>
