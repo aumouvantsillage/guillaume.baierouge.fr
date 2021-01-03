@@ -3,7 +3,7 @@ title: 5 reasons why I write free software
 author: Guillaume Savaton
 lang: en
 date: 2014-10-02
-updated: 2014-10-09
+updated: 2021-01-03
 draft: false
 collection:
 - posts
@@ -38,15 +38,15 @@ to create [Prezi](http://prezi.com/)-like presentations using open standards.
 I realized that I was not satisfied with slideshow software and I worked
 to transform Sozi into an actual presentation tool that I could use.
 
-While I am always disposed to improve Sozi, I tend to focus on the features that
+While I am always willing to improve Sozi, I tend to focus on the features that
 I actually need.
 Maybe you will find it selfish, but the time I can spend developing, testing and
 maintaining Sozi is limited, so I need to set priorities.
 For me, the top priority goes to features that I use regularly, because I have a
 *natural* environment to test them, and a strong incentive to fix their bugs.
 
-As a counter-example, let me mention the Sozi *media* extension that allows to add video
-or audio to a Sozi presentation.
+As a counter-example, let me mention the Sozi [media extension](https://sozi.baierouge.fr/pages/tutorial-media.html)
+that allows to add video or audio to a Sozi presentation.
 This is a feature that I have **never** used in any of my presentations.
 I accepted to implement it because a user convinced me to do so and provided enough
 technical information so that I could integrate it rapidly.
@@ -75,31 +75,33 @@ is my way to contribute to the free software ecosystem and give back what I rece
 
 The source code of Sozi is available from a [public repository](https://github.com/sozi-projects/Sozi).
 As a consequence, you are not only a user of Sozi, but also a potential participant in its development:
-* You can help [translate it into you native language](https://translations.launchpad.net/sozi) (the current Inkscape extension is available in 11 languages).
+* You can help [translate it into you native language](https://sozi.baierouge.fr/pages/translate-editor.html).
 * You can [report issues and request features](https://github.com/sozi-projects/Sozi/issues), but also investigate by yourself and propose solutions.
-* You can make [a package for your preferred operating system](http://sozi.baierouge.fr/pages/install-linux.html).
-  While it is limited to GNU/Linux distributions currently, I hope someone will make an installer for Windows or OS X.
-* You can help other users by answering questions in the [discussion group](http://groups.google.com/group/sozi-users).
+* You can make [a package for your preferred operating system](https://sozi.baierouge.fr/pages/20-install.html#installing-for-gnulinux).
+* You can help other users by answering questions in the [community forum](https://sozi.baierouge.fr/community/).
 
 For fame
 ========
 
-Like everybody else, I appreciate positive feedback
-and messages of gratitude for my work.
+Like everybody else, I appreciate positive feedback and messages of gratitude for my work.
 Getting recognition is part of the motivations for people to publish their work
 on the web today, I suppose.
 
 If I was really seeking fame, I would try to communicate more and better,
 make Sozi more visible, and make sure that my name is always associated with it.
 But actually, I usually prefer to spend time coding than advertising Sozi.
-I waited until this year to present it in an [international event](https://archive.fosdem.org/2014/schedule/event/sozi/).
+I waited until this year (2014) to present it in an [international event](https://archive.fosdem.org/2014/schedule/event/sozi/).
 The rest of the time, I do the minimum and let things happen.
 
 So, if Sozi has gained some visibility over the years, this is mainly due to
 some nice initiatives from the community, such as listing Sozi at
-[alternativeto.net](http://alternativeto.net/software/prezi/),
-writing an [article in the French Wikipedia](https://fr.wikipedia.org/wiki/Sozi),
-and publishing tutorials an reviews on YouTube and in various blogs.
+[alternativeto.net](http://alternativeto.net/software/sozi/),
+writing an article in the French Wikipedia,
+and publishing tutorials and reviews on YouTube and in various blogs.
+
+> Edit 2021-01-03:
+>
+> The Wikipedia article was deleted in 2015.
 
 For money
 =========
@@ -117,11 +119,11 @@ I personally do not donate to the developers of every free software that I use,
 so I do not expect to receive donations from all users of Sozi as well.
 As a result, Sozi will probably not make me rich.
 
-*Edit:* I realize that this section could be misinterpreted.
-Actually, I am quite satisfied with what I earn in my current job.
-I am not asking you to give me a complementary income in exchange for my work.
-Please consider that these donations can help me pay costs related to the
-development of Sozi, such as the hosting service for the web site of Sozi.
+> I realize that this section could be misinterpreted.
+> Actually, I am quite satisfied with what I earn in my current job.
+> I am not asking you to give me a complementary income in exchange for my work.
+> Please consider that these donations can help me pay costs related to the
+> development of Sozi, such as the hosting service for the web site of Sozi.
 
 For fun
 =======
