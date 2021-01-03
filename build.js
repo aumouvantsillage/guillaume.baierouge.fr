@@ -28,10 +28,15 @@ const prism       = require("markdown-it-prism");
  * Add a filter for relative links.
  */
 
-nunjucks.configure({watch: false, autoescape: false}).addFilter("relative", function (childName, parentName) {
-    const path = require("path");
-    return path.relative(path.dirname(parentName), childName);
-});
+nunjucks
+    .configure({
+        watch: false,
+        autoescape: false
+    })
+    .addFilter("relative", (childName, parentName) => {
+        const path = require("path");
+        return path.relative(path.dirname(parentName), childName);
+    });
 
 /*
  * Configure Markdown processor.
@@ -58,6 +63,10 @@ md.parser
     .enable("table")
     .enable("smartquotes");
 
+/*
+ * Generate HTML
+ */
+ 
 Metalsmith(__dirname)
     .metadata({
         site: {
@@ -76,10 +85,6 @@ Metalsmith(__dirname)
         buymeacoffee: "https://www.buymeacoffee.com/THtbNvnqE"
     })
     .use(date())
-    .use(sass({
-        outputStyle: "compressed",
-        outputDir: "css"
-    }))
     .use(drafts())
     .use(md)
     .use(sections({
@@ -120,34 +125,43 @@ Metalsmith(__dirname)
         }
     }))
     .use(templates("nunjucks"))
-    .use(assets({
-        source: "assets",
-        destination: "assets"
+    .build(err => {
+        if (err) throw err;
+    });
+
+/*
+ * Compile stylesheets
+ */
+
+Metalsmith(__dirname)
+    .source("styles")
+    .use(sass({
+        outputStyle: "compressed",
+        outputDir: "css"
     }))
-    .use(assets({
-        source: "node_modules/normalize.css",
-        destination: "css/normalize.css"
-    }))
-    .use(assets({
-        source: "node_modules/katex/dist",
-        destination: "css/katex"
-    }))
-    .use(assets({
-        source: "node_modules/@fortawesome/fontawesome-free",
-        destination: "css/fontawesome"
-    }))
-    .use(assets({
-        source: "node_modules/fontsource-pt-serif",
-        destination: "css/pt-serif"
-    }))
-    .use(assets({
-        source: "node_modules/fontsource-pt-sans-narrow",
-        destination: "css/pt-sans-narrow"
-    }))
-    .use(assets({
-        source: "node_modules/fontsource-jetbrains-mono",
-        destination: "css/jetbrains-mono"
-    }))
-    .build(function (err) {
+    .build(err => {
+        if (err) throw err;
+    });
+
+/*
+ * Copy assets
+ */
+
+const assetPaths = {
+    "assets"                                    : "assets",
+    "node_modules/normalize.css"                : "css/normalize.css",
+    "node_modules/katex/dist"                   : "css/katex",
+    "node_modules/@fortawesome/fontawesome-free": "css/fontawesome",
+    "node_modules/fontsource-pt-serif"          : "css/pt-serif",
+    "node_modules/fontsource-pt-sans-narrow"    : "css/pt-sans-narrow",
+    "node_modules/fontsource-jetbrains-mono"    : "css/jetbrains-mono",
+};
+
+Object.entries(assetPaths)
+    .reduce(
+        (M, [source, destination]) => M.use(assets({source, destination})),
+        Metalsmith(__dirname)
+    )
+    .build(err => {
         if (err) throw err;
     });
