@@ -176,5 +176,6 @@ In the following posts, we will follow the above steps in the reverse order:
 5. [Semantic checking (modules)](/2020/12/30/my-first-domain-specific-language-with-racket.-step-5:-modules):
    what if we want to split a circuit description into several source files?
    How do we share information between modules for the semantic checker?
-6. *Syntax analysis*: finally, we will register Tiny-HDL as a language
-   with an S-expression reader.
+6. [Syntax analysis](/2021/01/05/my-first-domain-specific-language-with-racket.-step-6:-syntax-analysis):
+   finally, we will register Tiny-HDL as a *module* language with a custom
+   *reader*.
