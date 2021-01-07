@@ -16,21 +16,19 @@ a Lisp-like syntax and a custom syntax.
 
 <!-- more -->
 
-Tiny-HDL Language flavors
-=========================
+Two language flavors for Tiny-HDL
+=================================
 
 Since the beginning of this series, we have considered that the syntax
 of Tiny-HDL was based on S-expressions.
 This was natural and necessary because Tiny-HDL was only available as a Racket
 library.
-In step 6, we want to make Tiny-HDL a standalone language with two syntax
-variants:
+In step 6, we want to make Tiny-HDL a standalone language with two possible syntaxes:
 
-* *Vanilla*, for parentheses lovers, will keep the S-expression-based
-  syntax that you already know,
-* *Spicy* will have a custom syntax loosely inspired by VHDL and Verilog.
+* *Vanilla*, for parentheses lovers,
+* *Spicy*, loosely inspired by VHDL and Verilog.
 
-The *vanilla* description of the half adder will look like this:
+The *vanilla* description of the half adder and the full adder will look like this:
 
 ```racket
 #lang tiny-hdl/vanilla
@@ -42,13 +40,31 @@ The *vanilla* description of the half adder will look like this:
   (assign co (and a b)))
 ```
 
+```racket
+#lang tiny-hdl/vanilla
+
+(use "half-adder-step-06-vanilla.rkt")
+
+(entity full-adder ([input a] [input b] [input ci] [output s] [output co]))
+
+(architecture full-adder-arch full-adder
+  (instance h1 half-adder-arch)
+  (instance h2 half-adder-arch)
+  (assign (h1 a) a)
+  (assign (h1 b) b)
+  (assign (h2 a) (h1 s))
+  (assign (h2 b) ci)
+  (assign s      (h2 s))
+  (assign co     (or (h1 co) (h2 co))))
+```
+
 Compared to the same example in step 5, the noticeable changes are:
 
-* The `#lang racket` directive has beed replaced by `#lang tiny-hdl/vanilla`.
-* The `(require tiny-hdl)` form has been removed.
-* The Tiny-HDL code is no longer wrapped in a `(begin-tiny-hdl ...)` form.
+* The `#lang racket` directives have been replaced by `#lang tiny-hdl/vanilla`.
+* The `(require tiny-hdl)` forms have been removed.
+* The Tiny-HDL code is no longer wrapped in `(begin-tiny-hdl ...)` forms.
 
-And here is the *spicy* version of the same half-adder:
+And here is the *spicy* version of the same example:
 
 ```
 #lang tiny-hdl/spicy
@@ -66,10 +82,35 @@ architecture half-adder-arch of half-adder
 end
 ```
 
+```
+#lang tiny-hdl/spicy
+
+use "half-adder-step-06-spicy.rkt"
+
+entity full-adder
+  input a
+  input b
+  input ci
+  output s
+  output co
+end
+
+architecture full-adder-arch of full-adder
+  h1 : half-adder-arch
+  h2 : half-adder-arch
+  h1.a <= a
+  h1.b <= b
+  h2.a <= h1.s
+  h2.b <= ci
+  s    <= h2.s
+  co   <= h1.co or h2.co
+end
+```
+
 In both cases, the `#lang` directive will have the following effect:
 
 1. Racket will look up, and run, a *reader* for the chosen language flavor.
-   A reader is basically a *parser* that converts a source file into a
+   A reader is basically a *parser* that converts source text into a
    syntax object.
 2. The syntax object will come wrapped in a `#%module-begin` form that serves
    as a hook for macro expansion.
@@ -156,8 +197,6 @@ As you can see, `tiny-hdl-read-syntax` uses two functions:
 * `tokenize`, imported from `lexer.rkt`, converts a Tiny-HDL source file into a token stream.
 * `parse`, imported from `grammar.rkt`, converts a token stream into a syntax object.
 
-`tiny-hdl-read` is an alternate reader that returns a datum.
-
 The lexical analyser
 --------------------
 
@@ -204,7 +243,7 @@ against regular expression patterns:
 * A boolean literal (`false`, `true`) is converted into a `BOOLEAN` token with a Racket boolean value (`#f`, `#t`).
 * An identifier is converted into an `ID` token with a symbol value.
 * A string literal is converted into a `STRING` token whose value is the string content.
-* Whitespace is matched against a built-in `whitespace` rule and converted into
+* Whitespace is matched against a built-in `whitespace` pattern and converted into
   a `WHITESPACE` token that will be ignored.
 * The *end-of-file* condition returns `(void)` as a termination indicator for the parser.
 
@@ -213,7 +252,7 @@ The parser
 
 The parser is specified as a grammar in `spicy/lang/grammar.rkt`
 using the Brag language.
-The beauty of it is that Brag itself is implemented as a Racket DSL with
+Interestingly, Brag itself is implemented as a Racket DSL with
 a custom syntax.
 
 The starting rule of the grammar is `begin-tiny-hdl`.
@@ -293,8 +332,8 @@ not: "not" not-term
 /instance-port-ref: ID /"." ID
 ```
 
-Language module
----------------
+The language module
+-------------------
 
 Finally, the `spicy/lang/expander.rkt` module exports the definitions
 needed to expand Tiny-HDL code.
@@ -311,3 +350,74 @@ syntax object, we do not redefine the `#%module-begin` macro:
   xor and or not
   #%module-begin)
 ```
+
+Getting the source code and running the examples
+================================================
+
+The source code for this step can be found in [branch step-06](https://github.com/aumouvantsillage/Tiny-HDL-Racket/tree/step-06)
+of the git repository for this project.
+
+There are two new versions of the full adder example:
+
+* [examples/half-adder-step-06-vanilla.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-06/examples/half-adder-step-06-vanilla.rkt):
+  the entity `half-adder` and its architecture `half-adder-arch`, using the *vanilla* flavor.
+* [examples/full-adder-step-06-vanilla.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-06/examples/full-adder-step-06-vanilla.rkt):
+  the entity `full-adder` and its architecture `full-adder-arch`, using the *vanilla* flavor.
+* [examples/full-adder-step-06-vanilla-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-06/examples/full-adder-step-06-vanilla-test.rkt):
+  the test module for the full adder using the *vanilla* flavor.
+* [examples/half-adder-step-06-spicy.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-06/examples/half-adder-step-06-spicy.rkt):
+  the entity `half-adder` and its architecture `half-adder-arch`, using the *spicy* flavor.
+* [examples/full-adder-step-06-spicy.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-06/examples/full-adder-step-06-spicy.rkt):
+  the entity `full-adder` and its architecture `full-adder-arch`, using the *spicy* flavor.
+* [examples/full-adder-step-06-spicy-test.rkt](https://github.com/aumouvantsillage/Tiny-HDL-Racket/blob/step-06/examples/full-adder-step-06-spicy-test.rkt):
+  the test module for the full adder using the *spicy* flavor.
+
+The implementations of both language flavors are available in folders
+`vanilla/lang` and `spicy/lang` of the source tree.
+
+Getting the source code for step 6
+----------------------------------
+
+Assuming you have already [cloned the git repository](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution/#getting-the-source-code-for-step-1),
+switch to branch `step-06`:
+
+```
+git checkout step-06
+```
+
+Running the examples
+--------------------
+
+Run `full-adder-step-06-vanilla-test.rkt` or `full-adder-step-06-spicy-test.rkt` with Racket:
+
+```
+racket examples/full-adder-step-06-vanilla-test.rkt
+racket examples/full-adder-step-06-spicy-test.rkt
+```
+
+Conclusion
+==========
+
+When I started this project, I came to Racket with a very narrow conception
+of what language-oriented programming was.
+Using Racket was a refreshing experience, but also frustrating at times.
+
+Using a language with an effective macro system was completely new to me.
+Before learning Racket, the word "macro" reminded me of C's `#define`, and that
+did not sound very exciting.
+Now I have a completely different vision of what macros are and what they can
+offer, especially in the context of language-oriented programming.
+
+I found the concept of creating a language using macros, and the ability
+to implement custom readers, very elegant.
+However, implementing name resolution and cross-module bindings felt particularly
+unintuitive at first, mainly due to my limited understanding of the macro
+expansion process, and my ignorance of the available APIs.
+This gave me the impression that Racket lacked maturity compared to other
+language frameworks that I had used before.
+Now I know that there is an ongoing effort to provide new APIs for DSL creation,
+and this is very encouraging.
+
+Since those difficulties are behind me, I can fully enjoy the reward of
+getting a fully-working DSL, and I feel ready to start a new language
+project with Racket.
