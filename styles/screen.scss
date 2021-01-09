@@ -43,20 +43,8 @@ body {
     hyphens: auto;
     margin: 1rem calc(50vw - 30rem);
 
-    > header {
-        nav a {
-            margin-left: 0.5em;
-            margin-right: 0.5em;
-        }
-
-        nav.social {
-            a { color: $icon-color; }
-            a:hover { color: $link-color; }
-        }
-
-        form {
-            display: inline;
-        }
+    > header form {
+        display: inline;
     }
 }
 
@@ -69,6 +57,17 @@ footer {
     text-align: center;
     margin-top: 2rem;
     margin-bottom: 2rem;
+}
+
+body > header nav a,
+article footer nav a {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+nav.social {
+    a { color: $icon-color; }
+    a:hover { color: $link-color; }
 }
 
 hr {

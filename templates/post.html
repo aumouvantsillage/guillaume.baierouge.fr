@@ -5,7 +5,11 @@
     <article>
         <header>
             <time datetime="{{date.toISOString()}}">{{date.toISOString().split("T")[0]}}</time>
-            <h1>{{title}}</h1>
+            {% if storyHome %}
+                <h1><a href="{{site.root}}/{{storyHome.path}}">{{title}}</a></h1>
+            {% else %}
+                <h1>{{title}}</h1>
+            {% endif %}
             {% if subtitle %}
                 <h2>{{subtitle}}</h2>
             {% endif %}
@@ -13,5 +17,17 @@
             {{tagList(tags)}}
         </header>
 	    {{contents}}
+        {% if storyPrev or storyNext %}
+            <footer>
+                <nav>
+                    {% if storyPrev %}
+                        <a href="{{site.root}}/{{storyPrev.path}}">&larr;&nbsp;{{storyPrev.subtitle or storyPrev.title}}</a>
+                    {% endif %}
+                    {% if storyNext %}
+                        <a href="{{site.root}}/{{storyNext.path}}">{{storyNext.subtitle}}&nbsp;&rarr;</a>
+                    {% endif %}
+                </nav>
+            </footer>
+        {% endif %}
     </article>
 {% endblock %}
