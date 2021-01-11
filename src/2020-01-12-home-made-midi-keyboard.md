@@ -39,7 +39,7 @@ The figure below shows the default key assignment. The orange "Fn" key is intend
 to be used in combination with the other keys to activate alternate functions such
 as choosing an instrument or changing the base pitch (more on that in the next articles).
 
-![midi@3:14 keyboard layout](/assets/figures/midi314-layout.svg)
+![midi@3:14 keyboard layout](/assets/figures/midi314/layout.svg)
 
 ::: info
 The name "midi@3:14" refers to the MIDI interface and the 3&times;14 layout.
@@ -89,7 +89,7 @@ A naive switch matrix layout would use one pin per row and one pin per column.
 For a 3&times;14 keyboard, this would require 17 digital pins, i.e. more than
 what the *Pro Micro* provides.
 
-![midi@3:14 switch matrix design](/assets/figures/midi314-switch-matrix.svg)
+![midi@3:14 switch matrix design](/assets/figures/midi314/switch-matrix.svg)
 
 However, there is no obligation for the electrical wiring to mimic the actual spatial key layout.
 In midi@3:14, a better solution was to design the circuit as if the keyboard had 6 rows and 7 columns.
@@ -98,7 +98,7 @@ As can be seen in the schematic below, the keyboard is logically split into two 
 the left part is assigned to rows 1 to 3 of the switch matrix,
 and the right part is assigned to rows 4 to 6.
 
-![midi@3:14 keyboard schematic](/assets/figures/midi314-schematic.svg)
+![midi@3:14 keyboard schematic](/assets/figures/midi314/schematic.svg)
 
 PCB layout
 ----------
@@ -115,7 +115,7 @@ The following footprints are used:
 * Diodes: DO-35, horizontal, through-hole, 10.16 mm.
 * Pro Micro: DIP-24, width 15.24 mm.
 
-![midi@3:14 PCB layout](/assets/figures/midi314-pcb-layout.svg)
+![midi@3:14 PCB layout](/assets/figures/midi314/pcb-layout.svg)
 
 ::: warning
 As you can see, in the figure above, I forgot to draw mounting holes on the PCB,
@@ -132,28 +132,28 @@ I even received five boards while I was only expecting one!
 The only issue was that the combined shipping and customs fees turned out to be
 more expensive than the PCBs themselves, but this is clearly not Elecrow's fault.
 
-![midi@3:14 PCB from manufacturer](/assets/figures/midi314-pcb-naked.jpg)
+![midi@3:14 PCB from manufacturer](/assets/figures/midi314/pcb-naked.jpg)
 
 Now let's have a look at the components.
 This is the Arduino-compatible *Pro Micro* module from SparkFun:
 
-![midi@3:14 SparkFun Pro Micro](/assets/figures/midi314-sparkfun-pro-micro.jpg)
+![midi@3:14 SparkFun Pro Micro](/assets/figures/midi314/sparkfun-pro-micro.jpg)
 
 Diodes and potentiometers, ordered from [Farnell](https://www.farnell.com/):
 
-![midi@3:14 Diodes and potentiometers](/assets/figures/midi314-diodes-and-pots.jpg)
+![midi@3:14 Diodes and potentiometers](/assets/figures/midi314/diodes-and-pots.jpg)
 
 Cherry MX "Red" switches and keycaps, from [WASD Keyboards](https://www.wasdkeyboards.com/).
 The "red" flavor is advertised as "ideal for action gamers".
 I chose them because they have low spring force and no audible click.
 
-![midi@3:14 Cherry MX switches and keycaps](/assets/figures/midi314-switches-and-caps.jpg)
+![midi@3:14 Cherry MX switches and keycaps](/assets/figures/midi314/switches-and-caps.jpg)
 
 And here is the completed keyboard, mounted on a laser-cut orange plexiglas plate
 matching the orange key and the blue color of the board.
 It is now ready to be programmed and used.
 
-![midi@3:14 Final assembly](/assets/figures/midi314-final-assembly.jpg)
+![midi@3:14 Final assembly](/assets/figures/midi314/final-assembly.jpg)
 
 Bill of materials and cost
 ==========================
@@ -200,7 +200,7 @@ while the other fingers are playing on the back row.
 This is probably the reason why Jankó keyboards usually
 have a stair-like arrangement (illustration below, *Die Gartenlaube* 1887, public domain).
 
-![Jankó key arrangement](/assets/figures/Die_Gartenlaube_1887_b_051_1.jpg)
+![Jankó key arrangement](/assets/figures/midi314/Die_Gartenlaube_1887_b_051_1.jpg)
 
 Finally, I think that the potentiometers should have been placed differently:
 they should have more space between them, and they should be rotated by 180&deg;.

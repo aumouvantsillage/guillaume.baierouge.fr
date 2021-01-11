@@ -99,7 +99,7 @@ As a result, the following picture shows an *ideal* situation where the
 application only records input coordinates and no time is spent rendering
 the paths.
 
-<img src="/assets/figures/Painter-FxOS-Flatfish.drawing.svg" width="75%">
+<img src="/assets/figures/gribouille/Painter-FxOS-Flatfish.drawing.svg" width="75%">
 
 On the following chart,
 * The X axis corresponds to the time, in milliseconds.
@@ -110,7 +110,7 @@ On the following chart,
 This chart shows that when no repaint operation is performed, the touch events are
 evenly distributed in time and the animation frames follow a regular rate.
 
-<img src="/assets/figures/Painter-FxOS-Flatfish.chart.svg" width="75%">
+<img src="/assets/figures/gribouille/Painter-FxOS-Flatfish.chart.svg" width="75%">
 
 Both tested platforms show similar performance.
 The maximum time between frames in Firefox for Android is due to an exceptionally
@@ -130,7 +130,7 @@ SVGPolylinePainter
 In the following picture, the path is drawn from left to right.
 We can observe that the segments of the polyline become longer at the end.
 
-<img src="/assets/figures/SVGPolylinePainter-FxOS-Flatfish.drawing.svg" width="75%">
+<img src="/assets/figures/gribouille/SVGPolylinePainter-FxOS-Flatfish.drawing.svg" width="75%">
 
 In the ``SVGPolylinePainter`` object, each execution of the ``repaint`` method assigns
 a new value to the ``points`` attribute of the same ``polyline`` element.
@@ -143,7 +143,7 @@ frames increases over time.
 While the distance (blue curve) still progresses approximately linearly,
 the orange curve shows that the application can handle fewer and fewer touch events.
 
-<img src="/assets/figures/SVGPolylinePainter-FxOS-Flatfish.chart.svg" width="75%">
+<img src="/assets/figures/gribouille/SVGPolylinePainter-FxOS-Flatfish.chart.svg" width="75%">
 
 The following table shows that Firefox OS and Firefox for Android behave differently in this
 situation.
@@ -167,12 +167,12 @@ creates a new ``polyline`` element each time the ``repaint`` method is called.
 The following picture shows no significant difference in smoothness between the beginning and the
 end of the path.
 
-<img src="/assets/figures/SVGPolylineGroupPainter-FxOS-Flatfish.drawing.svg" width="75%">
+<img src="/assets/figures/gribouille/SVGPolylineGroupPainter-FxOS-Flatfish.drawing.svg" width="75%">
 
 In the following chart, we observe that the orange curve is nearly linear and that the animation frames
 are distributed more evenly in time.
 
-<img src="/assets/figures/SVGPolylineGroupPainter-FxOS-Flatfish.chart.svg" width="75%">
+<img src="/assets/figures/gribouille/SVGPolylineGroupPainter-FxOS-Flatfish.chart.svg" width="75%">
 
 In this case again, the average time between animation frames in Firefox OS is smaller
 than in Firefox for Android and Chrome.
@@ -193,9 +193,9 @@ CanvasPainter
 that the rendering will not slow down while the path grows.
 But rendering on a ``canvas`` element gives a surprisingly bad result.
 
-<img src="/assets/figures/CanvasPainter-FxOS-Flatfish.drawing.svg" width="75%">
+<img src="/assets/figures/gribouille/CanvasPainter-FxOS-Flatfish.drawing.svg" width="75%">
 
-<img src="/assets/figures/CanvasPainter-FxOS-Flatfish.chart.svg" width="75%">
+<img src="/assets/figures/gribouille/CanvasPainter-FxOS-Flatfish.chart.svg" width="75%">
 
 Like Firefox OS, Firefox for Android takes a lot of time to render on a canvas.
 But the number of segments shows that it still manages to create a smooth drawing.
