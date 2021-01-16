@@ -3,7 +3,7 @@ title: "Make your own Sozi"
 author: Guillaume Savaton
 lang: en
 date: 2021-01-11
-draft: false
+draft: true
 collection:
 - posts
 - stories
