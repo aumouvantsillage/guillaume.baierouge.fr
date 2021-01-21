@@ -41,10 +41,18 @@ body {
     text-align: justify;
     word-wrap: break-word;
     hyphens: auto;
-    margin: 1rem calc(50vw - 30rem);
+    margin: 1rem 0;
+    margin-bottom: 1rem;
+    margin: 1rem 1rem;
 
     > header form {
         display: inline;
+    }
+}
+
+@media (min-width: 60rem) {
+    body {
+        margin: 1rem calc(50vw - 30rem);
     }
 }
 
@@ -108,12 +116,17 @@ article {
         }
 
         h1, h2, h3 {
-            margin-left: -1em;
-            width: calc(60rem + 2em);
             margin-top: 1.5em;
             word-wrap: normal;
             hyphens: none;
             text-align: left;
+        }
+
+        @media (min-width: 64rem) {
+            h1, h2, h3 {
+                margin-left: -1rem;
+                width: 62rem;
+            }
         }
 
         h1 { font-size: 160%; }
