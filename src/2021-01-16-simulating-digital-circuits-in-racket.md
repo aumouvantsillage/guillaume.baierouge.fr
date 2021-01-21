@@ -75,7 +75,10 @@ Let's define a function that returns the first `n` samples of a signal
 as a list:
 
 ```haskell
+-- Taking zero samples returns an empty list.
 sampleN 0 _ = []
+-- When n > 0, we extract the first sample x from the signal,
+-- and we use sampleN recursively to get the next (n-1) samples.
 sampleN n (x :- xs) = x : sampleN (n - 1) xs
 ```
 
@@ -195,17 +198,23 @@ The book [Structure And Interpretation of Computer Programs (SICP)](https://mitp
 also contains a
 [section about streams](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-24.html#%_sec_3.5).
 
-In this section, I re-implement a stream-like library from scratch,
-with support for infinite streams only.
+> When I started writing an implementation of signals in Racket,
+> my only source of inspiration was the Clash source code.
+> I didn't know anything about promises and streams in Racket,
+> and I hadn't read SICP.
+>
+> This section is mostly based on my implementation of signals from scratch.
+> While writing this post, I have made several changes to align the terminology
+> and the implementation with the literature.
 
 Delayed evaluation
 ------------------
 
 In Racket, lazy evaluation can be achieved using [promises](https://docs.racket-lang.org/reference/Delayed_Evaluation.html).
 The [delay](https://docs.racket-lang.org/reference/Delayed_Evaluation.html?q=delay#%28form._%28%28lib._racket%2Fpromise..rkt%29._delay%29%29)
-converts an expression into a promise,
+macro converts an expression into a promise,
 and the [force](https://docs.racket-lang.org/reference/Delayed_Evaluation.html?q=delay#%28def._%28%28lib._racket%2Fpromise..rkt%29._force%29%29)
-function evaluate that expression when needed.
+function evaluates that expression.
 The result of the evaluation is cached, so that we can `force`
 the same promise multiple times without the cost of reevaluating the expression.
 
@@ -215,14 +224,14 @@ The result is memoized in a variable `res`:
 
 ```racket
 (define-simple-macro (signal-delay body ...)
-  (let ([res #f])
+  (let ([res #f])                    ; Will store the value of the promise.
     (λ ()
-      (unless res
-        (set! res (begin body ...)))
-      res)))
+      (unless res                    ; If the promise has not been forced,
+        (set! res (begin body ...))) ; compute its value and store it.
+      res)))                         ; Return the stored value.
 
 (define-simple-macro (signal-force promise)
-  (promise))
+  (promise))                         ; Call the λ created by signal-delay.
 ```
 
 `signal-delay` would not work in a general-purpose implementation of promises.
@@ -243,10 +252,10 @@ that generates the rest of the signal:
   (signal-delay (cons val sig)))
 
 (define (signal-first sig)
-  (car (signal-force sig)))
+  (car (signal-force sig))) ; Returns the left element of the pair.
 
 (define (signal-rest sig)
-  (cdr (signal-force sig)))
+  (cdr (signal-force sig))) ; Returns the right element of the pair.
 ```
 
 Since the pair is wrapped in a promise, nothing is evaluated until the first
@@ -263,10 +272,10 @@ It is named after the Racket list manipulation function
 ```racket
 (define (signal-take sig n)
   (if (positive? n)
-    (cons
-      (signal-first sig)
-      (signal-take (signal-rest sig) (sub1 n)))
-    empty))
+    (cons                                       ; Make a list with:
+      (signal-first sig)                        ; the value of the first sample,
+      (signal-take (signal-rest sig) (sub1 n))) ; the next n-1 sample values.
+    empty))                                     ; If n is zero or less, return an empty list.
 ```
 
 Without any syntactic sugar, a constant signal can be written as a circular
@@ -275,7 +284,7 @@ Remember that inside `signal-cons`, `sig1` is not evaluated,
 so we don't need to worry about infinite recursion here:
 
 ```racket
-(define sig1 (signal-cons 56 sig1))
+(define sig1 (signal-cons 56 sig1)) ; The rest of sig1 is sig1 itself!
 
 (signal-take sig1 5)
 ; '(56 56 56 56 56)
@@ -283,8 +292,8 @@ so we don't need to worry about infinite recursion here:
 
 To create signals, two other constructs are introduced below.
 Function `list->signal` converts a list into a signal.
-Macro `signal` is syntactic sugar to create signals from a known
-sequence of values.
+Macro `signal` is syntactic sugar to create signals from the list of its
+arguments.
 
 To convert a finite list into an infinite signal, `list->signal` maps the last
 element of the list to a constant signal by creating a circular `signal-cons`
@@ -293,17 +302,17 @@ like in the previous example:
 ```racket
 (define (list->signal lst)
   (define rst (rest lst))
-  (define sig (signal-cons
-                (first lst)
-                (if (empty? rst)
-                  sig
-                  (list->signal rst))))
+  (define sig (signal-cons              ; Create a signal:
+                (first lst)             ; with the first element of the list,
+                (if (empty? rst)        ; and if there are no more samples,
+                  sig                   ; cycle over the current signal,
+                  (list->signal rst)))) ; else, create a signal with the rest of the list.
   sig)
 
 (define-simple-macro (signal val ...)
-  (list->signal (list val ...)))
+  (list->signal (list val ...))) ; Pass the arguments as a list to list->signal.
 
-(define sig2 (signal 10 20 30))
+(define sig2 (signal 10 20 30)) ; The value 30 will be replicated forever.
 
 (signal-take sig2 5)
 ; '(10 20 30 30 30)
@@ -315,28 +324,29 @@ Operations on signals
 Like we did in Haskell with the `Functor` and `Applicative` typeclasses,
 we want to *lift* ordinary functions into functions that operate on signals.
 A general solution for an arbitrary function `f` consists in creating
-a function `g` that accepts any number of signals as arguments, and that returns
+a function `f^` that accepts any number of signals as arguments, and that returns
 another signal constructed like this:
 
 * Make a list with the first sample of each argument, and call `f` on them.
-* Make a list with the rest of each argument and call `g` on them.
-* *Cons* the results of `f` and `g` into a new signal.
+* Make a list with the rest of each argument and call `f^` on them.
+* *Cons* the results of `f` and `f^` into a new signal.
 
 ```racket
 (define (signal-lift f)
-  (define (g . sig-lst)
-    (signal-cons
-      (apply f (map signal-first sig-lst))
-      (apply g (map signal-rest  sig-lst))))
-  g)
+  (define (f^ . sig-lst)                      ; The lifted version of f takes any number of arguments.
+    (signal-cons                              ; It will return a signal:
+      (apply f  (map signal-first sig-lst))   ; with f applied to the first sample of each argument,
+      (apply f^ (map signal-rest  sig-lst)))) ; and the lifted f applied to the rest of each argument.
+  f^)
 ```
 
-For instance, we can *lift* the `+` operator like this:
+For instance, the addition operation for signals will be implemented
+by lifting the `+` operator:
 
 ```racket
-(define .+ (signal-lift +))
+(define +^ (signal-lift +))
 
-(define sig3 (.+ (signal 1 2 3) (signal 10 20 30) (signal 100 200 300)))
+(define sig3 (+^ (signal 1 2 3) (signal 10 20 30) (signal 100 200 300)))
 
 (signal-take sig3 5)
 ; '(111 222 333 333 333)
@@ -347,25 +357,26 @@ and `map` by using the following macro:
 
 ```racket
 (define-simple-macro (signal-lift* f arg ...)
-  #:with (tmp ...) (generate-temporaries #'(arg ...))
-  (letrec ([g (λ (tmp ...)
-                (signal-cons
-                  (f (signal-first tmp) ...)
-                  (g (signal-rest  tmp) ...)))])
-    g))
+  #:with (tmp ...) (generate-temporaries #'(arg ...)) ; Make a unique name for each argument.
+  (letrec ([f^ (λ (tmp ...)                           ; The lifted version of f takes the given number of arguments.
+                 (signal-cons                         ; It will return a signal:
+                   (f  (signal-first tmp) ...)        ; with f applied to the first sample of each argument,
+                   (f^ (signal-rest  tmp) ...)))])    ; and the lifted f applied to the rest of each argument.
+    f^))
 ```
 
 Using `generate-temporaries` is a little trick to avoid checking that `arg ...`
 contains distinct symbols (see the example below).
 
-I don't know whether choosing the macro is relevant in terms of performance,
-but a benefit of `signal-lift*` is that `f` does not need to be a function.
+I don't know whether choosing `signal-lift*` rather than `signal-lift`
+is relevant in terms of performance,
+but a benefit of the macro is that `f` does not need to be a function.
 For instance, we can implement a version of the `if` form for signals:
 
 ```racket
-(define .if (signal-lift* if _ _ _))
+(define if^ (signal-lift* if _ _ _))
 
-(define sig4 (.if (signal #t #f #t #f #t #t #f) (signal 1) (signal 0)))
+(define sig4 (if^ (signal #t #f #t #f #t #t #f) (signal 1) (signal 0)))
 
 (signal-take sig4 8)
 ; '(1 0 1 0 1 1 0 0)
@@ -376,18 +387,23 @@ forms similar to `lambda`, `define` and `let`.
 
 ```racket
 (define-syntax-parser signal-λ
+  ; Lift a λ with the given list of arguments.
   [(signal-λ (sig:id ...) body ...)
    #'(signal-lift* (λ (sig ...) body ...) sig ...)]
-  [(signal-λ sig-lst body ...)
+  ; Lift a λ that accepts any number of arguments.
+  [(signal-λ sig-lst:id body ...)
    #'(signal-lift (λ sig-lst body ...))])
 
 (define-syntax-parser define-signal
+  ; Define a function with the given list of arguments.
   [(define-signal (name sig:id ...) body ...)
    #'(define name (signal-λ (sig ...) body ...))]
+  ; Define a function that accepts any number of arguments.
   [(define-signal (name . sig-lst:id) body ...)
    #'(define name (signal-λ sig-lst body ...))])
 
 (define-simple-macro (signal-let ([var:id sig] ...) body ...)
+  ; Create a lifted λ and apply it immediately to the given signals.
   ((signal-λ (var ...) body ...) sig ...))
 ```
 
@@ -396,10 +412,12 @@ We can use it to define functions whose arguments and results are signals,
 but whose body uses ordinary operations on values:
 
 ```racket
-(define-signal (.mac a b c)
+; Multiply and accumulate.
+(define-signal (mac^ a b c)
   (+ a (* b c)))
 
-(define-signal (.mean . sig-lst)
+; Compute the mean of the given signals.
+(define-signal (mean^ . sig-lst)
   (/ (apply + sig-lst) (length sig-lst)))
 ```
 
@@ -417,18 +435,14 @@ Two circuit description styles
 Now we can replicate the cyclic counter example as:
 
 ```racket
-(define-signal (.= x y)
-  (= x y))
+(define =^ (signal-lift* = _ _))
 
-(define-signal (.add1 x)
-  (add1 x))
+(define add1^ (signal-lift* add1 _))
 
 (define counter-mod-5
-  (signal-cons
-    0
-    (.if (.= counter-mod-5 (signal 4))
-      (signal 0)
-      (.add1 counter-mod-5))))
+  (signal-cons 0 (if^ (=^ counter-mod-5 (signal 4))
+                   (signal 0)
+                   (add1^ counter-mod-5))))
 
 (signal-take counter-mod-5 11)
 ; '(0 1 2 3 4 0 1 2 3 4 0)
@@ -456,24 +470,24 @@ Registers and feedback loops
 For readability, we can provide a `register` form as a synonym for `signal-cons`:
 
 ```racket
-(define-simple-macro (register q0 d)
-  (signal-cons q0 d))
+(define-simple-macro (register q0 sig-d)
+  (signal-cons q0 sig-d))
 ```
 
 A register with synchronous reset will assign `q0` to its output when
 its `r` input is true:
 
 ```racket
-(define-simple-macro (register/r q0 r d)
-  (register q0 (signal-let ([r* r] [d* d])
-                 (if r* q0 d*))))
+(define-simple-macro (register/r q0 sig-r sig-d)
+  (register q0 (signal-let ([r sig-r] [d sig-d])
+                 (if r q0 d))))
 ```
 
 To implement other digital hardware patterns, we will need a way to represent
 feeback loops.
 The `feedback` macro composes an expression `expr` with a register so that the
 result of `expr` is the input of the register, and the output of the register
-is fed back into the expression.
+is fed back into the expression (assuming that `name` is used in `expr`).
 
 ```racket
 (define-simple-macro (feedback name q0 expr)
@@ -483,12 +497,32 @@ is fed back into the expression.
 These macros define two register variants with an *enable* input:
 
 ```racket
-(define-simple-macro (register/e q0 e d)
-  (feedback q q0 (.if e d q)))
+(define-simple-macro (register/e q0 sig-e sig-d)
+  (feedback sig-q q0 (if^ sig-e sig-d sig-q)))
 
-(define-simple-macro (register/re q0 r e d)
-  (feedback q q0 (signal-let ([r* r] [e* e] [d* d] [q* q])
-                   (cond [r*   q0]
-                         [e*   d*]
-                         [else q*]))))
+(define-simple-macro (register/re q0 sig-r sig-e sig-d)
+  (feedback sig-q q0 (signal-let ([r sig-r] [e sig-e] [d sig-d] [q sig-q])
+                       (cond [r    q0]
+                             [e    d]
+                             [else q]))))
+```
+
+A Medvedev-style state machine component can be implemented using this pattern:
+
+```racket
+(define-signal (make-state-machine sig-cmd1 sig-cmd2)
+  (feedback sig-state 'IDLE
+    (signal-let ([st sig-state] [cmd1 sig-cmd1] [cmd2 sig-cmd2])
+      (match st
+        ['IDLE    (cond [cmd1 'RUNNING]               [else 'IDLE])]
+        ['RUNNING (cond [cmd1 'IDLE] [cmd2 'PAUSED]   [else 'RUNNING])]
+        ['PAUSED  (cond [cmd1 'IDLE] [cmd2 'RUNNING'] [else 'PAUSED])]))))
+
+(define (make-up-down-counter init-val min-val max-val sig-r sig-up sig-down)
+  (feedback sig-val init-val
+    (signal-let ([val sig-val] [r sig-r] [up sig-up] [down sig-down])
+      (cond [r                                   init-val]
+            [(and up (not down) (< val max-val)) (add1 val)]
+            [(and down (not up) (> val min-val)) (sub1 val)]
+            [else                                val]))))
 ```
