@@ -9,6 +9,7 @@ collection:
 - stories
 tags: Racket, Digital electronics
 template: post.html
+katex: true
 ---
 
 In the series [My first domain-specific language with Racket](/2020/11/08/my-first-domain-specific-language-with-racket/),
@@ -21,8 +22,103 @@ circuit description in Racket.
 
 <!-- more -->
 
-Functional description of digital circuits
-==========================================
+Functional modeling of digital circuits
+=======================================
+
+In this post, I focus on [Register-Transfer Level (RTL)](https://en.wikipedia.org/wiki/Register-transfer_level)
+simulation of digital circuits with the following restrictions:
+there is only one clock domain and
+no [three-state logic](https://en.wikipedia.org/wiki/Three-state_logic).
+
+At the Register-Transfer Level, such a digital circuit has the following
+general structure:
+
+where:
+
+* A register stores the current state $$s_n$$ and updates it on every clock tick.
+* $$f_T$$ is the *transition function* that computes the *next* state
+  from the inputs and the current state:\
+  $$s_{n+1} = f_T(x_n, s_n)$$.
+* $$f_O$$ is the *output function* that computes the current outputs
+  from the inputs and the current state:\
+  $$y_n = f_O(x_n, s_n)$$.
+
+$$f_T$$ and $$f_Q$$ are both pure functions.
+The only memory element is the register.
+
+Several special cases of such circuits can be mentioned:
+
+* A [combinational circuit](https://en.wikipedia.org/wiki/Combinational_logic)
+  has no clock and no memory: $$y = f_O(x)$$.
+* In a [Medvedev machine](https://en.wikipedia.org/wiki/Finite-state_machine#Hardware_applications),
+  the output is the current state: $$y_n = s_n$$.
+* In a [Moore machine](https://en.wikipedia.org/wiki/Moore_machine),
+  the output is computed only from the current state: $$y_n = f_O(s_n)$$.
+* A [Mealy machine](https://en.wikipedia.org/wiki/Mealy_machine)
+  is the general case where $$y_n = f_O(x_n, s_n)$$.
+
+Combinational circuits
+----------------------
+
+Modeling combinational circuits in a programming language can be
+fairly straightforward, but there are pitfalls.
+The developer must keep in mind that the program will not be executed
+as a sequence of operations, but will be synthesized into an interconnection
+of hardware components working concurrently.
+
+As a consequence, the program must be expandable into a dataflow graph
+with a finite number of operations and no feedback loop.
+Recursion and looping constructs can be problematic if they cannot be fully
+unrolled: the maximum number of iterations must be known at compile time.
+
+For instance, if I had to describe a circuit that computes the greatest
+common divisor of two positive numbers using Euclid's algorithm, a recursive
+implementation would look like this:
+
+```haskell
+gcd a b = if a > b then
+              gcd (a - b) b
+          else if b > a then
+              gcd a (b - a)
+          else
+              a
+```
+
+Since the actual number of comparisons and subtractions depends on `a` and `b`
+themselves, we cannot infer the number of components that will be needed to
+implement this function as a combinational circuit.
+If we know the maximum value `N` that `a` and `b` can take, we can rewrite this
+function and replace the recursion with a fold:
+
+```haskell
+gcdStep (a, b) i = if a > b then
+                       (a - b, b)
+                   else if b > a then
+                       (a, b - a)
+                   else
+                       (a, b)
+
+gcd a b = fst $ fold gcdStep (a, b) [1 .. N-1]
+```
+
+With this version, the GCD circuit will be organized as a cascade of `N-1`
+instances of `gcdStep`.
+The function `gcdStep` itself can easily be synthesized into a combinational
+circuit with two inputs and two outputs.
+
+Sequential circuits
+-------------------
+
+When synthesizing a combinational circuit, iterative algorithms produce
+a spatial replication of hardware elements.
+An alternative technique consists in reusing the same hardware in consecutive
+time slots, storing intermediate results as the algorithm is executed.
+
+In a synchronous digital circuit, the elementary storage element is the
+D flip-flop.
+It can store one bit of data and updates its state every clock cycle.
+
+The effect of a D flip-flop is to delay its input to the next clock edge.
 
 A detour via Haskell and Clash
 ===============================
@@ -510,7 +606,7 @@ These macros define two register variants with an *enable* input:
 A Medvedev-style state machine component can be implemented using this pattern:
 
 ```racket
-(define-signal (make-state-machine sig-cmd1 sig-cmd2)
+(define (make-state-machine sig-cmd1 sig-cmd2)
   (feedback sig-state 'IDLE
     (signal-let ([st sig-state] [cmd1 sig-cmd1] [cmd2 sig-cmd2])
       (match st
