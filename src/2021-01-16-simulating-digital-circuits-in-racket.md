@@ -33,6 +33,8 @@ no [three-state logic](https://en.wikipedia.org/wiki/Three-state_logic).
 At the Register-Transfer Level, such a digital circuit has the following
 general structure:
 
+<!-- TODO add figure -->
+
 where:
 
 * A register stores the current state $$s_n$$ and updates it on every clock tick.
@@ -75,53 +77,109 @@ For instance, if I had to describe a circuit that computes the greatest
 common divisor of two positive numbers using Euclid's algorithm, a recursive
 implementation would look like this:
 
-```haskell
-gcd a b = if a > b then
-              gcd (a - b) b
-          else if b > a then
-              gcd a (b - a)
-          else
-              a
+```racket
+(define (gcd a b)
+  (cond [(> a b) (gcd (- a b) b)]
+        [(> b a) (gcd a (- b a))]
+        [else    a]))
+
+(gcd 143 91)
+; 13
 ```
 
 Since the actual number of comparisons and subtractions depends on `a` and `b`
 themselves, we cannot infer the number of components that will be needed to
 implement this function as a combinational circuit.
 If we know the maximum value `N` that `a` and `b` can take, we can rewrite this
-function and replace the recursion with a fold:
+function with an iterative algorithm.
+In the following example:
 
-```haskell
-gcdStep (a, b) i = if a > b then
-                       (a - b, b)
-                   else if b > a then
-                       (a, b - a)
-                   else
-                       (a, b)
+* `gcd-step` processes a pair `(a, b)` and produces a new pair for the the next step;
+* `gcd` calls `gcd-step` repeatedly `N-1` times;
+  each result of `gcd-step` is passed as arguments in the next call;
 
-gcd a b = fst $ fold gcdStep (a, b) [1 .. N-1]
+```racket
+(define (gcd-step a b)
+  (cond [(> a b) (values (- a b) b)]
+        [(> b a) (values a (- b a))]
+        [else    (values a b)]))
+
+(define (gcd N a b)
+  (for/fold ([a^ a] [b^ b] #:result a^)
+            ([i (sub1 N)])
+    (gcd-step a^ b^)))
 ```
 
 With this version, the GCD circuit will be organized as a cascade of `N-1`
-instances of `gcdStep`.
-The function `gcdStep` itself can easily be synthesized into a combinational
+instances of `gcd-step`.
+The function `gcd-step` itself can easily be synthesized into a combinational
 circuit with two inputs and two outputs.
+
+<!-- TODO add figure -->
 
 Sequential circuits
 -------------------
 
-When synthesizing a combinational circuit, iterative algorithms produce
-a spatial replication of hardware elements.
-An alternative technique consists in reusing the same hardware in consecutive
-time slots, storing intermediate results as the algorithm is executed.
+When synthesizing a combinational circuit, iterative algorithms are translated
+into **spatially** replicated hardware elements.
+An alternative technique consists in reusing the same hardware in **consecutive
+time slots**, storing intermediate results as the algorithm is executed.
 
 In a synchronous digital circuit, the elementary storage element is the
-D flip-flop.
-It can store one bit of data and updates its state every clock cycle.
-
+[D flip-flop](https://en.wikipedia.org/wiki/Flip-flop_%28electronics%29#D_flip-flop).
+It can store one bit of data, and updates its state every clock cycle.
 The effect of a D flip-flop is to delay its input to the next clock edge.
+A *register* is a group of D flip-flops that store a piece of data encoded
+as a *binary word*.
+
+In a sequential circuit, the outputs can no longer be computed from the
+current values of the inputs.
+
+A sequential circuit transforms a sequence of values into another sequence.
+In a purely functional language, a solution is to write functions that operate
+on lists rather than single values.
+In the sequential implementation of the GCD below, I have introduced an
+additional *enable* input to notify the circuit that a new pair `(a, b)`
+is available:
+
+```racket
+(define (gcd-step e a b ra rb)
+  (cond [e         (values a b)]
+        [(> ra rb) (values (- ra rb) rb)]
+        [(> rb ra) (values ra (- rb ra))]
+        [else      (values ra rb)]))
+
+(define (gcd lst-e lst-a lst-b)
+  (for/fold ([lst-ra '(0)] [lst-rb '(0)] #:result (reverse lst-ra))
+            ([e (in-list lst-e)]
+             [a (in-list lst-a)]
+             [b (in-list lst-b)])
+    (let-values ([(ra rb) (gcd-step e a b (first lst-ra) (first lst-rb))])
+      (values (cons ra lst-ra) (cons rb lst-rb)))))
+
+(gcd '(#f #t  #f  #f #f #f #t  #f  #f  #f  #f   )
+     '(0  143 0   0  0  0  680 0   0   0   0    )
+     '(0  91  0   0  0  0  440 0   0   0   0    ))
+;    '(0  0   143 52 52 13 13  680 240 240 40 40)
+```
+
+In this implementation, we use `for/fold` to implement a feedback loop and construct
+lists of the internal register values `lst-ra` and `lst-rb`.
+These lists are filled in reverse order using `cons`, which requires to
+`reverse` the result at the end of the loop.
+
+In terms of hardware organization, the combinational implementation used `for/fold` with
+a *spatial* meaning, while the sequential implementation uses the same form with a *temporal* meaning.
+
+<!-- TODO add figure -->
+
+The sequential GCD implementation in Racket is not very readable as a hardware
+description.
+It would be better if we had a *signal* data type to abstract
+away the list manipulation operations.
 
 A detour via Haskell and Clash
-===============================
+==============================
 
 [Clash](https://clash-lang.org/) is a functional hardware description language
 implemented as an embedded DSL in Haskell.
@@ -262,7 +320,7 @@ instance Num a => Num (Signal a) where
     negate      = fmap negate
 
 (.==.) = liftA2 (==)
-(./=.) = liftA2 (/=)
+(.>.)  = liftA2 (>)
 (.&&.) = liftA2 (&&)
 (.||.) = liftA2 (||)
 -- etc.
@@ -278,6 +336,15 @@ counterMod5 = c where
 
 sampleN 11 counterMod5
 --> [0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0]
+```
+
+And finally, here is an implementation of the GCD:
+
+```haskell
+gcd' e a b = ra
+    where
+        ra = 0 :- (mux e a $ mux (ra .>. rb) (ra - rb) ra)
+        rb = 0 :- (mux e b $ mux (rb .>. ra) (rb - ra) rb)
 ```
 
 Clash provides other facilities for creating sequential functions that
@@ -441,6 +508,7 @@ by lifting the `+` operator:
 
 ```racket
 (define +^ (signal-lift +))
+(define -^ (signal-lift -))
 
 (define sig3 (+^ (signal 1 2 3) (signal 10 20 30) (signal 100 200 300)))
 
@@ -498,7 +566,7 @@ forms similar to `lambda`, `define` and `let`.
   [(define-signal (name . sig-lst:id) body ...)
    #'(define name (signal-λ sig-lst body ...))])
 
-(define-simple-macro (signal-let ([var:id sig] ...) body ...)
+(define-simple-macro (for/signal ([var:id sig] ...) body ...)
   ; Create a lifted λ and apply it immediately to the given signals.
   ((signal-λ (var ...) body ...) sig ...))
 ```
@@ -517,47 +585,59 @@ but whose body uses ordinary operations on values:
   (/ (apply + sig-lst) (length sig-lst)))
 ```
 
-The macro `signal-let` lifts its body and applies it to the given signals
+The macro `for/signal` lifts its body and applies it to the given signals
 immediately:
 
 ```
-(define sig7 (signal-let ([a (signal 10 20 30)] [b (signal 40 5 100)])
+(define sig7 (for/signal ([a (signal 10 20 30)] [b (signal 40 5 100)])
                (abs (- a b)))
 ```
 
 Two circuit description styles
 ------------------------------
 
-Now we can replicate the cyclic counter example as:
+Now we can implement the GCD example as:
 
 ```racket
-(define =^ (signal-lift* = _ _))
+(define >^ (signal-lift* > _ _))
 
-(define add1^ (signal-lift* add1 _))
+(define (gcd sig-e sig-a sig-b)
+  (define sig-ra (signal-cons 0 (if^ sig-e
+                                  sig-a
+                                  (if^ (>^ sig-ra sig-rb)
+                                    (-^ sig-ra sig-rb)
+                                    sig-ra))))
+  (define sig-rb (signal-cons 0 (if^ sig-e
+                                  sig-b
+                                  (if^ (>^ sig-rb sig-ra)
+                                    (-^ sig-rb sig-ra)
+                                    sig-rb))))
+  sig-ra)
 
-(define counter-mod-5
-  (signal-cons 0 (if^ (=^ counter-mod-5 (signal 4))
-                   (signal 0)
-                   (add1^ counter-mod-5))))
-
-(signal-take counter-mod-5 11)
-; '(0 1 2 3 4 0 1 2 3 4 0)
+(signal-take (gcd (signal #f #t  #f  #f #f #f #t  #f  #f  #f  #f)
+                  (signal 0  143 0   0  0  0  680 0   0   0   0)
+                  (signal 0  91  0   0  0  0  440 0   0   0   0)) 12)
+; '(0 0 143 52 52 13 13 680 240 240 40 40)
 ```
 
 It is not always useful to decompose a complex circuit into basic operations
 on signals like this.
-In the above case, the counter manages several internal signals that are not
+In the above case, the `gcd` manages several internal signals that are not
 really interesting.
-Moreover, we need to be careful and wrap all constants in a `(signal ...)` form.
 
-In this case, we can use `signal-let` like this:
+In this case, we can use the macro `for/signal` like this:
 
 ```racket
-(define counter-mod-5
-  (signal-cons 0 (signal-let ([val counter-mod-5])
-                   (if (= val 4)
-                     0
-                     (add1 val)))))
+(define (gcd sig-e sig-a sig-b)
+  (define sig-ra (signal-cons 0 (for/signal ([e sig-e] [a sig-a] [ra sig-ra] [rb sig-rb])
+                                  (cond [e         a]
+                                        [(> ra rb) (- ra rb)]
+                                        [else      ra]))))
+  (define sig-rb (signal-cons 0 (for/signal ([e sig-e] [b sig-b] [ra sig-ra] [rb sig-rb])
+                                  (cond [e         b]
+                                        [(> rb ra) (- rb ra)]
+                                        [else      rb]))))
+  sig-ra)
 ```
 
 Registers and feedback loops
@@ -575,7 +655,7 @@ its `r` input is true:
 
 ```racket
 (define-simple-macro (register/r q0 sig-r sig-d)
-  (register q0 (signal-let ([r sig-r] [d sig-d])
+  (register q0 (for/signal ([r sig-r] [d sig-d])
                  (if r q0 d))))
 ```
 
@@ -597,7 +677,7 @@ These macros define two register variants with an *enable* input:
   (feedback sig-q q0 (if^ sig-e sig-d sig-q)))
 
 (define-simple-macro (register/re q0 sig-r sig-e sig-d)
-  (feedback sig-q q0 (signal-let ([r sig-r] [e sig-e] [d sig-d] [q sig-q])
+  (feedback sig-q q0 (for/signal ([r sig-r] [e sig-e] [d sig-d] [q sig-q])
                        (cond [r    q0]
                              [e    d]
                              [else q]))))
@@ -608,17 +688,25 @@ A Medvedev-style state machine component can be implemented using this pattern:
 ```racket
 (define (make-state-machine sig-cmd1 sig-cmd2)
   (feedback sig-state 'IDLE
-    (signal-let ([st sig-state] [cmd1 sig-cmd1] [cmd2 sig-cmd2])
+    (for/signal ([st sig-state] [cmd1 sig-cmd1] [cmd2 sig-cmd2])
       (match st
         ['IDLE    (cond [cmd1 'RUNNING]               [else 'IDLE])]
         ['RUNNING (cond [cmd1 'IDLE] [cmd2 'PAUSED]   [else 'RUNNING])]
         ['PAUSED  (cond [cmd1 'IDLE] [cmd2 'RUNNING'] [else 'PAUSED])]))))
+```
 
-(define (make-up-down-counter init-val min-val max-val sig-r sig-up sig-down)
-  (feedback sig-val init-val
-    (signal-let ([val sig-val] [r sig-r] [up sig-up] [down sig-down])
-      (cond [r                                   init-val]
-            [(and up (not down) (< val max-val)) (add1 val)]
-            [(and down (not up) (> val min-val)) (sub1 val)]
-            [else                                val]))))
+And here is an implementation of the GCD using only one `feedback` form
+to generate a signal of lists:
+
+```racket
+(define first^ (signal-lift* first _))
+
+(define (gcd sig-e sig-a sig-b)
+  (first^ (feedback sig-ra-rb '(0 0)
+            (for/signal ([e sig-e] [a sig-a] [b sig-b] [ra-rb sig-ra-rb])
+              (match-define (list ra rb) ra-rb)
+              (cond [e         (list a b)]
+                    [(> ra rb) (list (- ra rb) rb)]
+                    [(> rb ra) (list ra (- rb ra)
+                    [else      ra-rb])])))))
 ```
