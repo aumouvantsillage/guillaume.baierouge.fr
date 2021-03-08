@@ -66,7 +66,7 @@ md.parser
 /*
  * Generate HTML
  */
- 
+
 Metalsmith(__dirname)
     .metadata({
         site: {
@@ -151,10 +151,6 @@ const assetPaths = {
     "assets"                                    : "assets",
     "node_modules/normalize.css"                : "css/normalize.css",
     "node_modules/katex/dist"                   : "css/katex",
-    "node_modules/@fortawesome/fontawesome-free": "css/fontawesome",
-    "node_modules/fontsource-pt-serif"          : "css/pt-serif",
-    "node_modules/fontsource-pt-sans-narrow"    : "css/pt-sans-narrow",
-    "node_modules/fontsource-jetbrains-mono"    : "css/jetbrains-mono",
 };
 
 Object.entries(assetPaths)

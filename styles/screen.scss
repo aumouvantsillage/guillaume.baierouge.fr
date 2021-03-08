@@ -37,7 +37,7 @@ body {
     box-sizing: border-box;
     font-size: 14pt;
     font-family: $content-font;
-	font-variant-ligatures: none;
+	// font-variant-ligatures: none;
     text-align: justify;
     word-wrap: break-word;
     hyphens: auto;
@@ -87,6 +87,7 @@ hr {
 
 h1, h2, h3, h4 {
     font-family: $heading-font;
+    font-weight: normal;
     @include shadowed-text;
 }
 
