@@ -33,7 +33,7 @@ no [three-state logic](https://en.wikipedia.org/wiki/Three-state_logic).
 At the Register-Transfer Level, such a digital circuit has the following
 general structure:
 
-<!-- TODO add figure -->
+![Architecture of a synchronous digital circuit](/assets/figures/digital-circuits-racket/synchronous-architecture.svg)
 
 where:
 
@@ -115,7 +115,7 @@ instances of `gcd-step`.
 The function `gcd-step` itself can easily be synthesized into a combinational
 circuit with two inputs and two outputs.
 
-<!-- TODO add figure -->
+![Combinational implementation of the GCD](/assets/figures/digital-circuits-racket/gcd-comb.svg)
 
 Sequential circuits
 -------------------
@@ -171,7 +171,7 @@ These lists are filled in reverse order using `cons`, which requires to
 In terms of hardware organization, the combinational implementation used `for/fold` with
 a *spatial* meaning, while the sequential implementation uses the same form with a *temporal* meaning.
 
-<!-- TODO add figure -->
+![Sequential implementation of the GCD](/assets/figures/digital-circuits-racket/gcd-seq.svg)
 
 The sequential GCD implementation in Racket is not very readable as a hardware
 description.
@@ -547,7 +547,7 @@ For instance, we can implement a version of the `if` form for signals:
 ```
 
 Finally, we can use `signal-lift` and `signal-lift*` to implement
-forms similar to `lambda`, `define` and `let`.
+forms similar to `lambda`, `define` and `for/list`.
 
 ```racket
 (define-syntax-parser signal-λ
@@ -559,6 +559,9 @@ forms similar to `lambda`, `define` and `let`.
    #'(signal-lift (λ sig-lst body ...))])
 
 (define-syntax-parser define-signal
+  ; Define a variable that contains a signal.
+  [(define-signal name val ...)
+   #'(define name (signal val ...))]
   ; Define a function with the given list of arguments.
   [(define-signal (name sig:id ...) body ...)
    #'(define name (signal-λ (sig ...) body ...))]
@@ -571,7 +574,8 @@ forms similar to `lambda`, `define` and `let`.
   ((signal-λ (var ...) body ...) sig ...))
 ```
 
-The macro `define-signal` is a shorthand for `(define name (signal-λ ...))`.
+The macro `define-signal` is a shorthand for `(define name (signal ...))`
+or `(define name (signal-λ ...))`.
 We can use it to define functions whose arguments and results are signals,
 but whose body uses ordinary operations on values:
 
@@ -588,9 +592,10 @@ but whose body uses ordinary operations on values:
 The macro `for/signal` lifts its body and applies it to the given signals
 immediately:
 
-```
+```racket
+; Compute the mean of these two signals.
 (define sig7 (for/signal ([a (signal 10 20 30)] [b (signal 40 5 100)])
-               (abs (- a b)))
+               (/ (+ a b) 2))
 ```
 
 Two circuit description styles
@@ -622,9 +627,8 @@ Now we can implement the GCD example as:
 
 It is not always useful to decompose a complex circuit into basic operations
 on signals like this.
-In the above case, the `gcd` manages several internal signals that are not
+In the above case, `gcd` manages several internal signals that are not
 really interesting.
-
 In this case, we can use the macro `for/signal` like this:
 
 ```racket
@@ -643,67 +647,52 @@ In this case, we can use the macro `for/signal` like this:
 Registers and feedback loops
 ----------------------------
 
-For readability, we can provide a `register` form as a synonym for `signal-cons`:
+For readability, we can provide a `register` form with built-in support for
+feedback loops:
 
 ```racket
-(define-simple-macro (register q0 sig-d)
-  (signal-cons q0 sig-d))
+(define-simple-macro (register q0 expr)
+  (letrec ([this-reg (signal-cons q0 expr)]) this-reg))
 ```
 
-A register with synchronous reset will assign `q0` to its output when
-its `r` input is true:
+These macros define three register variants with synchronous *reset* and *enable* inputs:
 
 ```racket
 (define-simple-macro (register/r q0 sig-r sig-d)
   (register q0 (for/signal ([r sig-r] [d sig-d])
                  (if r q0 d))))
-```
 
-To implement other digital hardware patterns, we will need a way to represent
-feeback loops.
-The `feedback` macro composes an expression `expr` with a register so that the
-result of `expr` is the input of the register, and the output of the register
-is fed back into the expression (assuming that `name` is used in `expr`).
-
-```racket
-(define-simple-macro (feedback name q0 expr)
-  (letrec ([name (register q0 expr)]) name))
-```
-
-These macros define two register variants with an *enable* input:
-
-```racket
 (define-simple-macro (register/e q0 sig-e sig-d)
-  (feedback sig-q q0 (if^ sig-e sig-d sig-q)))
+  (register q0 (if^ sig-e sig-d this-reg)))
 
 (define-simple-macro (register/re q0 sig-r sig-e sig-d)
-  (feedback sig-q q0 (for/signal ([r sig-r] [e sig-e] [d sig-d] [q sig-q])
-                       (cond [r    q0]
-                             [e    d]
-                             [else q]))))
+  (register q0 (for/signal ([r sig-r] [e sig-e] [d sig-d] [q this-reg])
+                 (cond [r    q0]
+                       [e    d]
+                       [else q]))))
 ```
 
 A Medvedev-style state machine component can be implemented using this pattern:
 
 ```racket
 (define (make-state-machine sig-cmd1 sig-cmd2)
-  (feedback sig-state 'IDLE
-    (for/signal ([st sig-state] [cmd1 sig-cmd1] [cmd2 sig-cmd2])
+  (register 'IDLE
+    (for/signal ([st this-reg] [cmd1 sig-cmd1] [cmd2 sig-cmd2])
       (match st
         ['IDLE    (cond [cmd1 'RUNNING]               [else 'IDLE])]
         ['RUNNING (cond [cmd1 'IDLE] [cmd2 'PAUSED]   [else 'RUNNING])]
         ['PAUSED  (cond [cmd1 'IDLE] [cmd2 'RUNNING'] [else 'PAUSED])]))))
 ```
 
-And here is an implementation of the GCD using only one `feedback` form
+And here is an implementation of the GCD using only one `register` form
 to generate a signal of lists:
 
 ```racket
 (define first^ (signal-lift* first _))
 
 (define (gcd sig-e sig-a sig-b)
-  (first^ (feedback sig-ra-rb '(0 0)
-            (for/signal ([e sig-e] [a sig-a] [b sig-b] [ra-rb sig-ra-rb])
+  (first^ (register '(0 0)
+            (for/signal ([e sig-e] [a sig-a] [b sig-b] [ra-rb this-reg])
               (match-define (list ra rb) ra-rb)
               (cond [e         (list a b)]
                     [(> ra rb) (list (- ra rb) rb)]
