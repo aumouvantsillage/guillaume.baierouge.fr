@@ -30,7 +30,7 @@ simulation of digital circuits with the following restrictions:
 there is only one clock domain and
 no [three-state logic](https://en.wikipedia.org/wiki/Three-state_logic).
 
-At the Register-Transfer Level, such a digital circuit has the following
+At the Register-Transfer Level, such a circuit has the following
 general structure:
 
 ![Architecture of a synchronous digital circuit](/assets/figures/digital-circuits-racket/synchronous-architecture.svg)
@@ -110,7 +110,7 @@ In the following example:
     (gcd-step a^ b^)))
 ```
 
-With this version, the GCD circuit will be organized as a cascade of `N-1`
+If we unroll the loop, we can synthesize `gcd` as a cascade of `N-1`
 instances of `gcd-step`.
 The function `gcd-step` itself can easily be synthesized into a combinational
 circuit with two inputs and two outputs.
@@ -136,11 +136,9 @@ In a sequential circuit, the outputs can no longer be computed from the
 current values of the inputs.
 
 A sequential circuit transforms a sequence of values into another sequence.
-In a purely functional language, a solution is to write functions that operate
-on lists rather than single values.
-In the sequential implementation of the GCD below, I have introduced an
-additional *enable* input to notify the circuit that a new pair `(a, b)`
-is available:
+To model such a circuit in a purely functional language, we need to write
+functions that operate on *sequence* objects rather than single values.
+A naive implementation could use lists like in the example below:
 
 ```racket
 (define (gcd-step e a b ra rb)
@@ -163,7 +161,9 @@ is available:
 ;    '(0  0   143 52 52 13 13  680 240 240 40 40)
 ```
 
-In this implementation, we use `for/fold` to implement a feedback loop and construct
+In this implementation of the GCD, I have introduced an additional *enable*
+(`e`) input to notify the circuit that a new pair `(a, b)` is available.
+I use `for/fold` to implement a feedback loop and construct
 lists of the internal register values `lst-ra` and `lst-rb`.
 These lists are filled in reverse order using `cons`, which requires to
 `reverse` the result at the end of the loop.
@@ -173,10 +173,16 @@ a *spatial* meaning, while the sequential implementation uses the same form with
 
 ![Sequential implementation of the GCD](/assets/figures/digital-circuits-racket/gcd-seq.svg)
 
-The sequential GCD implementation in Racket is not very readable as a hardware
-description.
-It would be better if we had a *signal* data type to abstract
-away the list manipulation operations.
+The sequential GCD implementation using lists has several issues.
+First, it is not very readable as a hardware description, partly due to the
+explicit list manipulation operations (`first`, `cons`, `reverse`) that do not
+clearly convey the semantics of sequential operation. Second, using lists as
+a data structure for signals is not a general solution: when function `gcd`
+is called, we need to provide complete lists of input values `lst-e`, `lst-a` and `lst-b`,
+which works only because there is no feedback loop between `gcd` and its environment.
+
+If we want to model circuits using functions, we need a better *signal* data
+type to *connect* these functions as we would connect hardware components.
 
 A detour via Haskell and Clash
 ==============================
