@@ -141,19 +141,15 @@ functions that operate on *sequence* objects rather than single values.
 A naive implementation could use lists like in the example below:
 
 ```racket
-(define (gcd-step e a b ra rb)
+(define (gcd-step ra rb e a b)
   (cond [e         (values a b)]
         [(> ra rb) (values (- ra rb) rb)]
         [(> rb ra) (values ra (- rb ra))]
         [else      (values ra rb)]))
 
-(define (gcd lst-e lst-a lst-b)
-  (for/fold ([lst-ra '(0)] [lst-rb '(0)] #:result (reverse lst-ra))
-            ([e (in-list lst-e)]
-             [a (in-list lst-a)]
-             [b (in-list lst-b)])
-    (let-values ([(ra rb) (gcd-step e a b (first lst-ra) (first lst-rb))])
-      (values (cons ra lst-ra) (cons rb lst-rb)))))
+(define (gcd sig-e sig-a sig-b)
+  (define-values (sig-ra sig-rb) (feedback gcd-step (0 0) sig-e sig-a sig-b))
+  sig-ra)
 
 (gcd '(#f #t  #f  #f #f #f #t  #f  #f  #f  #f   )
      '(0  143 0   0  0  0  680 0   0   0   0    )
@@ -162,24 +158,37 @@ A naive implementation could use lists like in the example below:
 ```
 
 In this implementation of the GCD, I have introduced an additional *enable*
-(`e`) input to notify the circuit that a new pair `(a, b)` is available.
-I use `for/fold` to implement a feedback loop and construct
-lists of the internal register values `lst-ra` and `lst-rb`.
-These lists are filled in reverse order using `cons`, which requires to
-`reverse` the result at the end of the loop.
-
-In terms of hardware organization, the combinational implementation used `for/fold` with
-a *spatial* meaning, while the sequential implementation uses the same form with a *temporal* meaning.
+input (`e`) to notify the circuit that a new pair `(a, b)` is available.
+Now, the arguments of `gcd` are lists of values `sig-e`, `sig-a` and `sig-b`,
+and the result is a list of output values.
+`feedback` is a macro that inserts a given combinational function
+in a feedback loop with registers: in this example, it calls `gcd-step` repeatedly
+and constructs lists of values for registers `ra` and `rb`, with 0 as their
+initial value.
 
 ![Sequential implementation of the GCD](/assets/figures/digital-circuits-racket/gcd-seq.svg)
 
-The sequential GCD implementation using lists has several issues.
-First, it is not very readable as a hardware description, partly due to the
-explicit list manipulation operations (`first`, `cons`, `reverse`) that do not
-clearly convey the semantics of sequential operation. Second, using lists as
-a data structure for signals is not a general solution: when function `gcd`
-is called, we need to provide complete lists of input values `lst-e`, `lst-a` and `lst-b`,
-which works only because there is no feedback loop between `gcd` and its environment.
+`feedback` is similar to [`foldl`](https://docs.racket-lang.org/reference/pairs.html?q=foldl#%28def._%28%28lib._racket%2Fprivate%2Flist..rkt%29._foldl%29%29),
+but it returns a list of accumulated values like the Haskell function
+[`scanl`](https://hackage.haskell.org/package/base-4.14.1.0/docs/Prelude.html#v:scanl).
+Moreover, `feedback` accepts a list as the initial *seed* value, and supports
+several other lists as inputs:
+
+```racket
+(define-simple-macro (feedback fn (val ...) sig ...)
+  #:with (x ...) (generate-temporaries #'(sig ...))
+  #:with (y ...) (generate-temporaries #'(val ...))
+  #:with (r ...) (generate-temporaries #'(val ...))
+  (for/fold ([r (list val)] ...
+             #:result (values (reverse r) ...))
+            ([x (in-list sig)] ...)
+    (define-values (y ...) (fn (first r) ... x ...))
+    (values (cons y r) ...)))
+```
+
+Using lists as a data structure for signals is not a general solution: when function `gcd`
+is called, we need to provide complete lists of input values `sig-e`, `sig-a` and `sig-b`.
+This works only because there is no feedback loop between `gcd` and its environment.
 
 If we want to model circuits using functions, we need a better *signal* data
 type to *connect* these functions as we would connect hardware components.
@@ -352,6 +361,8 @@ gcd' e a b = ra
         ra = 0 :- (mux e a $ mux (ra .>. rb) (ra - rb) ra)
         rb = 0 :- (mux e b $ mux (rb .>. ra) (rb - ra) rb)
 ```
+
+![Sequential implementation of the GCD in Clash](/assets/figures/digital-circuits-racket/gcd-clash.svg)
 
 Clash provides other facilities for creating sequential functions that
 follow the Medvedev, Moore, and Mealy structures.
