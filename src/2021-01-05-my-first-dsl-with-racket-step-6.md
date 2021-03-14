@@ -378,7 +378,7 @@ The implementations of both language flavors are available in folders
 Getting the source code for step 6
 ----------------------------------
 
-Assuming you have already [cloned the git repository](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution/#getting-the-source-code-for-step-1),
+Assuming you have already [cloned the git repository](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution/#getting-the-source-code-for-step-1),
 switch to branch `step-06`:
 
 ```

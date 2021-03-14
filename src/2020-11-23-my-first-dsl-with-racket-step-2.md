@@ -11,7 +11,7 @@ tags: Domain-Specific Language, Racket
 template: post.html
 ---
 
-In [step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution),
+In [step 1](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution),
 I have written the full adder example in Racket, following a few mapping rules
 to express the concepts of the Tiny-HDL language.
 The next step consists in writing a code generator that implements these mapping rules
@@ -99,7 +99,7 @@ These will be explained in the following sections.
 Entities
 --------
 
-Based on the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#entities),
+Based on the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution#entities),
 we can write a Racket macro that generalizes the translation of an entity into a structure type:
 
 ```racket
@@ -115,7 +115,7 @@ available to other modules.
 Architectures
 -------------
 
-Here again, a generalization of the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#architectures)
+Here again, a generalization of the [example from step 1](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution#architectures)
 leads to this macro:
 
 ```racket
@@ -135,7 +135,7 @@ leads to this macro:
 Instances
 ---------
 
-An [instantiation statement](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution#instantiation-statements)
+An [instantiation statement](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution#instantiation-statements)
 expands to a variable that receives the result of a call to an architecture constructor:
 
 ```racket
@@ -275,7 +275,7 @@ You will find the following new files:
 Getting the source code for step 2
 ----------------------------------
 
-Assuming you have already [cloned the git repository](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution/#getting-the-source-code-for-step-1),
+Assuming you have already [cloned the git repository](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution/#getting-the-source-code-for-step-1),
 switch to branch `step-02`:
 
 ```

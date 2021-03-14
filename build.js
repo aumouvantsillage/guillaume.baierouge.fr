@@ -94,9 +94,8 @@ Metalsmith(__dirname)
     .use(more())
     .use(branch()
             .filter((name, file) => file.subtitle)
-            // TODO: Change to :data/:title/:subtitle.
             .use(permalinks({
-        		pattern: ":date/:title.-:subtitle",
+        		pattern: ":date/:title/:subtitle",
         		relative: false
         	}))
     )

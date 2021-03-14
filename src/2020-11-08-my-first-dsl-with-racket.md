@@ -160,22 +160,22 @@ executed by the Racket interpreter.
 
 In the following posts, we will follow the above steps in the reverse order:
 
-1. [Execution](/2020/11/16/my-first-domain-specific-language-with-racket.-step-1:-execution):
+1. [Execution](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution):
    we will manually write some Racket code that implements the
    full adder example, and we will let Racket execute it.
-2. [Code generation](/2020/11/23/my-first-domain-specific-language-with-racket.-step-2:-code-generation):
+2. [Code generation](/2020/11/23/my-first-domain-specific-language-with-racket/step-2:-code-generation):
    based on the manually written code, we will develop a set of macros that
    convert a Tiny-HDL syntax tree into Racket code.
-3. [Semantic checking (name resolution)](/2020/12/15/my-first-domain-specific-language-with-racket.-step-3:-name-resolution):
+3. [Semantic checking (name resolution)](/2020/12/15/my-first-domain-specific-language-with-racket/step-3:-name-resolution):
    in this step, we will write a basic semantic checker that infers the links
    between named references and the corresponding AST nodes;
    the Tiny-HDL AST will be modified with information for the *code generation* step.
-4. [Semantic checking (design rule checks)](/2020/12/18/my-first-domain-specific-language-with-racket.-step-4:-design-rule-checks):
+4. [Semantic checking (design rule checks)](/2020/12/18/my-first-domain-specific-language-with-racket/step-4:-design-rule-checks):
    the semantic checker will be completed with domain-specific rules to ensure
    that a Tiny-HDL source file represents a valid digital electronic circuit.
-5. [Semantic checking (modules)](/2020/12/30/my-first-domain-specific-language-with-racket.-step-5:-modules):
+5. [Semantic checking (modules)](/2020/12/30/my-first-domain-specific-language-with-racket/step-5:-modules):
    what if we want to split a circuit description into several source files?
    How do we share information between modules for the semantic checker?
-6. [Syntax analysis](/2021/01/05/my-first-domain-specific-language-with-racket.-step-6:-syntax-analysis):
+6. [Syntax analysis](/2021/01/05/my-first-domain-specific-language-with-racket/step-6:-syntax-analysis):
    finally, we will register Tiny-HDL as a *module* language with a custom
    *reader*.

@@ -90,13 +90,14 @@ implementation would look like this:
 Since the actual number of comparisons and subtractions depends on `a` and `b`
 themselves, we cannot infer the number of components that will be needed to
 implement this function as a combinational circuit.
-If we know the maximum value `N` that `a` and `b` can take, we can rewrite this
+But if we know the maximum value `N` that `a` and `b` can take, we can rewrite this
 function with an iterative algorithm.
+
 In the following example:
 
 * `gcd-step` processes a pair `(a, b)` and produces a new pair for the the next step;
 * `gcd` calls `gcd-step` repeatedly `N-1` times;
-  each result of `gcd-step` is passed as arguments in the next call;
+  each result of `gcd-step` is passed as arguments to the next call.
 
 ```racket
 (define (gcd-step a b)
@@ -138,7 +139,7 @@ current values of the inputs.
 A sequential circuit transforms a sequence of values into another sequence.
 To model such a circuit in a purely functional language, we need to write
 functions that operate on *sequence* objects rather than single values.
-A naive implementation could use lists like in the example below:
+A naive implementation could use lists like in this example:
 
 ```racket
 (define (gcd-step ra rb e a b)
@@ -470,7 +471,7 @@ so we don't need to worry about infinite recursion here:
 ; '(56 56 56 56 56)
 ```
 
-To create signals, two other constructs are introduced below.
+To create signals, two other constructs are introduced.
 Function `list->signal` converts a list into a signal.
 Macro `signal` is syntactic sugar to create signals from the list of its
 arguments.
@@ -547,7 +548,7 @@ and `map` by using the following macro:
 ```
 
 Using `generate-temporaries` is a little trick to avoid checking that `arg ...`
-contains distinct symbols (see the example below).
+contains distinct symbols (see the next example).
 
 I don't know whether choosing `signal-lift*` rather than `signal-lift`
 is relevant in terms of performance,
