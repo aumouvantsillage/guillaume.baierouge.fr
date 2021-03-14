@@ -22,14 +22,14 @@ that is also advertised as a language-oriented programming language.
 
 <!-- more -->
 
-This article is about my first discovery of Racket through an experiment
+This blog series is about my first discovery of Racket through an experiment
 to create a reasonably small, though not trivial, Domain-Specific Language (DSL).
 This DSL is a very simple and limited hardware description language,
 loosely inspired by VHDL and Verilog.
 This is not my *dream* HDL yet, but hopefully this work will be a good
 starting point for a more *serious* language implementation.
 
-This article is also about my alternate feelings of excitement and frustration
+This series is also about my alternate feelings of excitement and frustration
 with Racket.
 As a long-time adept of the [Model-Driven Engineering (MDE)](https://en.wikipedia.org/wiki/Model-driven_engineering)
 methodology, using frameworks such as [EMF (the Eclipse Modeling Framework)](https://www.eclipse.org/modeling/emf/)
@@ -40,7 +40,7 @@ name resolution, and semantic checking.
 
 As a consequence, if you are looking for a definitive guide on language programming
 with Racket, you will probably not find it here.
-The goal of this article is to share the issues and the solutions that I have found,
+The goal of this series is to share the issues and the solutions that I have found,
 and hopefully gather feedback from more experienced Racket users.
 
 Tiny-HDL, a not-so-simple hardware description language
@@ -52,7 +52,7 @@ Its syntax is based on [S-expressions](https://en.wikipedia.org/wiki/S-expressio
 but it is not mandatory: in Racket you can specify a custom parser for your language,
 and you can even use a parser generator such as [Brag](https://docs.racket-lang.org/brag/).
 
-In this article, we will use the well-known [binary adder](https://en.wikipedia.org/wiki/Adder_(electronics)#Binary_adders)
+Throughout this series, we will use the well-known [binary adder](https://en.wikipedia.org/wiki/Adder_(electronics)#Binary_adders)
 circuit as an example.
 We will build a one-bit *full adder* composed of two *half adders*.
 

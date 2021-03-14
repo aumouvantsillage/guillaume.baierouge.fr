@@ -17,8 +17,8 @@ I volunteered as soon as the [applications opened](https://hacks.mozilla.org/201
 and on the 1st of April, I received a confirmation that I was one of the 500 selected participants.
 A few months passed. And two weeks ago, just before leaving for holyday, I finally received the tablet.
 
-In this article, I will give an overview of my first impressions with the device.
-More articles will come with details about what I am doing with it.
+In this post, I will give an overview of my first impressions with the device.
+More posts will come with details about what I am doing with it.
 
 <!-- more -->
 

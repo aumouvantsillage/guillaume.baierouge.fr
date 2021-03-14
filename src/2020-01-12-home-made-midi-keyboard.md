@@ -12,9 +12,9 @@ tags: Free Software, Free Hardware, Music, midi@3:14
 template: post.html
 ---
 
-This article is the first of a series about "midi@3:14", my home-made MIDI keyboard.
+This post is the first of a series about "midi@3:14", my home-made MIDI keyboard.
 In the following sections, you will read about the hardware design and assembly.
-The next articles will be dedicated to the firmware and companion software.
+The next posts will be dedicated to the firmware and companion software.
 
 <!-- more -->
 
@@ -37,7 +37,7 @@ As a result, midi@3:14 has the following characteristics:
 
 The figure below shows the default key assignment. The orange "Fn" key is intended
 to be used in combination with the other keys to activate alternate functions such
-as choosing an instrument or changing the base pitch (more on that in the next articles).
+as choosing an instrument or changing the base pitch (more on that in the next posts).
 
 ![midi@3:14 keyboard layout](/assets/figures/midi314/layout.svg)
 
@@ -67,7 +67,7 @@ The main components are:
 * A microcontroller module, the Arduino-compatible [SparkFun Pro Micro](https://www.sparkfun.com/products/12640),
 * A custom printed circuit board (PCB).
 
-For more explanations about making a matrix keyboard, see the article
+For more explanations about making a matrix keyboard, see the blog post
 [How to make a keyboard - The matrix](http://blog.komar.be/how-to-make-a-keyboard-the-matrix/)
 by Michał Trybus.
 
@@ -219,7 +219,7 @@ the user interface of the KiCad suite is sometimes inconsistent,
 it proved to be reasonably easy and effective to use.
 
 Now, obviously, this keyboard is useless without the proper embedded software.
-The next article will demonstrate that midi@3:14 performs great
+The next post will demonstrate that midi@3:14 performs great
 when programmed as a MIDI keyboard.
 
 References

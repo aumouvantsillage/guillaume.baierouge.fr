@@ -23,7 +23,7 @@ single person with the help of several contributors.
 There is no company behind it, no structured development team,
 no *professional-grade support*, and no ambition to gain *market shares*.
 
-In this article, I will try to clarify my motivations for developing Sozi.
+In this post, I will try to clarify my motivations for developing Sozi.
 
 <!-- more -->
 

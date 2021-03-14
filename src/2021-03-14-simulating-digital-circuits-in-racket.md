@@ -2,7 +2,7 @@
 title: "Simulating digital circuits in Racket"
 author: Guillaume Savaton
 lang: en
-date: 2021-01-16
+date: 2021-03-14
 draft: false
 collection:
 - posts
@@ -366,7 +366,7 @@ gcd' e a b = ra
 
 Clash provides other facilities for creating sequential functions that
 follow the Medvedev, Moore, and Mealy structures.
-Explaining them is out of the scope of this article.
+Explaining them is out of the scope of this post.
 
 Implementing signals in Racket
 ==============================
@@ -716,3 +716,29 @@ to generate a signal of lists:
                     [(> rb ra) (list ra (- rb ra)
                     [else      ra-rb])])))))
 ```
+
+Conclusion
+==========
+
+In the series [My first domain-specific language with Racket](/2020/11/08/my-first-domain-specific-language-with-racket/),
+Tiny-HDL lacked a proper model of computation and runtime to be a convincing
+hardware description language.
+In this post, I have introduced a functional API for manipulating digital
+signals in Racket, similar to what Clash offers in Haskell.
+
+As a next step, we could use it to improve Tiny-HDL with proper support
+for signals in the generated Racket code.
+At the syntactic level, we could also add constructs for describing sequential
+circuits.
+
+Another approach could be to use this API directly, as an *embedded DSL* for
+hardware description in Racket.
+This is basically what I did in the examples that illustrate this post,
+but it is not my preferred approach.
+In fact, I tend to prefer an HDL where the supported syntax clearly maps
+to hardware, compared to a general-purpose language with a hardware description
+*layer*, where the synthesizable subset would be difficult to specify.
+
+In a best-of-both-worlds scenario, I would use a Racket-based standalone DSL
+to write synthesizable circuit descriptions,
+and I would simulate them in a test environment written in Racket.
