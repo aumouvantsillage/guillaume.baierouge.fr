@@ -33,11 +33,13 @@ $text-shadow-color: rgba(100, 100, 100, 0.5);
     @include shadowed-block;
 }
 
+html {
+    font-family: $content-font;
+    font-size: 14pt;
+}
+
 body {
     box-sizing: border-box;
-    font-size: 14pt;
-    font-family: $content-font;
-	// font-variant-ligatures: none;
     text-align: justify;
     word-wrap: break-word;
     hyphens: auto;
