@@ -9,7 +9,7 @@ collection:
 - posts
 - stories
 tags: Mozilla, Tablet, Firefox OS
-template: post.html
+layout: post.njk
 ---
 
 On the Nexus 7, I have always been surprised by the poor reactivity of

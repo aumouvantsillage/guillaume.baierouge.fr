@@ -9,7 +9,7 @@ collection:
 - posts
 - stories
 tags: Linux, Free Software
-template: post.html
+layout: post.njk
 ---
 
 [Elementary OS](http://elementary.io/) is a Linux distribution that comes with its own desktop environment called Pantheon.

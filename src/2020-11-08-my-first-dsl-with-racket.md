@@ -9,7 +9,7 @@ collection:
 - posts
 - stories
 tags: Domain-Specific Language, Racket
-template: post.html
+layout: post.njk
 ---
 
 For many years, I have felt an attraction to languages from the Lisp family,

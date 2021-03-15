@@ -1,0 +1,6 @@
+{% extends "page.njk" %}
+{% from "post-list.njk" import postList %}
+
+{% block main %}
+    {{postList(posts)}}
+{% endblock %}

@@ -8,7 +8,7 @@ update: 2020-12-30
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
-template: post.html
+layout: post.njk
 ---
 
 Racket offers a sophisticated module system that allows to organize

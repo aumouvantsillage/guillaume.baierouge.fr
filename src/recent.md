@@ -1,3 +1,3 @@
 ---
-template: posts.html
+layout: posts.njk
 ---

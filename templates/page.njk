@@ -16,13 +16,13 @@
         <link rel="stylesheet" href="{{site.root}}/css/screen.css">
     </head>
     <body>
-		{% include "templates/header.html" %}
+		{% include "header.njk" %}
         <main>
 			{% block main %}
        			Main content
 			{% endblock %}
         </main>
-		{% include "templates/footer.html" %}
-		{% include "templates/piwik.html" %}
+		{% include "footer.njk" %}
+		{% include "piwik.njk" %}
     </body>
 </html>

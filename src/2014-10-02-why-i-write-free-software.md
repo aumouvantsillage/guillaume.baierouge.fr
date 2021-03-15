@@ -9,7 +9,7 @@ collection:
 - posts
 - stories
 tags: Free software, Sozi
-template: post.html
+layout: post.njk
 ---
 
 [Sozi](http://sozi.baierouge.fr) is a zooming presentation tool that I

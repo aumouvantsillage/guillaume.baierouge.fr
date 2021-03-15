@@ -8,7 +8,7 @@ update: 2021-01-01
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
-template: post.html
+layout: post.njk
 ---
 
 In this post, we add more semantic checks.

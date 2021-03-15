@@ -8,7 +8,7 @@ update: 2020-11-23
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
-template: post.html
+layout: post.njk
 ---
 
 In [step 1](/2020/11/16/my-first-domain-specific-language-with-racket/step-1:-execution),

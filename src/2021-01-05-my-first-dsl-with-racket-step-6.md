@@ -7,7 +7,7 @@ date: 2021-01-05
 draft: false
 collection: posts
 tags: Domain-Specific Language, Racket
-template: post.html
+layout: post.njk
 ---
 
 This is the final step of my Racket DSL implementation roadmap.

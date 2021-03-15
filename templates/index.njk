@@ -1,6 +1,6 @@
-{% extends "templates/page.html" %}
-{% from "templates/post-list.html" import postList %}
-{% from "templates/tag-list.html" import tagList %}
+{% extends "page.njk" %}
+{% from "post-list.njk" import postList %}
+{% from "tag-list.njk" import tagList %}
 
 {% block main %}
     {% for p in stories %}

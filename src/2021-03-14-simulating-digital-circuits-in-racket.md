@@ -8,7 +8,7 @@ collection:
 - posts
 - stories
 tags: Racket, Digital electronics
-template: post.html
+layout: post.njk
 katex: true
 ---
 

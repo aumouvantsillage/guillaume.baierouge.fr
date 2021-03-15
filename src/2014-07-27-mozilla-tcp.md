@@ -8,7 +8,7 @@ collection:
 - posts
 - stories
 tags: Mozilla, Tablet, Firefox OS
-template: post.html
+layout: post.njk
 ---
 
 In January this year, Mozilla [launched the Tablet Contribution Program](https://hacks.mozilla.org/2014/01/mozilla-launches-contribution-program-to-help-deliver-firefox-os-to-tablets/)

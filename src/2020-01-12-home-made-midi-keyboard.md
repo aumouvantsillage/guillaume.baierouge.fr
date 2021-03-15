@@ -9,7 +9,7 @@ collection:
 - posts
 - stories
 tags: Free Software, Free Hardware, Music, midi@3:14
-template: post.html
+layout: post.njk
 ---
 
 This post is the first of a series about "midi@3:14", my home-made MIDI keyboard.

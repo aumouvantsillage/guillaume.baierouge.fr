@@ -1,3 +1,3 @@
 ---
-template: tags.html
+layout: tags.njk
 ---

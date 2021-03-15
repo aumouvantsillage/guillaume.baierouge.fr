@@ -6,7 +6,7 @@ const assets      = require("metalsmith-assets");
 const drafts      = require("metalsmith-drafts");
 const permalinks  = require("metalsmith-permalinks");
 const markdown    = require("metalsmith-markdownit");
-const templates   = require("metalsmith-templates");
+const layouts     = require("metalsmith-layouts");
 const sass        = require("metalsmith-sass");
 const tags        = require("metalsmith-tags");
 const collections = require("metalsmith-collections");
@@ -15,28 +15,10 @@ const date        = require('metalsmith-build-date');
 const sections    = require("./plugins/metalsmith-sections");
 const stories     = require("./plugins/metalsmith-stories");
 const katex       = require("katex");
-const nunjucks    = require("nunjucks");
 const container   = require("markdown-it-container");
 const anchor      = require("markdown-it-anchor");
 const math        = require("markdown-it-math");
 const prism       = require("markdown-it-prism");
-
-/*
- * Configure nunjucks.
- * Disable file watching in nunjucks to prevent an exception.
- * Disable autoescaping.
- * Add a filter for relative links.
- */
-
-nunjucks
-    .configure({
-        watch: false,
-        autoescape: false
-    })
-    .addFilter("relative", (childName, parentName) => {
-        const path = require("path");
-        return path.relative(path.dirname(parentName), childName);
-    });
 
 /*
  * Configure Markdown processor.
@@ -66,6 +48,12 @@ md.parser
 /*
  * Generate HTML
  */
+
+function errorHandler(err) {
+    if (err) {
+        throw err;
+    }
+}
 
 Metalsmith(__dirname)
     .metadata({
@@ -109,7 +97,7 @@ Metalsmith(__dirname)
     .use(tags({
         sortBy: "date",
         reverse: true,
-        template: "tag.html",
+        layout: "tag.html",
         metadataKey: "allTags"
     }))
     .use(stories())
@@ -123,10 +111,20 @@ Metalsmith(__dirname)
             reverse: true
         }
     }))
-    .use(templates("nunjucks"))
-    .build(err => {
-        if (err) throw err;
-    });
+    .use(layouts({
+        directory: "templates",
+        engineOptions: {
+            watch: false,
+            autoescape: false,
+            filters: {
+                relative(childName, parentName) {
+                    const path = require("path");
+                    return path.relative(path.dirname(parentName), childName);
+                }
+            }
+        }
+    }))
+    .build(errorHandler);
 
 /*
  * Compile stylesheets
@@ -138,9 +136,7 @@ Metalsmith(__dirname)
         outputStyle: "compressed",
         outputDir: "css"
     }))
-    .build(err => {
-        if (err) throw err;
-    });
+    .build(errorHandler);
 
 /*
  * Copy assets
@@ -157,6 +153,4 @@ Object.entries(assetPaths)
         (M, [source, destination]) => M.use(assets({source, destination})),
         Metalsmith(__dirname)
     )
-    .build(err => {
-        if (err) throw err;
-    });
+    .build(errorHandler);
