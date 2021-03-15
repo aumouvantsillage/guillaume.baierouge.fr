@@ -35,7 +35,7 @@ $text-shadow-color: rgba(100, 100, 100, 0.5);
 
 html {
     font-family: $content-font;
-    font-size: 14pt;
+    font-size: large;
 }
 
 body {
@@ -52,9 +52,9 @@ body {
     }
 }
 
-@media (min-width: 60rem) {
+@media (min-width: 58.5rem) {
     body {
-        margin: 1rem calc(50vw - 30rem);
+        margin: 1rem calc(50vw - 25rem);
     }
 }
 
@@ -128,12 +128,13 @@ article {
             word-wrap: normal;
             hyphens: none;
             text-align: left;
+            width: calc(100% + 1rem);
         }
 
-        @media (min-width: 64rem) {
+        @media (min-width: 61rem) {
             h1, h2, h3 {
                 margin-left: -1rem;
-                width: 62rem;
+                width: 52rem;
             }
         }
 
