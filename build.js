@@ -97,7 +97,7 @@ Metalsmith(__dirname)
     .use(tags({
         sortBy: "date",
         reverse: true,
-        layout: "tag.html",
+        layout: "tag.njk",
         metadataKey: "allTags"
     }))
     .use(stories())
@@ -113,6 +113,7 @@ Metalsmith(__dirname)
     }))
     .use(layouts({
         directory: "templates",
+        pattern: "**/*.html",
         engineOptions: {
             watch: false,
             autoescape: false,
@@ -143,9 +144,10 @@ Metalsmith(__dirname)
  */
 
 const assetPaths = {
-    "assets"                                    : "assets",
-    "node_modules/normalize.css"                : "css/normalize.css",
-    "node_modules/katex/dist"                   : "css/katex",
+    "fonts"                      : "fonts",
+    "tmp/figures"                : "figures",
+    "node_modules/normalize.css" : "css/normalize.css",
+    "node_modules/katex/dist"    : "css/katex",
 };
 
 Object.entries(assetPaths)

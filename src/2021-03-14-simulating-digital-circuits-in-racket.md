@@ -33,7 +33,7 @@ no [three-state logic](https://en.wikipedia.org/wiki/Three-state_logic).
 At the Register-Transfer Level, such a circuit has the following
 general structure:
 
-![Architecture of a synchronous digital circuit](/assets/figures/digital-circuits-racket/synchronous-architecture.svg)
+![Architecture of a synchronous digital circuit](/figures/digital-circuits-racket/synchronous-architecture.svg)
 
 where:
 
@@ -116,7 +116,7 @@ instances of `gcd-step`.
 The function `gcd-step` itself can easily be synthesized into a combinational
 circuit with two inputs and two outputs.
 
-![Combinational implementation of the GCD](/assets/figures/digital-circuits-racket/gcd-comb.svg)
+![Combinational implementation of the GCD](/figures/digital-circuits-racket/gcd-comb.svg)
 
 Sequential circuits
 -------------------
@@ -167,7 +167,7 @@ in a feedback loop with registers: in this example, it calls `gcd-step` repeated
 and constructs lists of values for registers `ra` and `rb`, with 0 as their
 initial value.
 
-![Sequential implementation of the GCD](/assets/figures/digital-circuits-racket/gcd-seq.svg)
+![Sequential implementation of the GCD](/figures/digital-circuits-racket/gcd-seq.svg)
 
 `feedback` is similar to [`foldl`](https://docs.racket-lang.org/reference/pairs.html?q=foldl#%28def._%28%28lib._racket%2Fprivate%2Flist..rkt%29._foldl%29%29),
 but it returns a list of accumulated values like the Haskell function
@@ -363,7 +363,7 @@ gcd' e a b = ra
         rb = 0 :- (mux e b $ mux (rb .>. ra) (rb - ra) rb)
 ```
 
-![Sequential implementation of the GCD in Clash](/assets/figures/digital-circuits-racket/gcd-clash.svg)
+![Sequential implementation of the GCD in Clash](/figures/digital-circuits-racket/gcd-clash.svg)
 
 Clash provides other facilities for creating sequential functions that
 follow the Medvedev, Moore, and Mealy structures.
