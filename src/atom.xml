@@ -1,3 +1,4 @@
 ---
-layout: atom.xml
+layout: atom.njk
+permalinks: false
 ---

@@ -113,7 +113,7 @@ Metalsmith(__dirname)
     }))
     .use(layouts({
         directory: "templates",
-        pattern: "**/*.html",
+        pattern: ["**/*.html", "atom.xml"],
         engineOptions: {
             watch: false,
             autoescape: false,
