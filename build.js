@@ -11,7 +11,8 @@ const sass        = require("metalsmith-sass");
 const tags        = require("metalsmith-tags");
 const collections = require("metalsmith-collections");
 const more        = require("metalsmith-more");
-const date        = require('metalsmith-build-date');
+const date        = require("metalsmith-build-date");
+const renamer     = require("metalsmith-renamer");
 const sections    = require("./plugins/metalsmith-sections");
 const stories     = require("./plugins/metalsmith-stories");
 const katex       = require("katex");
@@ -123,6 +124,14 @@ Metalsmith(__dirname)
                     return path.relative(path.dirname(parentName), childName);
                 }
             }
+        }
+    }))
+    .use(renamer({
+        // This is a workaround because metalsmith-layouts with jstransformer-nunjucks
+        // expects to output only HTML files.
+        "Atom feed": {
+            pattern: "atom.xml.html",
+            rename: "atom.xml"
         }
     }))
     .build(errorHandler);

@@ -1,6 +1,6 @@
 {
   "name": "guillaume.baierouge.fr",
-  "version": "21.04.051251",
+  "version": "21.04.051247",
   "description": "Guillaume Savaton's personal website",
   "homepage": "http://guillaume.baierouge.fr",
   "license": "CC-BY-4.0",
@@ -36,6 +36,7 @@
     "metalsmith-markdownit": "^0.5.0",
     "metalsmith-more": "^0.2.0",
     "metalsmith-permalinks": "^2.2.0",
+    "metalsmith-renamer": "^0.5.87",
     "metalsmith-sass": "^1.7.0",
     "metalsmith-tags": "^2.1.0",
     "normalize.css": "^8.0.1"
