@@ -578,13 +578,13 @@ forms similar to `lambda`, `define` and `for/list`.
 
 (define-syntax-parser define-signal
   ; Define a variable that contains a signal.
-  [(define-signal name val ...)
+  [(define-signal name:id val ...)
    #'(define name (signal val ...))]
   ; Define a function with the given list of arguments.
-  [(define-signal (name sig:id ...) body ...)
+  [(define-signal (name:id sig:id ...) body ...)
    #'(define name (signal-λ (sig ...) body ...))]
   ; Define a function that accepts any number of arguments.
-  [(define-signal (name . sig-lst:id) body ...)
+  [(define-signal (name:id . sig-lst:id) body ...)
    #'(define name (signal-λ sig-lst body ...))])
 
 (define-simple-macro (for/signal ([var:id sig] ...) body ...)
@@ -666,11 +666,18 @@ Registers and feedback loops
 ----------------------------
 
 For readability, we can provide a `register` form with built-in support for
-feedback loops:
+feedback loops via the syntax parameter `this-reg`:
 
 ```racket
+(define-syntax-parameter this-reg
+  (λ (stx)
+    (raise-syntax-error (syntax-e stx) "can only be used inside register")))
+
 (define-simple-macro (register q0 expr)
-  (letrec ([this-reg (signal-cons q0 expr)]) this-reg))
+  (letrec ([res (signal-cons q0
+                  (syntax-parameterize ([this-reg (make-rename-transformer #'res)])
+                    expr))])
+    res))
 ```
 
 These macros define three register variants with synchronous *reset* and *enable* inputs:
