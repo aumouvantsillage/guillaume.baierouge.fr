@@ -29,7 +29,7 @@ $text-shadow-color: rgba(100, 100, 100, 0.5);
     border: 10px solid white;
     margin-left: auto;
     margin-right: auto;
-    max-width: calc(60rem - 30px);
+    max-width: calc(50rem - 30px);
     @include shadowed-block;
 }
 
