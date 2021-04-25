@@ -25,4 +25,9 @@
 		{% include "footer.njk" %}
 		{% include "piwik.njk" %}
     </body>
+    <script>
+        for (const div of document.querySelectorAll(".partial")) {
+            div.onclick = evt => div.classList.toggle("unfolded");
+        }
+    </script>
 </html>

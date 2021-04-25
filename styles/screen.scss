@@ -267,3 +267,24 @@ pre code {
     background: $warning-color;
     @include shadowed-block;
 }
+
+.partial {
+    text-align: center;
+}
+
+.partial::after {
+    content: "\25BC";
+}
+
+.partial pre {
+    max-height: 4.5rem;
+    overflow: hidden;
+}
+
+.partial.unfolded::after {
+    content: "\25B2";
+}
+
+.partial.unfolded pre {
+    max-height: none;
+}
