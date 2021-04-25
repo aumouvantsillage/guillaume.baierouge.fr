@@ -525,10 +525,10 @@ For instance, the addition operation for signals will be implemented
 by lifting the `+` operator:
 
 ```racket
-(define +^ (signal-lift +))
-(define -^ (signal-lift -))
+(define signal+ (signal-lift +))
+(define signal- (signal-lift -))
 
-(define sig3 (+^ (signal 1 2 3) (signal 10 20 30) (signal 100 200 300)))
+(define sig3 (signal+ (signal 1 2 3) (signal 10 20 30) (signal 100 200 300)))
 
 (signal-take sig3 5)
 ; '(111 222 333 333 333)
@@ -556,9 +556,9 @@ but a benefit of the macro is that `f` does not need to be a function.
 For instance, we can implement a version of the `if` form for signals:
 
 ```racket
-(define if^ (signal-lift* if _ _ _))
+(define signal-if (signal-lift* if _ _ _))
 
-(define sig4 (if^ (signal #t #f #t #f #t #t #f) (signal 1) (signal 0)))
+(define sig4 (signal-if (signal #t #f #t #f #t #t #f) (signal 1) (signal 0)))
 
 (signal-take sig4 8)
 ; '(1 0 1 0 1 1 0 0)
@@ -599,11 +599,11 @@ but whose body uses ordinary operations on values:
 
 ```racket
 ; Multiply and accumulate.
-(define-signal (mac^ a b c)
+(define-signal (signal-mac a b c)
   (+ a (* b c)))
 
 ; Compute the mean of the given signals.
-(define-signal (mean^ . sig-lst)
+(define-signal (signal-mean . sig-lst)
   (/ (apply + sig-lst) (length sig-lst)))
 ```
 
@@ -622,18 +622,18 @@ Two circuit description styles
 Now we can implement the GCD example as:
 
 ```racket
-(define >^ (signal-lift* > _ _))
+(define signal> (signal-lift >))
 
 (define (gcd sig-e sig-a sig-b)
-  (define sig-ra (signal-cons 0 (if^ sig-e
+  (define sig-ra (signal-cons 0 (signal-if sig-e
                                   sig-a
-                                  (if^ (>^ sig-ra sig-rb)
-                                    (-^ sig-ra sig-rb)
+                                  (signal-if (signal> sig-ra sig-rb)
+                                    (signal- sig-ra sig-rb)
                                     sig-ra))))
-  (define sig-rb (signal-cons 0 (if^ sig-e
+  (define sig-rb (signal-cons 0 (signal-if sig-e
                                   sig-b
-                                  (if^ (>^ sig-rb sig-ra)
-                                    (-^ sig-rb sig-ra)
+                                  (signal-if (signal> sig-rb sig-ra)
+                                    (signal- sig-rb sig-ra)
                                     sig-rb))))
   sig-ra)
 
@@ -688,7 +688,7 @@ These macros define three register variants with synchronous *reset* and *enable
                  (if r q0 d))))
 
 (define-simple-macro (register/e q0 sig-e sig-d)
-  (register q0 (if^ sig-e sig-d this-reg)))
+  (register q0 (signal-if sig-e sig-d this-reg)))
 
 (define-simple-macro (register/re q0 sig-r sig-e sig-d)
   (register q0 (for/signal ([r sig-r] [e sig-e] [d sig-d] [q this-reg])
@@ -713,16 +713,16 @@ And here is an implementation of the GCD using only one `register` form
 to generate a signal of lists:
 
 ```racket
-(define first^ (signal-lift* first _))
+(define signal-list-first (signal-lift* first _))
 
 (define (gcd sig-e sig-a sig-b)
-  (first^ (register '(0 0)
-            (for/signal ([e sig-e] [a sig-a] [b sig-b] [ra-rb this-reg])
-              (match-define (list ra rb) ra-rb)
-              (cond [e         (list a b)]
-                    [(> ra rb) (list (- ra rb) rb)]
-                    [(> rb ra) (list ra (- rb ra)
-                    [else      ra-rb])])))))
+  (signal-list-first (register '(0 0)
+                       (for/signal ([e sig-e] [a sig-a] [b sig-b] [ra-rb this-reg])
+                         (match-define (list ra rb) ra-rb)
+                         (cond [e         (list a b)]
+                               [(> ra rb) (list (- ra rb) rb)]
+                               [(> rb ra) (list ra (- rb ra)
+                               [else      ra-rb])])))))
 ```
 
 Conclusion
