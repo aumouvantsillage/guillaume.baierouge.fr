@@ -13,6 +13,7 @@ const collections = require("metalsmith-collections");
 const more        = require("metalsmith-more");
 const date        = require("metalsmith-build-date");
 const inplace     = require("metalsmith-in-place");
+const imglinks    = require("./plugins/metalsmith-imglinks");
 const sections    = require("./plugins/metalsmith-sections");
 const stories     = require("./plugins/metalsmith-stories");
 const katex       = require("katex");
@@ -76,6 +77,9 @@ Metalsmith(__dirname)
     .use(date())
     .use(drafts())
     .use(md)
+    .use(imglinks({
+        filter: /.*\.svg/
+    }))
     .use(sections({
         level: 2,
         nested: false
