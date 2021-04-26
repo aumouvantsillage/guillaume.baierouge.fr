@@ -1,10 +1,10 @@
 $link-color: rgb(34,102,170);
 $icon-color: rgb(130, 150, 170);
 $table-heading-background: rgb(190, 200, 210);
-$info-color: rgb(200, 220, 255);
+$info-color: rgb(215, 230, 250);
 $warning-color: rgb(255,220,70);
-$code-background: rgba(170, 170, 170, 0.25);
-$pre-background: rgba(170, 170, 170, 0.15);
+$code-background: rgba(170, 170, 170, 0.2);
+$pre-background: rgba(170, 170, 170, 0.1);
 
 $heading-font: "PT Sans Narrow", sans-serif;
 $content-font: "PT Serif", serif;
@@ -17,6 +17,8 @@ $text-shadow-color: rgba(100, 100, 100, 0.5);
     -webkit-box-shadow: 0px 3px 6px 0px $shadow-color;
     -moz-box-shadow:    0px 3px 6px 0px $shadow-color;
     box-shadow:         0px 3px 6px 0px $shadow-color;
+    margin-top:    calc(2rem - 6px);
+    margin-bottom: 2rem;
 }
 
 @mixin shadowed-text {
@@ -102,6 +104,8 @@ header h1 {
 }
 
 article {
+    margin-bottom: 1rem;
+
     header {
         h1 {
             position: relative;
@@ -141,18 +145,16 @@ article {
         h1 { font-size: 160%; }
 
         h2 { font-size: 120%; }
-        h2:before { content: "\203a\2002"; color: #aaa; }
+        h2::before { content: "\203a\2002"; color: #aaa; }
 
         h3 { font-size: 100%; font-weight: normal; }
-        h3:before { content: "\00bb\2002"; color: #aaa; }
+        h3::before { content: "\00bb\2002"; color: #aaa; }
 
         img {
             display: block;
             @include outlined-block;
         }
     }
-
-    margin-bottom: 1rem;
 
     p, li {
         line-height: 1.4;
@@ -162,10 +164,10 @@ article {
 a {
     color: $link-color;
     text-decoration: none;
-}
 
-a:hover {
-    text-decoration: underline;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 ul {
@@ -177,19 +179,19 @@ ul {
         padding-left: 1em;
     }
 
-    li:before {
+    li::before {
         content: "\2014\2002";
     }
-}
 
-ul.story {
-    li:before {
-        content: "\203a\2002";
-        color: #aaa;
-    }
+    &.story {
+        li::before {
+            content: "\203a\2002";
+            color: #aaa;
+        }
 
-    time {
-        font-size: 75%;
+        time {
+            font-size: 75%;
+        }
     }
 }
 
@@ -219,13 +221,6 @@ blockquote {
     padding: 0.1em 1em;
 }
 
-pre {
-    padding: 0.5em 1em;
-    @include shadowed-block;
-    overflow-x: auto;
-    background: $pre-background;
-}
-
 pre, code {
     font-family: $code-font;
     font-size: 90%;
@@ -249,9 +244,16 @@ code {
     background: $code-background;
 }
 
-pre code {
-    padding: 0;
-    background: transparent;
+pre {
+    padding: 0.5em 1em;
+    @include shadowed-block;
+    overflow-x: auto;
+    background: $pre-background;
+
+    code {
+        padding: 0;
+        background: transparent;
+    }
 }
 
 .info, .warning {
@@ -268,23 +270,38 @@ pre code {
     @include shadowed-block;
 }
 
-.partial {
-    text-align: center;
-}
+.expand {
+    cursor: pointer;
 
-.partial::after {
-    content: "\25BC";
-}
+    > * {
+        height: auto;
+    }
 
-.partial pre {
-    max-height: 4.5rem;
-    overflow: hidden;
-}
+    &::after {
+        content: "\f102";
+        font-family: ForkAwesome;
+        display: block;
+        text-align: center;
+        margin-top: -7rem;
+        padding-top: 5.5rem;
+        position: relative;
+        @include shadowed-text;
+    }
 
-.partial.unfolded::after {
-    content: "\25B2";
-}
+    &:hover::after {
+        color: $link-color;
+    }
 
-.partial.unfolded pre {
-    max-height: none;
+    &.closed {
+        > * {
+            height: 4.5rem;
+            overflow-y: hidden;
+        }
+
+
+        &::after {
+            content: "\f103";
+            background: linear-gradient(transparent, white 5rem);
+        }
+    }
 }

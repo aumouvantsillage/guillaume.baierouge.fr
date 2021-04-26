@@ -5,17 +5,15 @@ author: Guillaume Savaton
 lang: en
 date: 2021-04-23
 draft: false
-collection:
-- posts
-- stories
+collection: posts
 tags: Racket, Digital electronics, RISC-V
 layout: post.njk
 ---
 
-Let's try to describe a non-trivial circuit in Racket using the techniques
+Let's try to implement a non-trivial circuit in Racket using the techniques
 proposed in [my previous post](/2021/03/14/simulating-digital-circuits-in-racket/index.html).
 
-Virgule is a 32-bit RISC processor core that implements most of the
+Virgule is a 32-bit RISC processor core that supports most of the
 base instruction set of the RISC-V specification (RV32I).
 It was initially designed and implemented in VHDL to serve as an illustration
 for the digital electronics course that I teach.
@@ -48,12 +46,12 @@ sequencer:
 ![Architecture of the slow, state-based implementation](/figures/virgule-racket/virgule-state-based.svg)
 
 Since the architecture is fully synchronous, the clock signal is not represented
-to avoid cluttering the blok diagram.
+to avoid cluttering the block diagram.
 
 Virgule uses a similar bus interface as the [PicoRV32](https://github.com/cliffordwolf/picorv32).
-The same interface is used for fetching instructions, or for load and store
+The same interface is used for fetching instructions and for load/store
 operations.
-Here is a description of the I/O signals for Virgule:
+Here is a description of Virgule's I/O ports:
 
 | Signal    | Direction | Size (bits) | Role                                                                   |
 |:----------|:----------|------------:|:-----------------------------------------------------------------------|
@@ -77,8 +75,8 @@ In the following sections, I will detail the internal operation of the processor
 and show the Racket code that implements it.
 But before that, let's have a look at the Racket forms that we will need.
 
-How to describe circuits in Racket
-==================================
+Circuit implementation techniques and conventions
+=================================================
 
 My previous blog post, [Simulating digital circuits in Racket](/2021/03/14/simulating-digital-circuits-in-racket/index.html),
 introduced several constructs to represent and manipulate hardware signals in
@@ -89,7 +87,7 @@ that I have added when implementing Virgule.
 Combinational components
 ------------------------
 
-A combinational component can be described by a function.
+A combinational component can be written as a function.
 The form `define-signal` automatically *lifts* a Racket function that operates on
 values into a function that operates on signals.
 The instruction decoder and the arithmetic and logic unit are defined like this:
@@ -149,7 +147,7 @@ statements, you will appreciate the addition of *keyword arguments* to `define-s
 Sequential components
 ---------------------
 
-Sequential components such as `register-unit` or `branch-unit` can be described
+Sequential components such as `register-unit` or `branch-unit` are implemented
 by ordinary functions using `define`.
 As a consequence, if a component has several outputs, the corresponding Racket
 function can use `(values ...)` to return the output signals.
@@ -186,59 +184,61 @@ data types of arbitrary width. Before writing Virgule, my first impulse was to
 create a Racket module that would provide data types and operations in the
 spirit of VHDL packages `std_logic_1164` and `numeric_std`.
 
-This would have been useful if my intent was to use Racket as a hardware
+Such a module would be useful if my intent was to use Racket as a hardware
 description language.
 But you might remember that my ultimate goal is to use Racket as
 a platform for a hardware description DSL.
 While I expect this DSL to come with data types for logic vectors,
-there is no need to provide sophisticated abstractions for these types
+I am not convinced that we need sophisticated abstractions for these types
 at runtime.
 
-In the implementation of Virgule, I use native Racket booleans and integers
-directly, together with a few functions to manipulate them as if they were
-fixed-width binary data.
+For this reason, the implementation of Virgule uses built-in Racket
+types for logic values and logic vectors: booleans for flags and control signals,
+integers for general-purpose data and numbers.
 In fact, Racket integers already provide all the facilities that I need
 to represent logic vectors at runtime:
 
-* In Racket, integers can be arbitrarily large.
-* Racket already provides all the [bitwise operations](https://docs.racket-lang.org/reference/generic-numbers.html?q=bitwise#%28part._.Bitwise_.Operations%29)
+* They can be arbitrarily large.
+* They support all the [bitwise operations](https://docs.racket-lang.org/reference/generic-numbers.html?q=bitwise#%28part._.Bitwise_.Operations%29)
   needed for logic vectors.
-* And obviously, integers already support integer arithmetic operations.
+* And obviously, they support integer arithmetic operations.
 
 The missing features are: the ability to restrict the width of an integer,
-sign extension of an integer with a given width, vector concatenation.
+sign extension of an integer with a given width, and vector concatenation.
 For this reason, I have written the following helpers:
 
-These functions take a slice of a logic vector.
-`left` is the index of the most significant bit and `right` is the index of
-the least significant bit. `right` defaults to `left` if omitted.
-The *signed* version sign-extends the result starting from index `left`.
-
 ```racket
-(unsigned-slice v left right)
-(signed-slice   v left right)
-```
-
-These are shorthands to take a right-aligned slice of a given width:
-
-```racket
-(unsigned v w)
-(signed   v w)
-```
-
-These macros concatenate slices from one or more logic vectors.
-`right` can be omitted like in `unsigned-slice` and `signed-slice`:
-
-```racket
+(unsigned-slice   v left right)
+(signed-slice     v left right)
+(unsigned         v width)
+(signed           v width)
 (unsigned-concat [v left right] ...)
 (signed-concat   [v left right] ...)
 ```
 
+* `unsigned-slice` and `signed-slice` take a slice of a vector `v`.
+  `left` is the index of the most significant bit and `right` is the index of
+  the least significant bit. `right` defaults to `left` if omitted.
+  The *signed* version sign-extends the result starting from index `left`.
+* `unsigned` and `signed` are shorthands to take a right-aligned slice of a given width.
+* `unsigned-concat` and `signed-concat` are macros that concatenate slices from
+  one or more logic vectors.
+  `right` can be omitted like in `unsigned-slice` and `signed-slice`.
+
 You can find the complete implementation of these functions and macros
 in module [logic.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/logic.rkt).
 
-Virgule description walkthrough
-===============================
+:::info
+There is no support for *uninitialized* or *indeterminate* binary values
+(the `'U'` and `'X'` of the VHDL `std_logic` type).
+:::
+
+Virgule implementation walkthrough
+==================================
+
+This section does not contain the complete implementation of Virgule.
+You can check the [source repository](https://github.com/aumouvantsillage/Virgule-CPU-Racket)
+if you want to read the whole thing.
 
 Sequencer
 ---------
@@ -256,10 +256,12 @@ decoded instruction (`load?`, `store?`, `has-rd?`) to decide where to go next.
 In Racket, the state machine is composed of a `register/r` form
 that stores the current state, a `case` expression that computes the next
 state, and one combinational signal for each action.
-We choose to represent states as symbols.
-In VHDL, we would define an enumerated type.
+I chose to represent states as symbols.
+In VHDL, I would define an enumerated type.
 
-:::partial
+Click on the snippet to expand it.
+
+:::expand
 ```racket
 (define (virgule #:reset reset #:rdata rdata #:ready ready #:irq irq)
 

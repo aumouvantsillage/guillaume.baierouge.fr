@@ -26,8 +26,12 @@
 		{% include "piwik.njk" %}
     </body>
     <script>
-        for (const div of document.querySelectorAll(".partial")) {
-            div.onclick = evt => div.classList.toggle("unfolded");
+        // When JavaScript is disabled, .expand elements will stay open.
+        for (const div of document.querySelectorAll(".expand")) {
+            // Close them on load.
+            div.classList.add("closed");
+            // Toggle the closed state on click.
+            div.onclick = evt => div.classList.toggle("closed");
         }
     </script>
 </html>
