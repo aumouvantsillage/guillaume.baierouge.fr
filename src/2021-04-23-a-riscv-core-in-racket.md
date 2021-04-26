@@ -296,14 +296,24 @@ Click on the snippet to expand it.
 Fetching instructions
 ---------------------
 
+![Fetching instructions](/figures/virgule-racket/virgule-fetch.svg)
+
 Decoding instructions
 ---------------------
+
+![Decoding instructions](/figures/virgule-racket/virgule-decode.svg)
 
 Arithmetic and logic operations, branches
 -----------------------------------------
 
+![Executing instructions](/figures/virgule-racket/virgule-execute.svg)
+
 Memory operations
 -----------------
 
+![Memory transfers](/figures/virgule-racket/virgule-load-store.svg)
+
 Register writeback
 ------------------
+
+![Register writeback](/figures/virgule-racket/virgule-writeback.svg)
