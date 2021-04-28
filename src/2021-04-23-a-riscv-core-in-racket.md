@@ -10,7 +10,7 @@ tags: Racket, Digital electronics, RISC-V
 layout: post.njk
 ---
 
-Let's try to implement a non-trivial circuit in Racket using the techniques
+Let's try to simulate a non-trivial circuit in Racket using the techniques
 proposed in [the previous post](/2021/03/14/simulating-digital-circuits-in-racket/index.html).
 
 Virgule is a 32-bit RISC processor core that supports most of the
@@ -75,14 +75,13 @@ In the following sections, I will detail the internal operation of the processor
 and show the Racket code that implements it.
 But before that, let's have a look at the Racket forms that we will need.
 
-Circuit implementation techniques and conventions
-=================================================
+Circuit description facilities and conventions
+==============================================
 
 My previous blog post, [Simulating digital circuits in Racket](/2021/03/14/simulating-digital-circuits-in-racket/index.html),
-introduced several constructs to represent and manipulate hardware signals in
-Racket.
+introduced several constructs to represent and manipulate hardware signals in Racket.
 This section explains the choices that I have made, and the syntactic sugar
-that I have added when implementing Virgule.
+that I have added since that post was written.
 
 Combinational components
 ------------------------
@@ -146,7 +145,7 @@ into a *signal of lists*. When calling `load-store-unit`, this signal will be
 Sequential components
 ---------------------
 
-Sequential components such as `register-unit` or `branch-unit` are implemented
+Sequential components such as `register-unit` or `branch-unit` are represented
 by ordinary functions using `define`.
 As a consequence, if a component has several outputs, the corresponding Racket
 function can use `(values ...)` to return the output signals.
@@ -231,7 +230,7 @@ While I expect this DSL to come with data types for logic vectors,
 I am not convinced that we need sophisticated abstractions for these types
 at runtime.
 
-For this reason, the implementation of Virgule uses built-in Racket
+For this reason, the implementation of Virgule in Racket uses built-in
 types for logic values and logic vectors: booleans for flags and control signals,
 integers for general-purpose data and numbers.
 In fact, Racket integers already provide all the facilities that I need
@@ -264,7 +263,7 @@ For this reason, I have written the following helpers:
   one or more logic vectors.
   `right` can be omitted like in `unsigned-slice` and `signed-slice`.
 
-You can find the complete implementation of these functions and macros
+You can find the complete source code of these functions and macros
 in module [logic.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/logic.rkt).
 
 :::warning
@@ -751,7 +750,7 @@ folder.
 Performance considerations
 ==========================
 
-While implementing the register unit and the memory components, I had to choose
+While writing the register unit and the memory components, I had to choose
 between two structures for the memory cells: they could be defined as a
 *signal of vectors*, or as a *vector of signals*.
 
