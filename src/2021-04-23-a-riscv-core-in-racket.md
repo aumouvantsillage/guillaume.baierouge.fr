@@ -736,7 +736,7 @@ with a processor core, memory and peripheral devices:
 
 * [memory.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/memory.rkt)
   contains memory components.
-* [interconnect.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/interconnect.rkt)
+* [device.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/device.rkt)
   helps define a memory map and the address decoding logic.
 * [assembler.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/assembler.rkt)
   can convert an assembly program, written as S-expressions, into machine code.
