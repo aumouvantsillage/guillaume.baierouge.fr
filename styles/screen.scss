@@ -270,7 +270,7 @@ pre {
     @include shadowed-block;
 }
 
-.expand {
+.collapse {
     cursor: pointer;
 
     > * {

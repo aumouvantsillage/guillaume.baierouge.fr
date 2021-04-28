@@ -117,13 +117,14 @@ added a `#:returns` clause to `signal-λ`, `define-signal` and `for/signal`.
 It is used in `load-store-unit` like this:
 
 ```racket
-(define-signal (load-store-unit #:instr instr #:address address #:rdata rdata
+(define-signal (load-store-unit #:instr instr #:address address
                                 #:store-enable store-enable #:store-data store-data)
-  #:returns (load-data wstrobe wdata)
+                                 #:rdata rdata
+  #:returns (wstrobe wdata load-data)
   ...
-  (define load-data ...)
   (define wstrobe   ...)
-  (define wdata     ...))
+  (define wdata     ...)
+  (define load-data ...))
 ```
 
 Internally, `load-store-unit` will *bundle* `load-data`, `wstrobe` and `wdata`
@@ -131,12 +132,12 @@ into a *signal of lists*. When calling `load-store-unit`, this signal will be
 *unbundled* into three separate signals:
 
 ```racket
-(define-values (load-data wstrobe wdata)
+(define-values (wstrobe wdata load-data)
   (load-store-unit #:instr        ...
                    #:address      ...
-                   #:rdata        ...
                    #:store-enable ...
-                   #:store-data   ...))
+                   #:store-data   ...
+                   #:rdata        ...))
 ```
 
 :::info
@@ -174,6 +175,39 @@ the following forms are equivalent:
 (for/signal (src-instr x-reg) ...)
 ; ... is short for:
 (for/signal ([src-instr src-instr] [x-reg x-reg]) ...)
+```
+
+Referring to a signal that is defined later
+-------------------------------------------
+
+In a circuit that contains circular dependencies, a signal can appear in an
+expression before it is assigned.
+`signal-defer` is a macro that delays the evaluation of a Racket
+variable containing a signal.
+It could be defined like this:
+
+```racket
+(define-simple-macro (signal-defer sig)
+  (signal-delay (signal-force sig)))
+```
+
+If I write:
+
+```racket
+(define x (signal-defer y))
+```
+
+the value of `y` will not be read until `x` is forced.
+Forcing `x` will also automatically force `y`.
+
+However, since we know that `signal-delay` creates a function, and
+considering that we do not need an extra level of memoization, we
+can replace it by a simple lambda:
+
+```racket
+(define-simple-macro (signal-defer sig)
+  (λ ()
+    (signal-force sig)))
 ```
 
 Logic values and logic vectors
@@ -236,9 +270,9 @@ There is no support for *uninitialized* or *indeterminate* binary values
 Virgule implementation walkthrough
 ==================================
 
-This section does not contain the complete implementation of Virgule.
-You can check the [source repository](https://github.com/aumouvantsillage/Virgule-CPU-Racket)
-if you want to read the whole thing.
+There is a lot of Racket code in this section.
+The biggest code snippets are collapsed so you are not obliged to scroll
+through them if you are only interested in the explanations.
 
 Sequencer
 ---------
@@ -254,14 +288,14 @@ decoded instruction (`load?`, `store?`, `has-rd?`) to decide where to go next.
 ![Virgule sequencer state machine](/figures/virgule-racket/virgule-sequencer.svg)
 
 In Racket, the state machine is composed of a `register/r` form
-that stores the current state, a `case` expression that computes the next
+that stores the current state, a `match` expression that computes the next
 state, and one combinational signal for each action.
 I chose to represent states as symbols.
-In VHDL, I would define an enumerated type.
+In VHDL, I would declare an enumerated type.
 
 Click on the snippet to expand it.
 
-:::expand
+:::collapse
 ```racket
 (define (virgule #:reset reset #:rdata rdata #:ready ready #:irq irq)
 
@@ -296,24 +330,431 @@ Click on the snippet to expand it.
 Fetching instructions
 ---------------------
 
+In the `fetch` state, the processor copies the program counter register
+`pc-reg` to the address bus and asserts the `valid` output.
+At the end of the memory transfer (`valid` and `ready`), the input data bus
+`rdata` is copied to register `rdata-reg`.
+
 ![Fetching instructions](/figures/virgule-racket/virgule-fetch.svg)
+
+This is the complete definition of signals `rdata-reg`, `valid` and `ready`.
+In function `virgule`, they are part of the code that manages all memory
+accesses.
+
+```racket
+(define rdata-reg (register/e 0 (signal-and valid ready) rdata))
+(define valid     (signal-or fetch-en store-en load-en))
+(define address   (signal-if fetch-en pc-reg alu-result-reg))
+```
 
 Decoding instructions
 ---------------------
 
+The `decoder` function extracts information from the instruction word
+in `rdata-reg`, producing the `instr` signal of type:
+
+```racket
+(struct instruction (rd funct3 rs1 rs2 imm
+                     alu-fn use-pc? use-imm? has-rd?
+                     load? store? jump? branch? mret?))
+```
+
+| Field      | Type           | Role                                                                              |
+|:-----------|:---------------|:----------------------------------------------------------------------------------|
+| `rd`       | 5-bit unsigned | The index of the destination register.                                            |
+| `funct3`   | 3-bit unsigned | The `funct3` field of the instruction, encodes branch, load and store operations. |
+| `rs1`      | 5-bit unsigned | The index of the first source register.                                           |
+| `rs2`      | 5-bit unsigned | The index of the second source register.                                          |
+| `imm`      | 32-bit signed  | The immediate value encoded in the instruction.                                   |
+| `alu-fn`   | symbol         | The arithmetic or logic operation to execute.                                     |
+| `use-pc?`  | boolean        | Does this instruction use the program counter as the first ALU operand?           |
+| `use-imm?` | boolean        | Does this instruction use an immediate as the second ALU operand?                 |
+| `has-rd?`  | boolean        | Does this instruction write a result to a destination register?                   |
+| `load?`    | boolean        | Is this instruction a memory load?                                                |
+| `store?`   | boolean        | Is this instruction a memory store?                                               |
+| `jump?`    | boolean        | Is this instruction a jump (`JAL`, `JALR`)?                                       |
+| `branch?`  | boolean        | Is this instruction a conditional branch?                                         |
+| `mret?`    | boolean        | Is this instruction a return from an interrupt handler?                           |
+
 ![Decoding instructions](/figures/virgule-racket/virgule-decode.svg)
+
+Several other operations happen in the `decode` state:
+
+* `register-unit` reads the source registers needed by the instruction,
+  and outputs their values to `xs1` and `xs2`.
+* Two multiplexers select the operands for the arithmetic and logic unit.
+  The first operand (`alu-a`) can be either the current value of the program
+  counter (`pc-reg`) or `xs1`.
+  The second operand (`alu-b`) can be either an immediate value or `xs2`.
+* At the end of the clock cycle, `alu-a`, `alu-b`, `xs1`, `xs2` and `instr`
+  are stored to registers.
+
+:::collapse
+```racket
+(define instr (decoder (signal-defer rdata-reg)))
+(define instr-reg (register/e instr-nop decode-en instr))
+
+; Full version in section "Register writeback".
+(define-values (xs1 xs2) (register-unit ...
+                                        #:src-instr instr
+                                        ...))
+
+(define xs1-reg (register/e 0 decode-en xs1))
+(define xs2-reg (register/e 0 decode-en xs2))
+
+(define alu-a-reg (register/e 0 decode-en
+                    (for/signal (instr xs1 [pc (signal-defer pc-reg)])
+                      (if (instruction-use-pc? instr)
+                        pc
+                        xs1))))
+(define alu-b-reg (register/e 0 decode-en
+                    (for/signal (instr xs2)
+                      (if (instruction-use-imm? instr)
+                        (instruction-imm instr)
+                        xs2))))
+```
+:::
+
+`decoder` is defined in [datapath-components.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/datapath-components.rkt)
+It uses constants and functions defined in module [opcodes.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/opcodes.rkt).
+
+* `instruction-fmt` identifies the format of an instruction.
+* `word->fields` extracts the fields from the instruction word.
+* `decode-alu-fn` identifies the arithmetic or logic operation to execute.
+
+:::collapse
+```racket
+(define (instruction-fmt opcode)
+  (match opcode
+    [(== opcode-op)                         'fmt-r]
+    [(== opcode-store)                      'fmt-s]
+    [(== opcode-branch)                     'fmt-b]
+    [(or (== opcode-lui) (== opcode-auipc)) 'fmt-u]
+    [(== opcode-jal)                        'fmt-j]
+    [_                                      'fmt-i]))
+
+(define (word->fields w)
+  (define opcode (unsigned-slice w 6 0))
+  (define imm (match (instruction-fmt opcode)
+                ['fmt-i (signed-concat [w 31 20])]
+                ['fmt-s (signed-concat [w 31 25] [w 11 7])]
+                ['fmt-b (signed-concat [w 31] [w 7] [w 30 25] [w 11 8] [0 0])]
+                ['fmt-u (signed-concat [w 31 12] [0 11 0])]
+                ['fmt-j (signed-concat [w 31] [w 19 12] [w 20] [w 30 21] [0 0])]
+                [_      0]))
+  (values opcode
+          (unsigned-slice w 11  7) ; rd
+          (unsigned-slice w 14 12) ; funct3
+          (unsigned-slice w 19 15) ; rs1
+          (unsigned-slice w 24 20) ; rs2
+          (unsigned-slice w 31 25) ; funct7
+          imm))
+
+(define (decode-alu-fn opcode funct3 funct7)
+  (match (list     opcode                             funct3              funct7)
+    [(list     (== opcode-lui)                        _                   _              ) 'alu-nop]
+    [(list     (== opcode-op)                     (== funct3-add-sub) (== funct7-sub-sra)) 'alu-sub]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-slt)         _              ) 'alu-slt]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-sltu)        _              ) 'alu-sltu]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-xor)         _              ) 'alu-xor]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-or)          _              ) 'alu-or]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-and)         _              ) 'alu-and]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-sll)         _              ) 'alu-sll]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-srl-sra) (== funct7-sub-sra)) 'alu-sra]
+    [(list (or (== opcode-op-imm) (== opcode-op)) (== funct3-srl-sra)     _              ) 'alu-srl]
+    [_                                                                                     'alu-add]))
+
+(define-signal (decoder data)
+  (define-values (opcode rd funct3 rs1 rs2 funct7 imm)
+    (word->fields data))
+  (define use-pc?  (in? opcode (opcode-auipc opcode-jal opcode-branch)))
+  (define use-imm? (not (= opcode opcode-op)))
+  (define load?    (= opcode opcode-load))
+  (define store?   (= opcode opcode-store))
+  (define mret?    (and (= opcode opcode-system) (= funct3 funct3-mret) (= imm imm-mret)))
+  (define jump?    (in? opcode (opcode-jal opcode-jalr)))
+  (define branch?  (= opcode opcode-branch))
+  (define has-rd?  (nor branch? store? (zero? rd)))
+  (define alu-fn   (decode-alu-fn opcode funct3 funct7))
+  (instruction rd funct3 rs1 rs2 imm
+               alu-fn use-pc? use-imm? has-rd?
+               load? store? jump? branch? mret?))
+```
+:::
 
 Arithmetic and logic operations, branches
 -----------------------------------------
 
+In the `execute` state, `arith-logic-unit` performs an arithmetic or logic operation
+and `branch-unit` computes the address of the next instruction.
+The signal `pc+4` receives the address immediately after the current instruction.
+It is stored in a register (`pc+4-reg`) for later use in the `writeback` state.
+
 ![Executing instructions](/figures/virgule-racket/virgule-execute.svg)
+
+In branch and jump instructions, the target address is the result of an
+addition performed by the arithmetic and logic unit.
+If the instruction is a conditional branch, `branch-unit` will compare the
+values of two source registers, available in `xs1-reg` and `xs2-reg`,
+and decide whether the branch is taken or not.
+
+`branch-unit` also handles interrupts. When `irq` is asserted,
+and when the processor is not already serving an interrupt request,
+it will:
+
+* switch to a non-interruptible state,
+* save the address of the next instruction to an internal register (`mepc-reg`),
+* branch to the interrupt service routine at address 4.
+
+If the current instruction is `mret`, `branch-unit` will:
+
+* switch back to the interruptible state,
+* branch to the address saved in `mepc-reg`.
+
+:::collapse
+```racket
+(define alu-result     (arith-logic-unit instr-reg alu-a-reg alu-b-reg))
+(define alu-result-reg (register/e 0 execute-en alu-result))
+
+(define pc-reg (register/re 0 reset execute-en
+                 (branch-unit #:reset   reset
+                              #:enable  execute-en
+                              #:irq     irq
+                              #:instr   instr-reg
+                              #:xs1     xs1-reg
+                              #:xs2     xs2-reg
+                              #:address alu-result
+                              #:pc+4    (signal-defer pc+4))))
+(define pc+4 (for/signal (pc-reg)
+               (word (+ 4 pc-reg))))
+(define pc+4-reg (register/e 0 execute-en pc+4))
+```
+:::
+
+Functions `arith-logic-unit` and `branch-unit` are defined in module
+[datapath-components.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/datapath-components.rkt).
+
+:::collapse
+```racket
+(define-signal (arith-logic-unit instr a b)
+  (define sa (signed-word a))
+  (define sb (signed-word b))
+  (define sh (unsigned-slice b 5 0))
+  (word (match (instruction-alu-fn instr)
+          ['alu-nop  b]
+          ['alu-add  (+ a b)]
+          ['alu-sub  (- a b)]
+          ['alu-slt  (if (< sa sb) 1 0)]
+          ['alu-sltu (if (< a  b)  1 0)]
+          ['alu-xor  (bitwise-xor a b)]
+          ['alu-or   (bitwise-ior a b)]
+          ['alu-and  (bitwise-and a b)]
+          ['alu-sll  (arithmetic-shift a     sh)]
+          ['alu-srl  (arithmetic-shift a  (- sh))]
+          ['alu-sra  (arithmetic-shift sa (- sh))])))
+
+(define-signal (comparator instr a b)
+  (define sa (signed-word a))
+  (define sb (signed-word b))
+  (match (instruction-funct3 instr)
+    [(== funct3-beq)  (=      a  b)]
+    [(== funct3-bne)  (not (= a  b))]
+    [(== funct3-blt)  (<      sa sb)]
+    [(== funct3-bge)  (>=     sa sb)]
+    [(== funct3-bltu) (<      a  b)]
+    [(== funct3-bgeu) (>=     a  b)]
+    [_                #f]))
+
+(define (branch-unit #:reset reset #:enable enable #:irq irq
+                     #:instr instr #:xs1 xs1 #:xs2 xs2 #:address address #:pc+4 pc+4)
+  (define taken (comparator instr xs1 xs2))
+  (define pc-target (for/signal (instr [mepc (signal-defer mepc-reg)] address taken pc+4)
+                      (define aligned-address (unsigned-concat [address 31 2] [0 1 0]))
+                      (cond [(instruction-mret? instr)               mepc]
+                            [(instruction-jump? instr)               aligned-address]
+                            [(and (instruction-branch? instr) taken) aligned-address]
+                            [else                                    pc+4])))
+  (define irq-state-reg (register/re #f reset enable
+                          (for/signal (instr irq [state this-reg])
+                            (cond [(instruction-mret? instr) #f]
+                                  [irq                       #t]
+                                  [else                      state]))))
+  (define accept-irq (signal-and-not irq irq-state-reg))
+  (define mepc-reg (register/re 0 reset (signal-and enable accept-irq)
+                     pc-target))
+  (signal-if accept-irq
+             (signal irq-addr)
+             pc-target))
+```
+:::
 
 Memory operations
 -----------------
 
+In load and store operations, the address is always the result of an
+addition performed by the arithmetic and logic unit.
+The `valid` output is asserted in the `load` and `store` states.
+At the end of the memory transfer (`valid` and `ready`), the input data bus
+`rdata` is copied to register `rdata-reg`.
+
 ![Memory transfers](/figures/virgule-racket/virgule-load-store.svg)
+
+In the `store` state, the role of `load-store-unit` consists in copying
+the data from `xs2-reg` to `wdata`, ensuring that it is properly aligned
+with respect to the target address and data size.
+`load-store-unit` also sets the `wstrobe` output.
+
+:::collapse
+```racket
+(define rdata-reg (register/e 0 (signal-and valid ready) rdata))
+(define valid     (signal-or fetch-en store-en load-en))
+(define address   (signal-if fetch-en pc-reg alu-result-reg))
+
+; Full version in section "Register writeback".
+(define-values (wstrobe wdata ...)
+  (load-store-unit #:instr        instr-reg
+                   #:address      alu-result-reg
+                   #:store-enable store-en
+                   #:store-data   xs2-reg
+                   ...))
+```
+:::
+
+Here is the part of `load-store-unit` that handles store operations:
+
+:::collapse
+```racket
+(define-signal (load-store-unit #:instr instr #:address address
+                                #:store-enable store-enable #:store-data store-data
+                                #:rdata rdata)
+  #:returns (wstrobe wdata load-data)
+  (define align         (unsigned-slice address 1 0))
+  (define wdata (match (instruction-funct3 instr)
+                  [(== funct3-lb-sb) (unsigned-concat [store-data  7 0] [store-data  7 0]
+                                                      [store-data  7 0] [store-data  7 0])]
+                  [(== funct3-lh-sh) (unsigned-concat [store-data 15 0] [store-data 15 0])]
+                  [_                 store-data]))
+  (define wstrobe (if store-enable
+                    (match (instruction-funct3 instr)
+                      [(or (== funct3-lb-sb) (== funct3-lbu)) (arithmetic-shift #b0001 align)]
+                      [(or (== funct3-lh-sh) (== funct3-lhu)) (arithmetic-shift #b0011 align)]
+                      [(== funct3-lw-sw)                      #b1111]
+                      [_                                      #b0000])
+                    #b0000))
+  ...))
+```
+:::
 
 Register writeback
 ------------------
 
+Finally, in the `writeback` state, the processor stores the result of the
+current instruction into a destination register.
+The register index is available in the `rd` field of `instr-reg`.
+
+* If the instruction is a load, the result is taken from `rdata-reg` via
+  `load-store-unit`, ensuring that it is properly aligned and sign-extended.
+* If the instruction is a jump, the destination register receives a return
+  address (`pc+4-reg`).
+* In other cases, the destination register receives the result from
+  `arith-logic-unit` (`alu-result-reg`).
+
 ![Register writeback](/figures/virgule-racket/virgule-writeback.svg)
+
+:::collapse
+```racket
+(define-values (xs1 xs2) (register-unit #:reset      reset
+                                        #:enable     writeback-en
+                                        #:src-instr  instr
+                                        #:dest-instr instr-reg
+                                        #:xd         (signal-defer xd)))
+
+(define-values (wstrobe wdata load-data)
+  (load-store-unit #:instr        instr-reg
+                   #:address      alu-result-reg
+                   #:store-enable store-en
+                   #:store-data   xs2-reg
+                   #:rdata        rdata-reg))
+
+(define xd (for/signal (instr-reg load-data pc+4-reg alu-result-reg)
+             (cond [(instruction-load? instr-reg) load-data]
+                   [(instruction-jump? instr-reg) pc+4-reg]
+                   [else                          alu-result-reg])))
+```
+:::
+
+Here is the code for `register-unit`. It uses a persistent vector
+(`pvector`) to store register values. You will find an explanation of this
+implementation choice in section [Performance considerations](#performance-considerations).
+
+:::collapse
+```racket
+(define (register-unit #:reset reset #:enable enable
+                       #:src-instr src-instr #:dest-instr dest-instr #:xd xd)
+  (define x-reg (register/r (make-pvector reg-count 0) reset
+                  (for/signal (enable dest-instr xd this-reg)
+                    (if (and enable (instruction-has-rd? dest-instr))
+                      (set-nth this-reg (instruction-rd dest-instr) xd)
+                      this-reg))))
+  (for/signal (src-instr x-reg) #:returns (xs1 xs2)
+    (define xs1 (nth x-reg (instruction-rs1 src-instr)))
+    (define xs2 (nth x-reg (instruction-rs2 src-instr)))))
+```
+:::
+
+And this is the part of `load-store-unit` that handles load operations:
+
+:::collapse
+```racket
+(define-signal (load-store-unit #:instr instr #:address address
+                                #:store-enable store-enable #:store-data store-data
+                                #:rdata rdata)
+  #:returns (wstrobe wdata load-data)
+  (define align         (unsigned-slice address 1 0))
+  ...
+  (define aligned-rdata (unsigned-slice rdata 31 (* 8 align)))
+  (define load-data (word (match (instruction-funct3 instr)
+                            [(== funct3-lb-sb) (signed-slice   aligned-rdata  7 0)]
+                            [(== funct3-lh-sh) (signed-slice   aligned-rdata 15 0)]
+                            [(== funct3-lbu)   (unsigned-slice aligned-rdata  7 0)]
+                            [(== funct3-lhu)   (unsigned-slice aligned-rdata 15 0)]
+                            [_                                 aligned-rdata]))))
+```
+:::
+
+
+Simulating a computer system
+============================
+
+The repository contains several modules that can help simulate a system
+with a processor core, memory and peripheral devices:
+
+* [memory.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/memory.rkt)
+  contains memory components.
+* [device.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/device.rkt)
+  helps define a memory map and the address decoding logic.
+* [assembler.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/assembler.rkt)
+  can convert an assembly program, written as S-expressions, into machine code.
+* [vcd.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/vcd.rkt)
+  outputs waveforms to a [Value change dump](https://en.wikipedia.org/wiki/Value_change_dump)
+  file that can be displayed by [GTKWave](http://gtkwave.sourceforge.net/).
+
+Example programs for a simple system with a fake text output device are available
+in the [examples](https://github.com/aumouvantsillage/Virgule-CPU-Racket/tree/main/examples)
+folder.
+
+Performance considerations
+==========================
+
+While implementing the register unit and the memory components, I had to choose
+between two structures for the memory cells: they could be defined as a signal
+of vectors, or as a vector of signals.
+
+In VHDL, such a choice does not exist: if I declare a signal with an
+array type, I am allowed to manipulate it as a whole,
+or I can reference each array element as if it were a separate signal.
+
+In Racket, my first impression was that a signal of vectors would be less efficient
+because changing a single cell at a given point in time would require to create
+a new vector.
+It turns out that a vector of signals has the same issue:

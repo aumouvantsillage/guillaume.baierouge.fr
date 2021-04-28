@@ -34,7 +34,7 @@ const md = markdown("commonmark", {
 md.parser
     .use(container, "info")
     .use(container, "warning")
-    .use(container, "expand")
+    .use(container, "collapse")
     .use(anchor)
     .use(prism)
     .use(math, {
