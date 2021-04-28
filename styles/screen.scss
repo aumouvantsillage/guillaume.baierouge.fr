@@ -285,6 +285,7 @@ pre {
         margin-top: -7rem;
         padding-top: 5.5rem;
         position: relative;
+        z-index: -1;
         @include shadowed-text;
     }
 
@@ -295,12 +296,13 @@ pre {
     &.closed {
         > * {
             height: 4.5rem;
-            overflow-y: hidden;
+            overflow: hidden;
         }
 
         &::after {
             content: "\f103";
             background: linear-gradient(transparent, white 5rem);
+            z-index: auto;
         }
     }
 }
