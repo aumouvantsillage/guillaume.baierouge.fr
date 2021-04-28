@@ -750,11 +750,23 @@ While implementing the register unit and the memory components, I had to choose
 between two structures for the memory cells: they could be defined as a signal
 of vectors, or as a vector of signals.
 
-In VHDL, such a choice does not exist: if I declare a signal with an
-array type, I am allowed to manipulate it as a whole,
-or I can reference each array element as if it were a separate signal.
+> In VHDL, such a choice does not exist: if I declare a signal with an
+> array type, I am allowed to manipulate it as a whole,
+> or I can reference each array element as if it were a separate signal.
 
 In Racket, my first impression was that a signal of vectors would be less efficient
-because changing a single cell at a given point in time would require to create
-a new vector.
-It turns out that a vector of signals has the same issue:
+because each write operation would create a new vector.
+But using a vector of signals turns out to be far worse, because the cost of reading
+at any arbitrary location outweighs the benefits.
+
+The [benchmarks](https://github.com/aumouvantsillage/Virgule-CPU-Racket/tree/main/benchmarks)
+folder contains five programs that compare the speed an memory usage of various
+memory implementations.
+The following choices are compared:
+
+* Using a signal of vectors *vs* a vector of signals.
+* Using built-in Racket vectors *vs* [persistent vectors](https://docs.racket-lang.org/pvector/).
+* Using `register/e` *vs* `register`.
+
+The results show that the most efficient combination is to use a signal of
+persistent vectors with `register`.
