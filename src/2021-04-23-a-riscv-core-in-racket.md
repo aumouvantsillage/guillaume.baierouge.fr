@@ -759,10 +759,10 @@ between two structures for the memory cells: they could be defined as a
 > array type, I am allowed to manipulate it as a whole,
 > or I can reference each array element as if it were a separate signal.
 
-In Racket, my first impression was that a signal of vectors would be less efficient
+My first impression was that a signal of vectors would be less efficient
 because each write operation would create a new vector.
 But using a vector of signals turned out to be far worse, because the cost of reading
-at any arbitrary location outweighs the benefits.
+at any arbitrary location outweighed the benefits.
 
 The [benchmarks](https://github.com/aumouvantsillage/Virgule-CPU-Racket/tree/main/benchmarks)
 folder contains five programs that compare the speed an memory usage of various
@@ -789,8 +789,10 @@ The third item compares the use of these patterns:
 
 In the first case, the register is updated only when `e` is true, but
 the expression in `for/signal` is evaluated even when `e` is false.
-In the second case, the register is updated in every clock cycle
+In the second case, the register is updated in every clock cycle,
 but `expr` is evaluated only when `e` is true.
+Both produce signals with the same values, but are not equivalent
+in terms of operations and intermediate data.
 
 The results below have been obtained for a memory containing 1000 integers,
 a simulation duration of 10000 clock cycles with one write every two clock cycles.
