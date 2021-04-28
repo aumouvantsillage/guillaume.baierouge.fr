@@ -11,7 +11,7 @@ layout: post.njk
 ---
 
 Let's try to implement a non-trivial circuit in Racket using the techniques
-proposed in [my previous post](/2021/03/14/simulating-digital-circuits-in-racket/index.html).
+proposed in [the previous post](/2021/03/14/simulating-digital-circuits-in-racket/index.html).
 
 Virgule is a 32-bit RISC processor core that supports most of the
 base instruction set of the RISC-V specification (RV32I).
@@ -119,7 +119,7 @@ It is used in `load-store-unit` like this:
 ```racket
 (define-signal (load-store-unit #:instr instr #:address address
                                 #:store-enable store-enable #:store-data store-data)
-                                 #:rdata rdata
+                                #:rdata rdata
   #:returns (wstrobe wdata load-data)
   ...
   (define wstrobe   ...)
@@ -140,10 +140,8 @@ into a *signal of lists*. When calling `load-store-unit`, this signal will be
                    #:rdata        ...))
 ```
 
-:::info
-If you like to use *named associations* in your VHDL or Verilog instantiation
-statements, you will appreciate the addition of *keyword arguments* to `define-signal`.
-:::
+> If you like to use *named associations* in your VHDL or Verilog instantiation
+> statements, you will appreciate the addition of *keyword arguments* to `define-signal`.
 
 Sequential components
 ---------------------
@@ -152,6 +150,13 @@ Sequential components such as `register-unit` or `branch-unit` are implemented
 by ordinary functions using `define`.
 As a consequence, if a component has several outputs, the corresponding Racket
 function can use `(values ...)` to return the output signals.
+`virgule` itself is defined like this:
+
+```racket
+(define (virgule #:reset reset #:rdata rdata #:ready ready #:irq irq)
+  ...
+  (values valid address wstrobe wdata))
+```
 
 In the function body, we can create sequential signals with `register`,
 or any of its variants, and combinational signals with `for/signal`.
@@ -262,9 +267,9 @@ For this reason, I have written the following helpers:
 You can find the complete implementation of these functions and macros
 in module [logic.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/logic.rkt).
 
-:::info
-There is no support for *uninitialized* or *indeterminate* binary values
-(the `'U'` and `'X'` of the VHDL `std_logic` type).
+:::warning
+There is no support for *uninitialized* or *indeterminate* binary values,
+such as `'U'` and `'X'` in VHDL's `std_logic` type, or `x` in Verilog.
 :::
 
 Virgule implementation walkthrough
@@ -487,7 +492,7 @@ Arithmetic and logic operations, branches
 
 In the `execute` state, `arith-logic-unit` performs an arithmetic or logic operation
 and `branch-unit` computes the address of the next instruction.
-The signal `pc+4` receives the address immediately after the current instruction.
+The signal `pc+4` receives the address of the next instruction in memory.
 It is stored in a register (`pc+4-reg`) for later use in the `writeback` state.
 
 ![Executing instructions](/figures/virgule-racket/virgule-execute.svg)
@@ -497,19 +502,6 @@ addition performed by the arithmetic and logic unit.
 If the instruction is a conditional branch, `branch-unit` will compare the
 values of two source registers, available in `xs1-reg` and `xs2-reg`,
 and decide whether the branch is taken or not.
-
-`branch-unit` also handles interrupts. When `irq` is asserted,
-and when the processor is not already serving an interrupt request,
-it will:
-
-* switch to a non-interruptible state,
-* save the address of the next instruction to an internal register (`mepc-reg`),
-* branch to the interrupt service routine at address 4.
-
-If the current instruction is `mret`, `branch-unit` will:
-
-* switch back to the interruptible state,
-* branch to the address saved in `mepc-reg`.
 
 :::collapse
 ```racket
@@ -530,6 +522,19 @@ If the current instruction is `mret`, `branch-unit` will:
 (define pc+4-reg (register/e 0 execute-en pc+4))
 ```
 :::
+
+`branch-unit` also handles interrupts. When `irq` is asserted,
+and when the processor is not already serving an interrupt request,
+it will:
+
+* switch to a non-interruptible state,
+* save the address of the next instruction to an internal register (`mepc-reg`),
+* branch to the interrupt service routine at address 4.
+
+If the current instruction is `mret`, `branch-unit` will:
+
+* switch back to the interruptible state,
+* branch to the address saved in `mepc-reg`.
 
 Functions `arith-logic-unit` and `branch-unit` are defined in module
 [datapath-components.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/datapath-components.rkt).
@@ -553,27 +558,27 @@ Functions `arith-logic-unit` and `branch-unit` are defined in module
           ['alu-srl  (arithmetic-shift a  (- sh))]
           ['alu-sra  (arithmetic-shift sa (- sh))])))
 
-(define-signal (comparator instr a b)
-  (define sa (signed-word a))
-  (define sb (signed-word b))
-  (match (instruction-funct3 instr)
-    [(== funct3-beq)  (=      a  b)]
-    [(== funct3-bne)  (not (= a  b))]
-    [(== funct3-blt)  (<      sa sb)]
-    [(== funct3-bge)  (>=     sa sb)]
-    [(== funct3-bltu) (<      a  b)]
-    [(== funct3-bgeu) (>=     a  b)]
-    [_                #f]))
+(define (branch-taken? instr a b)
+  (and (instruction-branch? instr)
+       (let ([sa (signed-word a)]
+             [sb (signed-word b)])
+         (match (instruction-funct3 instr)
+           [(== funct3-beq)  (=      a  b)]
+           [(== funct3-bne)  (not (= a  b))]
+           [(== funct3-blt)  (<      sa sb)]
+           [(== funct3-bge)  (>=     sa sb)]
+           [(== funct3-bltu) (<      a  b)]
+           [(== funct3-bgeu) (>=     a  b)]
+           [_                #f]))))
 
 (define (branch-unit #:reset reset #:enable enable #:irq irq
                      #:instr instr #:xs1 xs1 #:xs2 xs2 #:address address #:pc+4 pc+4)
-  (define taken (comparator instr xs1 xs2))
-  (define pc-target (for/signal (instr [mepc (signal-defer mepc-reg)] address taken pc+4)
+  (define pc-target (for/signal (instr xs1 xs2 address pc+4 [mepc (signal-defer mepc-reg)])
                       (define aligned-address (unsigned-concat [address 31 2] [0 1 0]))
-                      (cond [(instruction-mret? instr)               mepc]
-                            [(instruction-jump? instr)               aligned-address]
-                            [(and (instruction-branch? instr) taken) aligned-address]
-                            [else                                    pc+4])))
+                      (cond [(instruction-mret? instr)     mepc]
+                            [(instruction-jump? instr)     aligned-address]
+                            [(branch-taken? instr xs1 xs2) aligned-address]
+                            [else                          pc+4])))
   (define irq-state-reg (register/re #f reset enable
                           (for/signal (instr irq [state this-reg])
                             (cond [(instruction-mret? instr) #f]
@@ -747,8 +752,8 @@ Performance considerations
 ==========================
 
 While implementing the register unit and the memory components, I had to choose
-between two structures for the memory cells: they could be defined as a signal
-of vectors, or as a vector of signals.
+between two structures for the memory cells: they could be defined as a
+*signal of vectors*, or as a *vector of signals*.
 
 > In VHDL, such a choice does not exist: if I declare a signal with an
 > array type, I am allowed to manipulate it as a whole,
@@ -756,17 +761,48 @@ of vectors, or as a vector of signals.
 
 In Racket, my first impression was that a signal of vectors would be less efficient
 because each write operation would create a new vector.
-But using a vector of signals turns out to be far worse, because the cost of reading
+But using a vector of signals turned out to be far worse, because the cost of reading
 at any arbitrary location outweighs the benefits.
 
 The [benchmarks](https://github.com/aumouvantsillage/Virgule-CPU-Racket/tree/main/benchmarks)
 folder contains five programs that compare the speed an memory usage of various
 memory implementations.
-The following choices are compared:
+The following choices are evaluated:
 
 * Using a signal of vectors *vs* a vector of signals.
 * Using built-in Racket vectors *vs* [persistent vectors](https://docs.racket-lang.org/pvector/).
 * Using `register/e` *vs* `register`.
 
-The results show that the most efficient combination is to use a signal of
+The third item compares the use of these patterns:
+
+```racket
+(register/e q0 e
+  (for/signal (...)
+     expr))
+
+(register q0
+  (for/signal (this-reg ...)
+    (if e
+      expr
+      this-reg)))
+```
+
+In the first case, the register is updated only when `e` is true, but
+the expression in `for/signal` is evaluated even when `e` is false.
+In the second case, the register is updated in every clock cycle
+but `expr` is evaluated only when `e` is true.
+
+The results below have been obtained for a memory containing 1000 integers,
+a simulation duration of 10000 clock cycles with one write every two clock cycles.
+All memory cells are written and read in turns.
+
+They show that the most efficient combination is to use a signal of
 persistent vectors with `register`.
+
+| Storage              | Register type | Time (ms) | Memory use (MB) |
+|:---------------------|:--------------|----------:|----------------:|
+| `vector` of signals  | `register/e`  |     21000 |            2000 |
+| Signal of `vector`s  | `register/e`  |       110 |              86 |
+| Signal of `vector`s  | `register`    |        58 |              45 |
+| Signal of `pvector`s | `register/e`  |        39 |              14 |
+| Signal of `pvector`s | `register`    |        28 |              10 |
