@@ -7,7 +7,6 @@ const drafts      = require("metalsmith-drafts");
 const permalinks  = require("metalsmith-permalinks");
 const markdown    = require("metalsmith-markdownit");
 const layouts     = require("metalsmith-layouts");
-const sass        = require("metalsmith-sass");
 const tags        = require("metalsmith-tags");
 const collections = require("metalsmith-collections");
 const more        = require("metalsmith-more");
@@ -64,10 +63,6 @@ Metalsmith(__dirname)
             title: "guillaume savaton - au mouvant sillage",
             url: "http://guillaume.baierouge.fr",
             root: ""
-        },
-        piwik: {
-            siteId: 3,
-            url: "http://baierouge.fr/piwik"
         },
         github: "https://github.com/aumouvantsillage/",
         twitter: "https://twitter.com/umouvantsillage",
@@ -137,24 +132,13 @@ Metalsmith(__dirname)
     .build(errorHandler);
 
 /*
- * Compile stylesheets
- */
-
-Metalsmith(__dirname)
-    .source("styles")
-    .use(sass({
-        outputStyle: "compressed",
-        outputDir: "css"
-    }))
-    .build(errorHandler);
-
-/*
  * Copy assets
  */
 
 const assetPaths = {
     "fonts"                      : "fonts",
     "tmp/figures"                : "figures",
+    "styles"                     : "css",
     "node_modules/normalize.css" : "css/normalize.css",
     "node_modules/katex/dist"    : "css/katex",
 };

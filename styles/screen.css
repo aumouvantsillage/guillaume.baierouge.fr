@@ -1,0 +1,326 @@
+:root {
+    --link-color: rgb(34,102,170);
+    --icon-color: rgb(130, 150, 170);
+    --table-heading-background: rgb(190, 200, 210);
+    --info-color: rgb(215, 230, 250);
+    --warning-color: rgb(255,220,70);
+    --code-background: rgba(170, 170, 170, 0.2);
+    --pre-background: rgba(170, 170, 170, 0.1);
+
+    --heading-font: "PT Sans Narrow", sans-serif;
+    --content-font: "PT Serif", serif;
+    --code-font: "JetBrains Mono", monospace;
+
+    --shadow-color: rgba(100, 100, 100, 0.75);
+    --text-shadow-color: rgba(100, 100, 100, 0.5);
+}
+
+html {
+    font-family: var(--content-font);
+    font-size: large;
+}
+
+body {
+    box-sizing: border-box;
+    text-align: justify;
+    word-wrap: break-word;
+    hyphens: auto;
+    margin: 1rem 0;
+    margin-bottom: 1rem;
+    margin: 1rem 1rem;
+}
+
+body > header form {
+    display: inline;
+}
+
+@media (min-width: 58.5rem) {
+    body {
+        margin: 1rem calc(50vw - 25rem);
+    }
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+body > header nav a,
+article footer nav a {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+nav.social a {
+    color: var(--icon-color);
+}
+
+nav.social a:hover {
+    color: var(--link-color);
+}
+
+img.buymeacoffee {
+    height: 1em;
+}
+
+hr {
+    width: 30%;
+    height: 1px;
+    border: none;
+    background: #aaa;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--heading-font);
+    font-weight: normal;
+}
+
+header h1 {
+    font-size: 140%;
+}
+
+article {
+    margin-bottom: 1rem;
+}
+
+article header {
+    margin-bottom: 2rem;
+}
+
+article header h1 {
+    position: relative;
+    font-size: 180%;
+}
+
+article header nav {
+    margin-top: 1rem;
+}
+
+article section h1,
+article section h2 {
+    position: sticky;
+    top: 0px;
+    background-color: white;
+    z-index: 1;
+}
+
+article section h1,
+article section h2,
+article section h3 {
+    margin-top: 1.5em;
+    word-wrap: normal;
+    hyphens: none;
+    text-align: left;
+    width: calc(100% + 1rem);
+}
+
+@media (min-width: 61rem) {
+    article section h1,
+    article section h2,
+    article section h3 {
+        margin-left: -1rem;
+        width: 52rem;
+    }
+}
+
+article section h1 {
+    font-size: 160%;
+}
+
+article section h2 {
+    font-size: 120%;
+}
+
+article section h2::before {
+    content: "\203a\2002";
+    color: #aaa;
+}
+
+article section h3 {
+    font-size: 100%;
+    font-weight: normal;
+}
+
+article section h3::before {
+    content: "\00bb\2002";
+    color: #aaa;
+}
+
+article section img {
+    display: block;
+}
+
+article p,
+article li {
+    line-height: 1.4;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+    padding-left: 1.5em;
+}
+
+ul li {
+    text-indent: -1.5em;
+    padding-left: 1em;
+}
+
+ul li::before {
+    content: "\2014\2002";
+}
+
+ul.story li::before {
+    content: "\203a\2002";
+    color: #aaa;
+}
+
+ul.story time {
+    font-size: 75%;
+}
+
+th, td {
+    padding: 0.3em 1em;
+}
+
+th {
+    text-align: center;
+    font-family: var(--heading-font);
+    font-weight: normal;
+    background: var(--table-heading-background);
+}
+
+td {
+    border-bottom: 1px solid #aaa;
+}
+
+blockquote {
+    border-left: 0.3em solid var(--table-heading-background);
+    font-style: italic;
+    margin-left: 1em;
+    padding: 0.1em 1em;
+}
+
+pre, code {
+    font-family: var(--code-font);
+    font-size: 90%;
+
+    font-variant-ligatures: none;
+    text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+
+    -moz-tab-size: 4;
+	tab-size: 4;
+
+	hyphens: none;
+}
+
+code {
+    border-radius: 0.25em;
+    padding: 0 0.3em;
+    background: var(--code-background);
+}
+
+pre {
+    padding: 0.5em 1em;
+    overflow-x: auto;
+    background: var(--pre-background);
+}
+
+pre code {
+    padding: 0;
+    background: transparent;
+}
+
+.info, .warning {
+    padding: 0.3em 1em;
+}
+
+.info {
+    background: var(--info-color);
+}
+
+.warning {
+    background: var(--warning-color);
+}
+
+.collapse {
+    cursor: pointer;
+}
+
+.collapse > * {
+    height: auto;
+}
+
+.collapse::after {
+    content: "\f102";
+    font-family: ForkAwesome;
+    display: block;
+    text-align: center;
+    margin-top: -7rem;
+    padding-top: 5.5rem;
+    position: relative;
+    z-index: -1;
+}
+
+.collapse:hover::after {
+    color: var(--link-color);
+}
+
+.collapse.closed > * {
+    height: 4.5rem;
+    overflow: hidden;
+}
+
+.collapse.closed::after {
+    content: "\f103";
+    background: linear-gradient(transparent, white 5rem);
+    z-index: auto;
+}
+
+/* Shadowed block */
+pre,
+.info,
+.warning,
+article section img,
+table {
+    -webkit-box-shadow: 0px 3px 6px 0px var(--shadow-color);
+    -moz-box-shadow:    0px 3px 6px 0px var(--shadow-color);
+    box-shadow:         0px 3px 6px 0px var(--shadow-color);
+    margin-top:    calc(2rem - 6px);
+    margin-bottom: 2rem;
+}
+
+/* Outlined block */
+article section img,
+table {
+    border: 10px solid white;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: calc(50rem - 30px);
+}
+
+/* Shadowed text */
+h1, h2, h3, h4,
+.collapse:after {
+    -webkit-text-shadow: 0px 1px 2px var(--text-shadow-color);
+    -moz-text-shadow:    0px 1px 2px var(--text-shadow-color);
+    text-shadow:         0px 1px 2px var(--text-shadow-color);
+}
