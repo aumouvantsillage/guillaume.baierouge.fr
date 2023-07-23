@@ -65,7 +65,7 @@ Metalsmith(__dirname)
             root: ""
         },
         github: "https://github.com/aumouvantsillage/",
-        twitter: "https://twitter.com/umouvantsillage",
+        // twitter: "https://twitter.com/umouvantsillage",
         mastodon: "https://mamot.fr/@aumouvantsillage",
         linkedIn: "http://fr.linkedin.com/in/gsavaton/",
         buymeacoffee: "https://www.buymeacoffee.com/THtbNvnqE"

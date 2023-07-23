@@ -1,12 +1,12 @@
 <header>
 	<h1><a href="{{site.root}}/">{{site.title}}</a></h1>
     <nav class="social">
-        <a href="{{twitter}}"  title="Twitter"><i class="fa fa-twitter"></i></a>
-		<a href="{{mastodon}}" title="Mastodon"><i class="fa fa-mastodon"></i></a>
-        <a href="{{linkedIn}}" title="LinkedIn"><i class="fa fa-linkedin-square"></i></a>
-        <a href="{{github}}"   title="GitHub repositories"><i class="fa fa-github"></i></a>
+        {%if twitter  %}<a href="{{twitter}}"  title="Twitter"><i class="fa fa-twitter"></i></a>{% endif %}
+		{%if mastodon %}<a href="{{mastodon}}" title="Mastodon"><i class="fa fa-mastodon"></i></a>{% endif %}
+        {%if linkedIn %}<a href="{{linkedIn}}" title="LinkedIn"><i class="fa fa-linkedin-square"></i></a>{% endif %}
+        {%if github   %}<a href="{{github}}"   title="GitHub repositories"><i class="fa fa-github"></i></a>{% endif %}
         <a href="{{site.root}}/atom.xml" title="Atom feed"><i class="fa fa-rss"></i></a>
-		{% include "buymeacoffee.njk" %}
+		{%if buymeacoffee %}{% include "buymeacoffee.njk" %}{% endif %}
     </nav>
 	<hr>
 	<nav>
