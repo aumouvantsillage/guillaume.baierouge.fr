@@ -4,6 +4,7 @@ subtitle: "A RISC-V core in Racket"
 author: Guillaume Savaton
 lang: en
 date: 2021-04-23
+updated: 2024-07-10
 draft: false
 collection: posts
 tags: Racket, Digital electronics, RISC-V
@@ -13,23 +14,23 @@ layout: post.njk
 Let's try to simulate a non-trivial circuit in Racket using the techniques
 proposed in [the previous post](/2021/03/14/simulating-digital-circuits-in-racket/index.html).
 
-Virgule is a 32-bit RISC processor core that supports most of the
+Vermicel is a 32-bit RISC processor core that supports most of the
 base instruction set of the RISC-V specification (RV32I).
-It was initially designed and implemented in VHDL to serve as an illustration
-for the digital electronics course that I teach.
+It was initially designed and implemented in VHDL under the name "Virgule" to serve as an illustration
+for the digital electronics course that I taught.
 The VHDL source code is not publicly available yet but you can get an overview
-of what Virgule is by using [its web-based simulator emulsiV](https://guillaume-savaton-eseo.github.io/emulsiV)
+of what Vermicel is by using [its web-based simulator emulsiV](https://guillaume-savaton-eseo.github.io/emulsiV)
 and reading [its documentation](https://guillaume-savaton-eseo.github.io/emulsiV/doc).
 
 <!-- more -->
 
-I have written two implementations of Virgule: one uses a
+I have written two implementations of Vermicel: one uses a
 finite state machine as a sequencer; the other is organized as a five-stage
 pipeline.
 Both implementations use the same set of components in their datapaths.
 
 :::warning
-The architecture of Virgule favours simplicity over completeness, speed or size.
+The architecture of Vermicel favours simplicity over completeness, speed or size.
 If you are looking for an optimized, production-ready RISC-V core, there are
 plenty of other implementations to choose from.
 :::
@@ -43,15 +44,15 @@ easier to understand.
 Here is an overview of its internal architecture with a state diagram of its
 sequencer:
 
-![Architecture of the slow, state-based implementation](/figures/virgule-racket/virgule-state-based.svg)
+![Architecture of the slow, state-based implementation](/figures/vermicel-racket/vermicel-state-based.svg)
 
 Since the architecture is fully synchronous, the clock signal is not represented
 to avoid cluttering the block diagram.
 
-Virgule uses a similar bus interface as the [PicoRV32](https://github.com/cliffordwolf/picorv32).
+Vermicel uses a similar bus interface as the [PicoRV32](https://github.com/cliffordwolf/picorv32).
 The same interface is used for fetching instructions and for load/store
 operations.
-Here is a description of Virgule's I/O ports:
+Here is a description of Vermicel's I/O ports:
 
 | Signal    | Direction | Size (bits) | Role                                                                   |
 |:----------|:----------|------------:|:-----------------------------------------------------------------------|
@@ -149,10 +150,10 @@ Sequential components such as `register-unit` or `branch-unit` are represented
 by ordinary functions using `define`.
 As a consequence, if a component has several outputs, the corresponding Racket
 function can use `(values ...)` to return the output signals.
-`virgule` itself is defined like this:
+`vermicel` itself is defined like this:
 
 ```racket
-(define (virgule #:reset reset #:rdata rdata #:ready ready #:irq irq)
+(define (vermicel #:reset reset #:rdata rdata #:ready ready #:irq irq)
   ...
   (values valid address wstrobe wdata))
 ```
@@ -218,7 +219,7 @@ Logic values and logic vectors
 ------------------------------
 
 Hardware description languages usually have special support for binary
-data types of arbitrary width. Before writing Virgule, my first impulse was to
+data types of arbitrary width. Before writing Vermicel, my first impulse was to
 create a Racket module that would provide data types and operations in the
 spirit of VHDL packages `std_logic_1164` and `numeric_std`.
 
@@ -230,7 +231,7 @@ While I expect this DSL to come with data types for logic vectors,
 I am not convinced that we need sophisticated abstractions for these types
 at runtime.
 
-For this reason, the implementation of Virgule in Racket uses built-in
+For this reason, the implementation of Vermicel in Racket uses built-in
 types for logic values and logic vectors: booleans for flags and control signals,
 integers for general-purpose data and numbers.
 In fact, Racket integers already provide all the facilities that I need
@@ -264,14 +265,14 @@ For this reason, I have written the following helpers:
   `right` can be omitted like in `unsigned-slice` and `signed-slice`.
 
 You can find the complete source code of these functions and macros
-in module [logic.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/logic.rkt).
+in module [logic.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/logic.rkt).
 
 :::warning
 There is no support for *uninitialized* or *indeterminate* binary values,
 such as `'U'` and `'X'` in VHDL's `std_logic` type, or `x` in Verilog.
 :::
 
-Virgule implementation walkthrough
+Vermicel implementation walkthrough
 ==================================
 
 There is a lot of Racket code in this section.
@@ -289,7 +290,7 @@ to complete (`ready`).
 In the `execute` state, the sequencer uses information from the current
 decoded instruction (`load?`, `store?`, `has-rd?`) to decide where to go next.
 
-![Virgule sequencer state machine](/figures/virgule-racket/virgule-sequencer.svg)
+![Vermicel sequencer state machine](/figures/vermicel-racket/vermicel-sequencer.svg)
 
 In Racket, the state machine is composed of a `register/r` form
 that stores the current state, a `match` expression that computes the next
@@ -301,7 +302,7 @@ Click on the snippet to expand it.
 
 :::collapse
 ```racket
-(define (virgule #:reset reset #:rdata rdata #:ready ready #:irq irq)
+(define (vermicel #:reset reset #:rdata rdata #:ready ready #:irq irq)
 
   (define state-reg (register/r 'state-fetch reset
                       (for/signal (instr ready [state this-reg])
@@ -339,10 +340,10 @@ In the `fetch` state, the processor copies the program counter register
 At the end of the memory transfer (`valid` and `ready`), the input data bus
 `rdata` is copied to register `rdata-reg`.
 
-![Fetching instructions](/figures/virgule-racket/virgule-fetch.svg)
+![Fetching instructions](/figures/vermicel-racket/vermicel-fetch.svg)
 
 This is the complete definition of signals `rdata-reg`, `valid` and `ready`.
-In function `virgule`, they are part of the code that manages all memory
+In function `vermicel`, they are part of the code that manages all memory
 accesses.
 
 ```racket
@@ -380,7 +381,7 @@ in `rdata-reg`, producing the `instr` signal of type:
 | `branch?`  | boolean        | Is this instruction a conditional branch?                                         |
 | `mret?`    | boolean        | Is this instruction a return from an interrupt handler?                           |
 
-![Decoding instructions](/figures/virgule-racket/virgule-decode.svg)
+![Decoding instructions](/figures/vermicel-racket/vermicel-decode.svg)
 
 Several other operations happen in the `decode` state:
 
@@ -419,8 +420,8 @@ Several other operations happen in the `decode` state:
 ```
 :::
 
-`decoder` is defined in [datapath-components.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/datapath-components.rkt)
-It uses constants and functions defined in module [opcodes.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/opcodes.rkt).
+`decoder` is defined in [datapath-components.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/datapath-components.rkt)
+It uses constants and functions defined in module [opcodes.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/opcodes.rkt).
 
 * `instruction-fmt` identifies the format of an instruction.
 * `word->fields` extracts the fields from the instruction word.
@@ -494,7 +495,7 @@ and `branch-unit` computes the address of the next instruction.
 The signal `pc+4` receives the address of the next instruction in memory.
 It is stored in a register (`pc+4-reg`) for later use in the `writeback` state.
 
-![Executing instructions](/figures/virgule-racket/virgule-execute.svg)
+![Executing instructions](/figures/vermicel-racket/vermicel-execute.svg)
 
 In branch and jump instructions, the target address is the result of an
 addition performed by the arithmetic and logic unit.
@@ -536,7 +537,7 @@ If the current instruction is `mret`, `branch-unit` will:
 * branch to the address saved in `mepc-reg`.
 
 Functions `arith-logic-unit` and `branch-unit` are defined in module
-[datapath-components.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/datapath-components.rkt).
+[datapath-components.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/datapath-components.rkt).
 
 :::collapse
 ```racket
@@ -601,7 +602,7 @@ The `valid` output is asserted in the `load` and `store` states.
 At the end of the memory transfer (`valid` and `ready`), the input data bus
 `rdata` is copied to register `rdata-reg`.
 
-![Memory transfers](/figures/virgule-racket/virgule-load-store.svg)
+![Memory transfers](/figures/vermicel-racket/vermicel-load-store.svg)
 
 In the `store` state, the role of `load-store-unit` consists in copying
 the data from `xs2-reg` to `wdata`, ensuring that it is properly aligned
@@ -663,7 +664,7 @@ The register index is available in the `rd` field of `instr-reg`.
 * In other cases, the destination register receives the result from
   `arith-logic-unit` (`alu-result-reg`).
 
-![Register writeback](/figures/virgule-racket/virgule-writeback.svg)
+![Register writeback](/figures/vermicel-racket/vermicel-writeback.svg)
 
 :::collapse
 ```racket
@@ -733,18 +734,18 @@ Simulating a computer system
 The repository contains several modules that can help simulate a system
 with a processor core, memory and peripheral devices:
 
-* [memory.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/memory.rkt)
+* [memory.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/memory.rkt)
   contains memory components.
-* [device.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/device.rkt)
+* [device.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/device.rkt)
   helps define a memory map and the address decoding logic.
-* [assembler.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/assembler.rkt)
+* [assembler.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/assembler.rkt)
   can convert an assembly program, written as S-expressions, into machine code.
-* [vcd.rkt](https://github.com/aumouvantsillage/Virgule-CPU-Racket/blob/main/src/vcd.rkt)
+* [vcd.rkt](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/blob/main/src/vcd.rkt)
   outputs waveforms to a [Value change dump](https://en.wikipedia.org/wiki/Value_change_dump)
   file that can be displayed by [GTKWave](http://gtkwave.sourceforge.net/).
 
 Example programs for a simple system with a fake text output device are available
-in the [examples](https://github.com/aumouvantsillage/Virgule-CPU-Racket/tree/main/examples)
+in the [examples](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/tree/main/examples)
 folder.
 
 Performance considerations
@@ -763,7 +764,7 @@ because each write operation would create a new vector.
 But using a vector of signals turned out to be far worse, because the cost of reading
 at any arbitrary location outweighed the benefits.
 
-The [benchmarks](https://github.com/aumouvantsillage/Virgule-CPU-Racket/tree/main/benchmarks)
+The [benchmarks](https://github.com/aumouvantsillage/Vermicel-CPU-Racket/tree/main/benchmarks)
 folder contains five programs that compare the speed an memory usage of various
 memory implementations.
 The following choices are evaluated:
