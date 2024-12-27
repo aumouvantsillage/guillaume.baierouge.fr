@@ -12,7 +12,7 @@ serve: all
 	./node_modules/.bin/ws -o -d build
 
 upload: #all
-	rsync --archive --checksum --delete --progress --compress build/* guillaume@baierouge.fr:/var/www/guillaume.baierouge.fr/
+	rsync --archive --checksum --delete --progress --compress build/ infomaniak-tiliosys:~/sites/guillaume.baierouge.fr/
 
 tmp/%.svg: %.svg
 	@mkdir -p $(dir $@)
