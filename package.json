@@ -19,7 +19,7 @@
     "debug": "^4.2.0",
     "jsdom": "^25.0.0",
     "jstransformer-nunjucks": "^1.0.0",
-    "katex": "^0.16.10",
+    "katex": "^0.16.21",
     "local-web-server": "^5.3.3",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",
