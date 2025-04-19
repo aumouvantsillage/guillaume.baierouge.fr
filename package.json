@@ -25,7 +25,7 @@
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-container": "^4.0.0",
     "markdown-it-math": "^4.1.1",
-    "markdown-it-prism": "^2.1.6",
+    "markdown-it-prism": "^2.3.1",
     "metalsmith": "^2.3.0",
     "metalsmith-assets": "^0.1.0",
     "metalsmith-branch": "0.0.5",
